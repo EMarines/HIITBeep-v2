@@ -1,0 +1,38 @@
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    sveltekit(),
+    SvelteKitPWA({
+      srcDir: './src',
+      mode: 'production',
+      strategies: 'injectManifest',
+      filename: 'service-worker.js',
+      manifest: {
+        name: 'HIITBeep',
+        short_name: 'HIITBeep',
+        description: 'Cronómetro HIIT con sonidos y animaciones',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#111827',
+        theme_color: '#111827',
+        icons: [
+          {
+            src: '/favicon.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml'
+          }
+        ]
+      },
+      injectManifest: {
+        globPatterns: ['client/**/*.{js,css,ico,png,svg,jpg,jpeg}']
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
+      }
+    })
+  ]
+});
