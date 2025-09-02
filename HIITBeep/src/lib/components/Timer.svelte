@@ -12,13 +12,33 @@
 	let timeRemaining = 0;
 	let isRunning = false;
 	let isPaused = false;
+	let isCompleted = false; // Nueva variable para indicar rutina completada
 	let timer: number;
 	let audioContext: AudioContext | null = null;
 	
 	$: currentInterval = intervals[currentIntervalIndex];
-	$: progress = currentInterval ? (currentInterval.duration - timeRemaining) / currentInterval.duration : 0;
+	$: progress = currentInterval && !isCompleted 
+		? Math.max(0, Math.min(1, (currentInterval.duration - timeRemaining) / currentInterval.duration)) 
+		: (isCompleted ? 1 : 0);
 	$: circumference = 2 * Math.PI * 120;
 	$: strokeDashoffset = circumference * (1 - progress);
+	
+	// Calcular el color de fondo directamente como reactivo
+	$: backgroundColor = currentInterval 
+		? (() => {
+			const colorMap: {[key: string]: string} = {
+				'bg-yellow-500': '#eab308',
+				'bg-red-500': '#ef4444', 
+				'bg-blue-500': '#3b82f6',
+				'bg-green-500': '#22c55e',
+				'bg-purple-500': '#a855f7',
+				'bg-pink-500': '#ec4899',
+				'bg-orange-500': '#f97316'
+			};
+			return colorMap[currentInterval.color] || '#111827';
+		})()
+		: '#111827';
+	$: console.log('backgroundColor changed:', backgroundColor);
 	
 	onMount(() => {
 		if (browser && intervals.length > 0) {
@@ -97,28 +117,34 @@
 				if (timeRemaining <= 0) {
 					playBeep(600, 400);
 					
-					currentIntervalIndex++;
-					
-					// Si hemos completado todos los intervalos del ciclo actual
-					if (currentIntervalIndex >= intervals.length) {
-						// Si aún hay repeticiones pendientes
-						if (currentRepetition < repetitions) {
-							currentRepetition++;
-							currentIntervalIndex = 0; // Volver al primer intervalo
-							timeRemaining = intervals[0].duration;
-							// Beep especial para nueva repetición
-							setTimeout(() => playBeep(1000, 300), 100);
-							setTimeout(() => playBeep(1200, 300), 500);
+					// Pequeña pausa para mostrar el círculo completado
+					setTimeout(() => {
+						currentIntervalIndex++;
+						
+						// Si hemos completado todos los intervalos del ciclo actual
+						if (currentIntervalIndex >= intervals.length) {
+							// Si aún hay repeticiones pendientes
+							if (currentRepetition < repetitions) {
+								currentRepetition++;
+								currentIntervalIndex = 0; // Volver al primer intervalo
+								timeRemaining = intervals[0].duration;
+								// Beep especial para nueva repetición
+								setTimeout(() => playBeep(1000, 300), 100);
+								setTimeout(() => playBeep(1200, 300), 500);
+							} else {
+								// Todas las repeticiones completadas
+								isRunning = false;
+								isCompleted = true; // Activar estado de completado
+								clearInterval(timer);
+								// Beep final más largo
+								setTimeout(() => playBeep(400, 800), 100);
+								setTimeout(() => playBeep(500, 800), 600);
+							}
 						} else {
-							// Todas las repeticiones completadas
-							isRunning = false;
-							clearInterval(timer);
-							playBeep(400, 600);
+							// Siguiente intervalo en la misma repetición
+							timeRemaining = intervals[currentIntervalIndex].duration;
 						}
-					} else {
-						// Siguiente intervalo en la misma repetición
-						timeRemaining = intervals[currentIntervalIndex].duration;
-					}
+					}, 300); // 300ms para ver el círculo completo
 				}
 			}
 		}, 1000);
@@ -151,24 +177,10 @@
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	}
 	
-	function getBackgroundColor(): string {
-		if (!currentInterval) return 'rgb(17, 24, 39)'; // gray-900
-		
-		const colorMap: {[key: string]: string} = {
-			'bg-yellow-500': 'rgb(234, 179, 8)',
-			'bg-red-500': 'rgb(239, 68, 68)',
-			'bg-blue-500': 'rgb(59, 130, 246)',
-			'bg-green-500': 'rgb(34, 197, 94)',
-			'bg-purple-500': 'rgb(168, 85, 247)',
-			'bg-pink-500': 'rgb(236, 72, 153)',
-			'bg-orange-500': 'rgb(249, 115, 22)'
-		};
-		
-		return colorMap[currentInterval.color] || 'rgb(17, 24, 39)';
-	}
+
 </script>
 
-<div class="min-h-screen flex flex-col items-center justify-center p-8 transition-all duration-1000" style="background-color: {getBackgroundColor()}">
+<div class="min-h-screen flex flex-col items-center justify-center p-8 transition-all duration-1000" style="background-color: {backgroundColor}">>
 	<div class="text-center text-white">
 		<!-- Nombre del intervalo actual -->
 		<h1 class="text-3xl font-light mb-8">
@@ -186,26 +198,32 @@
 					stroke="rgba(255,255,255,0.2)"
 					stroke-width="8"
 					fill="none"
-				/>
-				<!-- Círculo de progreso -->
-				<circle
-					cx="140"
-					cy="140"
-					r="120"
-					stroke="rgba(255,255,255,0.9)"
-					stroke-width="8"
-					fill="none"
-					stroke-linecap="round"
-					stroke-dasharray="{circumference}"
-					stroke-dashoffset="{strokeDashoffset}"
-					style="transition: stroke-dashoffset 1s linear;"
-				/>
-			</svg>
+			/>
+			<!-- Círculo de progreso -->
+			<circle
+				cx="140"
+				cy="140"
+				r="120"
+				stroke="rgba(255,255,255,0.9)"
+				stroke-width="8"
+				fill="none"
+				stroke-linecap="round"
+				stroke-dasharray="{circumference}"
+				stroke-dashoffset="{strokeDashoffset}"
+			/>
+		</svg>			<!-- Paloma de fondo (solo cuando está completado) -->
+			{#if isCompleted}
+				<div class="absolute inset-0 flex items-center justify-center">
+					<span class="text-[12rem] text-green-500 opacity-60" style="line-height: 1; font-weight: 900;">
+						✓
+					</span>
+				</div>
+			{/if}
 			
 			<!-- Tiempo en el centro -->
 			<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center">
 				<span class="text-6xl font-light text-white" style="line-height: 1;">
-					{isRunning ? formatTime(timeRemaining) : '00:00'}
+					{isRunning ? formatTime(timeRemaining) : (isCompleted ? '00:00' : '00:00')}
 				</span>
 			</div>
 		</div>
@@ -251,7 +269,7 @@
 			</button>
 		</div>
 		
-		{#if !isRunning && currentRepetition >= repetitions && currentIntervalIndex >= intervals.length}
+		{#if isCompleted}
 			<div class="mt-8">
 				<h2 class="text-4xl font-light text-white mb-4">¡Rutina Completada! 🎉</h2>
 				<p class="text-white/80 text-lg">
