@@ -22,6 +22,32 @@
 		localIntervals = localIntervals.filter((_, i) => i !== index);
 	}
 	
+	function copyInterval(index: number) {
+		const intervalToCopy = localIntervals[index];
+		const copiedInterval = {
+			name: intervalToCopy.name,
+			duration: intervalToCopy.duration,
+			color: intervalToCopy.color
+		};
+		localIntervals = [...localIntervals, copiedInterval];
+	}
+	
+	function moveIntervalUp(index: number) {
+		if (index > 0) {
+			const newIntervals = [...localIntervals];
+			[newIntervals[index], newIntervals[index - 1]] = [newIntervals[index - 1], newIntervals[index]];
+			localIntervals = newIntervals;
+		}
+	}
+	
+	function moveIntervalDown(index: number) {
+		if (index < localIntervals.length - 1) {
+			const newIntervals = [...localIntervals];
+			[newIntervals[index], newIntervals[index + 1]] = [newIntervals[index + 1], newIntervals[index]];
+			localIntervals = newIntervals;
+		}
+	}
+	
 	function saveConfiguration() {
 		if (localIntervals.length === 0) return;
 		dispatch('save-config', { 
@@ -91,21 +117,53 @@
 			<div class="space-y-4 mb-6">
 				<h3 class="text-lg font-medium text-white">Intervalos:</h3>
 				{#each localIntervals as interval, index}
-					<div class="bg-gray-800 rounded-lg p-4 border-l-4 {interval.color}">
-						<div class="flex items-center justify-between mb-3">
-							<input 
-								bind:value={interval.name} 
-								class="bg-gray-700 text-lg font-medium outline-none rounded px-3 py-2 hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 transition-colors text-white w-full mr-4"
-								placeholder="Nombre del intervalo"
-							/>
+					<div class="bg-gray-800 rounded-lg border-l-4 {interval.color} relative">
+						<!-- Barra superior con botones -->
+						<div class="flex justify-between items-center p-2 border-b border-gray-700">
 							<button 
-								on:click={() => removeInterval(index)}
-								class="text-red-400 hover:text-red-300 transition-colors text-xl ml-2 flex-shrink-0"
+								on:click={() => copyInterval(index)}
+								class="text-blue-400 hover:text-blue-300 transition-colors text-xs p-2 rounded bg-gray-700 hover:bg-gray-600"
+								title="Copiar intervalo al final"
 							>
-								✕
+								📄 Copiar
 							</button>
+							<div class="flex gap-3">
+								<button 
+									on:click={() => moveIntervalUp(index)}
+									disabled={index === 0}
+									class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+									title="Mover hacia arriba"
+								>
+									⬆️
+								</button>
+								<button 
+									on:click={() => moveIntervalDown(index)}
+									disabled={index === localIntervals.length - 1}
+									class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+									title="Mover hacia abajo"
+								>
+									⬇️
+								</button>
+								<button 
+									on:click={() => removeInterval(index)}
+									class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
+									title="Eliminar intervalo"
+								>
+									🗑️
+								</button>
+							</div>
 						</div>
 						
+						<!-- Contenido de datos -->
+						<div class="p-4">
+							<div class="mb-3">
+								<input 
+									bind:value={interval.name} 
+									class="bg-gray-700 text-lg font-medium outline-none rounded px-3 py-2 hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 transition-colors text-white w-full"
+									placeholder="Nombre del intervalo"
+								/>
+							</div>
+							
 						<div class="flex items-center gap-4">
 							<div class="flex-1">
 								<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">Duración (segundos)</label>
@@ -130,6 +188,7 @@
 									{/each}
 								</select>
 							</div>
+						</div>
 						</div>
 					</div>
 				{/each}
