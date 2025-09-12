@@ -2,6 +2,7 @@
   "es": {
     "app": {
       "title": "HIITBeep",
+      "subtitle": "Configura tus intervalos de entrenamiento",
       "description": "Cronómetro HIIT con sonidos y animaciones"
     },
     "common": {
@@ -17,7 +18,8 @@
       "delete": "Eliminar",
       "copy": "Copiar",
       "edit": "Editar",
-      "settings": "Configuración"
+      "settings": "Configuración",
+      "of": "de"
     },
     "main": {
       "repetitions": "Repeticiones",
@@ -49,12 +51,17 @@
       "delete_interval": "Eliminar intervalo"
     },
     "timer": {
-      "completed": "¡Rutina Completada! 🎉",
+      "completed": "Completado",
+      "routine_completed": "¡Rutina Completada! 🎉",
       "excellent_work": "¡Excelente trabajo!",
       "completed_reps": "¡Completaste {reps} repeticiones!",
-      "repetition_of": "Repetición {current} de {total}",
-      "interval_of": "Intervalo {current} de {total}",
-      "duration": "Duración:"
+      "repetition": "Repetición",
+      "interval": "Intervalo",
+      "duration": "Duración",
+      "pause": "Pausar",
+      "continue": "Continuar",
+      "restart": "Reiniciar",
+      "stop": "Detener"
     },
     "intervals": {
       "preparation": "Preparación",
@@ -74,6 +81,7 @@
   "en": {
     "app": {
       "title": "HIITBeep",
+      "subtitle": "Configure your training intervals",
       "description": "HIIT Timer with sounds and animations"
     },
     "common": {
@@ -89,7 +97,8 @@
       "delete": "Delete",
       "copy": "Copy",
       "edit": "Edit",
-      "settings": "Settings"
+      "settings": "Settings",
+      "of": "of"
     },
     "main": {
       "repetitions": "Repetitions",
@@ -121,12 +130,17 @@
       "delete_interval": "Delete interval"
     },
     "timer": {
-      "completed": "Routine Completed! 🎉",
+      "completed": "Completed",
+      "routine_completed": "Routine Completed! 🎉",
       "excellent_work": "Excellent work!",
       "completed_reps": "You completed {reps} repetitions!",
-      "repetition_of": "Repetition {current} of {total}",
-      "interval_of": "Interval {current} of {total}",
-      "duration": "Duration:"
+      "repetition": "Repetition",
+      "interval": "Interval",
+      "duration": "Duration",
+      "pause": "Pause",
+      "continue": "Continue",
+      "restart": "Restart",
+      "stop": "Stop"
     },
     "intervals": {
       "preparation": "Preparation",

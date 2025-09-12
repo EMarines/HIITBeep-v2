@@ -16,7 +16,7 @@
 	let localIntervals = [...intervals];
 	
 	function addInterval() {
-		localIntervals = [...localIntervals, { name: $t('intervals.new'), duration: 30, color: 'bg-green-500' }];
+		localIntervals = [...localIntervals, { name: $t('settings.new_interval'), duration: 30, color: 'bg-green-500' }];
 	}
 	
 	function removeInterval(index: number) {
@@ -102,8 +102,8 @@
 		<div class="p-4">
 			<!-- Campo de Repeticiones -->
 			<div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500 mb-6">
-				<label for="{repetitionsId}" class="block text-lg font-medium mb-2 text-white">{$t('settings.repetitions')}</label>
-				<p class="text-sm text-gray-400 mb-3">{$t('settings.repetitionsDescription')}</p>
+				<label for="{repetitionsId}" class="block text-lg font-medium mb-2 text-white">{$t('settings.repetitions_number')}</label>
+				<p class="text-sm text-gray-400 mb-3">{$t('settings.repetitions_help')}</p>
 				<input 
 					id="{repetitionsId}"
 					type="number" 
@@ -124,16 +124,16 @@
 							<button 
 								on:click={() => copyInterval(index)}
 								class="text-blue-400 hover:text-blue-300 transition-colors text-xs p-2 rounded bg-gray-700 hover:bg-gray-600"
-								title="{$t('settings.copyInterval')}"
+								title="{$t('settings.copy_interval')}"
 							>
-								📄 {$t('settings.copy')}
+								📄 {$t('common.copy')}
 							</button>
 							<div class="flex gap-3">
 								<button 
 									on:click={() => moveIntervalUp(index)}
 									disabled={index === 0}
 									class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-									title="{$t('settings.moveUp')}"
+									title="{$t('settings.move_up')}"
 								>
 									⬆️
 								</button>
@@ -141,14 +141,14 @@
 									on:click={() => moveIntervalDown(index)}
 									disabled={index === localIntervals.length - 1}
 									class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-									title="{$t('settings.moveDown')}"
+									title="{$t('settings.move_down')}"
 								>
 									⬇️
 								</button>
 								<button 
 									on:click={() => removeInterval(index)}
 									class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
-									title="{$t('settings.deleteInterval')}"
+									title="{$t('settings.delete_interval')}"
 								>
 									🗑️
 								</button>
@@ -161,13 +161,13 @@
 								<input 
 									bind:value={interval.name} 
 									class="bg-gray-700 text-lg font-medium outline-none rounded px-3 py-2 hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 transition-colors text-white w-full"
-									placeholder="{$t('settings.intervalName')}"
+									placeholder="{$t('settings.interval_name')}"
 								/>
 							</div>
 							
 						<div class="flex items-center gap-4">
 							<div class="flex-1">
-								<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration')}</label>
+								<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration_seconds')}</label>
 								<input 
 									id="{generateIntervalId(index, 'duration')}"
 									type="number" 
@@ -196,7 +196,7 @@
 				
 				{#if localIntervals.length === 0}
 					<div class="bg-gray-800 rounded-lg p-4 text-center">
-						<p class="text-gray-400">{$t('settings.noIntervals')}</p>
+						<p class="text-gray-400">{$t('settings.no_intervals_configured')}</p>
 					</div>
 				{/if}
 			</div>
@@ -206,7 +206,7 @@
 				on:click={addInterval}
 				class="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white mb-4"
 			>
-				+ {$t('settings.addInterval')}
+				{$t('settings.add_interval')}
 			</button>
 		</div>
 		
@@ -225,7 +225,7 @@
 					disabled={localIntervals.length === 0}
 					class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
 				>
-					{$t('settings.saveConfiguration')}
+					{$t('settings.save_configuration')}
 				</button>
 			</div>
 		</div>

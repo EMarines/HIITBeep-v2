@@ -272,9 +272,9 @@
 		
 		{#if isCompleted}
 			<div class="mt-8">
-				<h2 class="text-4xl font-light text-white mb-4">{$t('timer.routineCompleted')} 🎉</h2>
+				<h2 class="text-4xl font-light text-white mb-4">{$t('timer.routine_completed')}</h2>
 				<p class="text-white/80 text-lg">
-					{repetitions === 1 ? $t('timer.excellentWork') : $t('timer.completedRepetitions', { count: repetitions })}
+					{repetitions === 1 ? $t('timer.excellent_work') : $t('timer.completed_reps', { reps: repetitions })}
 				</p>
 			</div>
 		{/if}

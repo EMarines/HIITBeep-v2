@@ -13,7 +13,7 @@
 	];
 	
 	function addInterval() {
-		intervals = [...intervals, { name: $t('intervals.new'), duration: 30, color: 'bg-green-500' }];
+		intervals = [...intervals, { name: $t('settings.new_interval'), duration: 30, color: 'bg-green-500' }];
 	}
 	
 	function removeInterval(index: number) {
@@ -50,8 +50,8 @@
 		
 		<!-- Campo de Repeticiones -->
 		<div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500 mb-6">
-			<label for="{repetitionsId}" class="block text-lg font-medium mb-2">{$t('settings.repetitions')}</label>
-			<p class="text-sm text-gray-400 mb-3">{$t('settings.repetitionsDescription')}</p>
+			<label for="{repetitionsId}" class="block text-lg font-medium mb-2">{$t('settings.repetitions_number')}</label>
+			<p class="text-sm text-gray-400 mb-3">{$t('settings.repetitions_help')}</p>
 			<input 
 				id="{repetitionsId}"
 				type="number" 
@@ -80,7 +80,7 @@
 					
 					<div class="flex items-center gap-4">
 						<div class="flex-1">
-							<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration')}</label>
+							<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration_seconds')}</label>
 							<input 
 								id="{generateIntervalId(index, 'duration')}"
 								type="number" 
@@ -112,7 +112,7 @@
 				on:click={addInterval}
 				class="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
 			>
-				+ {$t('settings.addInterval')}
+				{$t('settings.add_interval')}
 			</button>
 			
 			<button 
@@ -120,7 +120,7 @@
 				disabled={intervals.length === 0}
 				class="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-lg transition-colors"
 			>
-				{$t('main.startRoutine')}
+				{$t('main.start_routine')}
 			</button>
 		</div>
 	</div>
