@@ -181,10 +181,10 @@
 
 </script>
 
-<div class="min-h-screen flex flex-col items-center justify-center p-8 transition-all duration-1000" style="background-color: {backgroundColor}">>
+<div class="min-h-screen flex flex-col items-center justify-center p-8 transition-all duration-1000" style="background-color: {backgroundColor}">
 	<div class="text-center text-white">
 		<!-- Nombre del intervalo actual -->
-		<h1 class="text-3xl font-light mb-8">
+		<h1 class="text-3xl font-light mb-8" style="text-shadow: 0 0 10px rgba(0, 0, 0, 1), 2px 2px 8px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(0, 0, 0, 0.8)">
 			{currentInterval ? currentInterval.name : $t('timer.completed')}
 		</h1>
 		
@@ -223,7 +223,7 @@
 			
 			<!-- Tiempo en el centro -->
 			<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-				<span class="text-6xl font-light text-white" style="line-height: 1;">
+				<span class="text-6xl font-light text-white" style="line-height: 1; text-shadow: 0 0 15px rgba(0, 0, 0, 1), 3px 3px 10px rgba(0, 0, 0, 0.9), -2px -2px 4px rgba(0, 0, 0, 0.8);">
 					{isRunning ? formatTime(timeRemaining) : (isCompleted ? '00:00' : '00:00')}
 				</span>
 			</div>
@@ -231,14 +231,14 @@
 		
 		<!-- Información adicional -->
 		{#if isRunning}
-			<p class="text-white/80 mb-1 text-lg">
+			<p class="text-white/80 mb-1 text-lg" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
 				{$t('timer.repetition')} {currentRepetition} {$t('common.of')} {repetitions}
 			</p>
-			<p class="text-white/70 mb-2 text-base">
+			<p class="text-white/70 mb-2 text-base" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
 				{$t('timer.interval')} {currentIntervalIndex + 1} {$t('common.of')} {intervals.length}
 			</p>
 			{#if currentInterval}
-				<p class="text-white/60 text-base mb-8">
+				<p class="text-white/60 text-base mb-8" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
 					{$t('timer.duration')}: {formatTime(currentInterval.duration)}
 				</p>
 			{/if}
@@ -250,6 +250,7 @@
 				<button
 					on:click={togglePause}
 					class="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-full text-white font-medium transition-colors backdrop-blur-sm"
+					style="text-shadow: 0 0 6px rgba(0, 0, 0, 1), 1px 1px 4px rgba(0, 0, 0, 0.9);"
 				>
 					{isPaused ? `▶️ ${$t('timer.continue')}` : `⏸️ ${$t('timer.pause')}`}
 				</button>
@@ -257,6 +258,7 @@
 				<button
 					on:click={resetTimer}
 					class="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-full text-white font-medium transition-colors backdrop-blur-sm"
+					style="text-shadow: 0 0 6px rgba(0, 0, 0, 1), 1px 1px 4px rgba(0, 0, 0, 0.9);"
 				>
 					🔄 {$t('timer.restart')}
 				</button>
@@ -265,6 +267,7 @@
 			<button
 				on:click={stopTimer}
 				class="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-full text-white font-medium transition-colors backdrop-blur-sm"
+				style="text-shadow: 0 0 6px rgba(0, 0, 0, 1), 1px 1px 4px rgba(0, 0, 0, 0.9);"
 			>
 				{isRunning ? `⏹️ ${$t('timer.stop')}` : `← ${$t('common.back')}`}
 			</button>
@@ -272,8 +275,8 @@
 		
 		{#if isCompleted}
 			<div class="mt-8">
-				<h2 class="text-4xl font-light text-white mb-4">{$t('timer.routine_completed')}</h2>
-				<p class="text-white/80 text-lg">
+				<h2 class="text-4xl font-light text-white mb-4" style="text-shadow: 0 0 10px rgba(0, 0, 0, 1), 2px 2px 8px rgba(0, 0, 0, 0.9);">{$t('timer.routine_completed')}</h2>
+				<p class="text-white/80 text-lg" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
 					{repetitions === 1 ? $t('timer.excellent_work') : $t('timer.completed_reps', { reps: repetitions })}
 				</p>
 			</div>
