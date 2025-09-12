@@ -76,6 +76,21 @@
       "purple": "Morado",
       "pink": "Rosa",
       "orange": "Naranja"
+    },
+    "preferences": {
+      "title": "Preferencias",
+      "language": "Idioma",
+      "language_description": "Selecciona tu idioma preferido para la interfaz de la aplicación",
+      "select_language": "Seleccionar idioma",
+      "sounds": "Sonidos",
+      "sounds_description": "Configura los sonidos de beeps y notificaciones",
+      "theme": "Tema",
+      "theme_description": "Personaliza la apariencia de la aplicación",
+      "accessibility": "Accesibilidad",
+      "accessibility_description": "Opciones para mejorar la accesibilidad de la aplicación",
+      "coming_soon": "Próximamente...",
+      "version": "Versión",
+      "made_with": "Hecho con"
     }
   },
   "en": {
@@ -155,6 +170,21 @@
       "purple": "Purple",
       "pink": "Pink",
       "orange": "Orange"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "language": "Language",
+      "language_description": "Select your preferred language for the application interface",
+      "select_language": "Select language",
+      "sounds": "Sounds",
+      "sounds_description": "Configure beeps and notification sounds",
+      "theme": "Theme",
+      "theme_description": "Customize the application appearance",
+      "accessibility": "Accessibility",
+      "accessibility_description": "Options to improve application accessibility",
+      "coming_soon": "Coming soon...",
+      "version": "Version",
+      "made_with": "Made with"
     }
   }
 }

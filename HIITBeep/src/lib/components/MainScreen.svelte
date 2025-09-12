@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { t } from '$lib/i18n';
-	import LanguageSelector from './LanguageSelector.svelte';
 	
 	const dispatch = createEventDispatcher();
 	
@@ -10,6 +10,10 @@
 	
 	function openSettings() {
 		dispatch('open-settings');
+	}
+	
+	function openPreferences() {
+		goto('/preferences');
 	}
 	
 	function startWorkout() {
@@ -39,11 +43,17 @@
 
 <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-900 text-white">
 	<div class="max-w-md w-full">
-		<!-- Header con título, selector de idioma y engrane -->
+		<!-- Header con título y botones de navegación -->
 		<div class="flex items-center justify-between mb-8">
 			<h1 class="text-4xl font-bold">{$t('app.title')}</h1>
 			<div class="flex items-center gap-3">
-				<LanguageSelector />
+				<button 
+					on:click={openPreferences}
+					class="text-2xl text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
+					title="{$t('preferences.title')}"
+				>
+					🔧
+				</button>
 				<button 
 					on:click={openSettings}
 					class="text-2xl text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
