@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import { t } from '$lib/i18n';
 	
 	const dispatch = createEventDispatcher();
 	
 	let repetitions = 3; // Número de repeticiones del ciclo
 	
 	let intervals = [
-		{ name: 'Preparación', duration: 3, color: 'bg-yellow-500' },
-		{ name: 'Ejercicio', duration: 60, color: 'bg-red-500' },
-		{ name: 'Descanso', duration: 30, color: 'bg-blue-500' }
+		{ name: $t('intervals.preparation'), duration: 3, color: 'bg-yellow-500' },
+		{ name: $t('intervals.exercise'), duration: 60, color: 'bg-red-500' },
+		{ name: $t('intervals.rest'), duration: 30, color: 'bg-blue-500' }
 	];
 	
 	function addInterval() {
-		intervals = [...intervals, { name: 'Nuevo Intervalo', duration: 30, color: 'bg-green-500' }];
+		intervals = [...intervals, { name: $t('intervals.new'), duration: 30, color: 'bg-green-500' }];
 	}
 	
 	function removeInterval(index: number) {
@@ -25,13 +26,13 @@
 	}
 	
 	const colorOptions = [
-		{ name: 'Amarillo', value: 'bg-yellow-500' },
-		{ name: 'Rojo', value: 'bg-red-500' },
-		{ name: 'Azul', value: 'bg-blue-500' },
-		{ name: 'Verde', value: 'bg-green-500' },
-		{ name: 'Morado', value: 'bg-purple-500' },
-		{ name: 'Rosa', value: 'bg-pink-500' },
-		{ name: 'Naranja', value: 'bg-orange-500' }
+		{ name: $t('colors.yellow'), value: 'bg-yellow-500' },
+		{ name: $t('colors.red'), value: 'bg-red-500' },
+		{ name: $t('colors.blue'), value: 'bg-blue-500' },
+		{ name: $t('colors.green'), value: 'bg-green-500' },
+		{ name: $t('colors.purple'), value: 'bg-purple-500' },
+		{ name: $t('colors.pink'), value: 'bg-pink-500' },
+		{ name: $t('colors.orange'), value: 'bg-orange-500' }
 	];
 	
 	// Generate unique IDs for form controls
@@ -44,13 +45,13 @@
 
 <div class="min-h-screen flex flex-col items-center justify-center p-6">
 	<div class="max-w-md w-full">
-		<h1 class="text-4xl font-bold text-center mb-8">HIITBeep</h1>
-		<p class="text-center text-gray-400 mb-8">Configura tus intervalos de entrenamiento</p>
+		<h1 class="text-4xl font-bold text-center mb-8">{$t('app.title')}</h1>
+		<p class="text-center text-gray-400 mb-8">{$t('app.subtitle')}</p>
 		
 		<!-- Campo de Repeticiones -->
 		<div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500 mb-6">
-			<label for="{repetitionsId}" class="block text-lg font-medium mb-2">Número de Repeticiones</label>
-			<p class="text-sm text-gray-400 mb-3">¿Cuántas veces quieres repetir el ciclo completo?</p>
+			<label for="{repetitionsId}" class="block text-lg font-medium mb-2">{$t('settings.repetitions')}</label>
+			<p class="text-sm text-gray-400 mb-3">{$t('settings.repetitionsDescription')}</p>
 			<input 
 				id="{repetitionsId}"
 				type="number" 
@@ -79,7 +80,7 @@
 					
 					<div class="flex items-center gap-4">
 						<div class="flex-1">
-							<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">Duración (segundos)</label>
+							<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration')}</label>
 							<input 
 								id="{generateIntervalId(index, 'duration')}"
 								type="number" 
@@ -90,7 +91,7 @@
 						</div>
 						
 						<div class="flex-1">
-							<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">Color</label>
+							<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">{$t('settings.color')}</label>
 							<select 
 								id="{generateIntervalId(index, 'color')}"
 								bind:value={interval.color}
@@ -111,7 +112,7 @@
 				on:click={addInterval}
 				class="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
 			>
-				+ Agregar Intervalo
+				+ {$t('settings.addInterval')}
 			</button>
 			
 			<button 
@@ -119,7 +120,7 @@
 				disabled={intervals.length === 0}
 				class="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-lg transition-colors"
 			>
-				Iniciar Rutina
+				{$t('main.startRoutine')}
 			</button>
 		</div>
 	</div>

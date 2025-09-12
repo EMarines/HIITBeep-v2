@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import { t } from '$lib/i18n';
 	
 	const dispatch = createEventDispatcher();
 	
@@ -15,7 +16,7 @@
 	let localIntervals = [...intervals];
 	
 	function addInterval() {
-		localIntervals = [...localIntervals, { name: 'Nuevo Intervalo', duration: 30, color: 'bg-green-500' }];
+		localIntervals = [...localIntervals, { name: $t('intervals.new'), duration: 30, color: 'bg-green-500' }];
 	}
 	
 	function removeInterval(index: number) {
@@ -64,13 +65,13 @@
 	}
 	
 	const colorOptions = [
-		{ name: 'Amarillo', value: 'bg-yellow-500' },
-		{ name: 'Rojo', value: 'bg-red-500' },
-		{ name: 'Azul', value: 'bg-blue-500' },
-		{ name: 'Verde', value: 'bg-green-500' },
-		{ name: 'Morado', value: 'bg-purple-500' },
-		{ name: 'Rosa', value: 'bg-pink-500' },
-		{ name: 'Naranja', value: 'bg-orange-500' }
+		{ name: $t('colors.yellow'), value: 'bg-yellow-500' },
+		{ name: $t('colors.red'), value: 'bg-red-500' },
+		{ name: $t('colors.blue'), value: 'bg-blue-500' },
+		{ name: $t('colors.green'), value: 'bg-green-500' },
+		{ name: $t('colors.purple'), value: 'bg-purple-500' },
+		{ name: $t('colors.pink'), value: 'bg-pink-500' },
+		{ name: $t('colors.orange'), value: 'bg-orange-500' }
 	];
 	
 	// Generate unique IDs for form controls
@@ -87,7 +88,7 @@
 		<!-- Header del modal -->
 		<div class="sticky top-0 bg-gray-900 border-b border-gray-700 p-4 rounded-t-lg">
 			<div class="flex items-center justify-between">
-				<h2 class="text-2xl font-bold text-white">Configuración</h2>
+				<h2 class="text-2xl font-bold text-white">{$t('settings.title')}</h2>
 				<button 
 					on:click={cancelConfiguration}
 					class="text-gray-400 hover:text-white text-2xl"
@@ -101,8 +102,8 @@
 		<div class="p-4">
 			<!-- Campo de Repeticiones -->
 			<div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500 mb-6">
-				<label for="{repetitionsId}" class="block text-lg font-medium mb-2 text-white">Número de Repeticiones</label>
-				<p class="text-sm text-gray-400 mb-3">¿Cuántas veces quieres repetir el ciclo completo?</p>
+				<label for="{repetitionsId}" class="block text-lg font-medium mb-2 text-white">{$t('settings.repetitions')}</label>
+				<p class="text-sm text-gray-400 mb-3">{$t('settings.repetitionsDescription')}</p>
 				<input 
 					id="{repetitionsId}"
 					type="number" 
@@ -115,7 +116,7 @@
 			
 			<!-- Intervalos -->
 			<div class="space-y-4 mb-6">
-				<h3 class="text-lg font-medium text-white">Intervalos:</h3>
+				<h3 class="text-lg font-medium text-white">{$t('settings.intervals')}:</h3>
 				{#each localIntervals as interval, index}
 					<div class="bg-gray-800 rounded-lg border-l-4 {interval.color} relative">
 						<!-- Barra superior con botones -->
@@ -123,16 +124,16 @@
 							<button 
 								on:click={() => copyInterval(index)}
 								class="text-blue-400 hover:text-blue-300 transition-colors text-xs p-2 rounded bg-gray-700 hover:bg-gray-600"
-								title="Copiar intervalo al final"
+								title="{$t('settings.copyInterval')}"
 							>
-								📄 Copiar
+								📄 {$t('settings.copy')}
 							</button>
 							<div class="flex gap-3">
 								<button 
 									on:click={() => moveIntervalUp(index)}
 									disabled={index === 0}
 									class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-									title="Mover hacia arriba"
+									title="{$t('settings.moveUp')}"
 								>
 									⬆️
 								</button>
@@ -140,14 +141,14 @@
 									on:click={() => moveIntervalDown(index)}
 									disabled={index === localIntervals.length - 1}
 									class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-									title="Mover hacia abajo"
+									title="{$t('settings.moveDown')}"
 								>
 									⬇️
 								</button>
 								<button 
 									on:click={() => removeInterval(index)}
 									class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
-									title="Eliminar intervalo"
+									title="{$t('settings.deleteInterval')}"
 								>
 									🗑️
 								</button>
@@ -160,13 +161,13 @@
 								<input 
 									bind:value={interval.name} 
 									class="bg-gray-700 text-lg font-medium outline-none rounded px-3 py-2 hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 transition-colors text-white w-full"
-									placeholder="Nombre del intervalo"
+									placeholder="{$t('settings.intervalName')}"
 								/>
 							</div>
 							
 						<div class="flex items-center gap-4">
 							<div class="flex-1">
-								<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">Duración (segundos)</label>
+								<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration')}</label>
 								<input 
 									id="{generateIntervalId(index, 'duration')}"
 									type="number" 
@@ -177,7 +178,7 @@
 							</div>
 							
 							<div class="flex-1">
-								<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">Color</label>
+								<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">{$t('settings.color')}</label>
 								<select 
 									id="{generateIntervalId(index, 'color')}"
 									bind:value={interval.color}
@@ -195,7 +196,7 @@
 				
 				{#if localIntervals.length === 0}
 					<div class="bg-gray-800 rounded-lg p-4 text-center">
-						<p class="text-gray-400">No hay intervalos configurados</p>
+						<p class="text-gray-400">{$t('settings.noIntervals')}</p>
 					</div>
 				{/if}
 			</div>
@@ -205,7 +206,7 @@
 				on:click={addInterval}
 				class="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white mb-4"
 			>
-				+ Agregar Intervalo
+				+ {$t('settings.addInterval')}
 			</button>
 		</div>
 		
@@ -216,7 +217,7 @@
 					on:click={cancelConfiguration}
 					class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium text-white transition-colors"
 				>
-					Cancelar
+					{$t('common.cancel')}
 				</button>
 				
 				<button 
@@ -224,7 +225,7 @@
 					disabled={localIntervals.length === 0}
 					class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
 				>
-					Guardar Configuración
+					{$t('settings.saveConfiguration')}
 				</button>
 			</div>
 		</div>

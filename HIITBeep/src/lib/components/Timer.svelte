@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
+	import { t } from '$lib/i18n';
 	
 	const dispatch = createEventDispatcher();
 	
@@ -184,7 +185,7 @@
 	<div class="text-center text-white">
 		<!-- Nombre del intervalo actual -->
 		<h1 class="text-3xl font-light mb-8">
-			{currentInterval ? currentInterval.name : 'Completado'}
+			{currentInterval ? currentInterval.name : $t('timer.completed')}
 		</h1>
 		
 		<!-- Círculo animado con tiempo -->
@@ -231,14 +232,14 @@
 		<!-- Información adicional -->
 		{#if isRunning}
 			<p class="text-white/80 mb-1 text-lg">
-				Repetición {currentRepetition} de {repetitions}
+				{$t('timer.repetition')} {currentRepetition} {$t('common.of')} {repetitions}
 			</p>
 			<p class="text-white/70 mb-2 text-base">
-				Intervalo {currentIntervalIndex + 1} de {intervals.length}
+				{$t('timer.interval')} {currentIntervalIndex + 1} {$t('common.of')} {intervals.length}
 			</p>
 			{#if currentInterval}
 				<p class="text-white/60 text-base mb-8">
-					Duración: {formatTime(currentInterval.duration)}
+					{$t('timer.duration')}: {formatTime(currentInterval.duration)}
 				</p>
 			{/if}
 		{/if}
@@ -250,14 +251,14 @@
 					on:click={togglePause}
 					class="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-full text-white font-medium transition-colors backdrop-blur-sm"
 				>
-					{isPaused ? '▶️ Continuar' : '⏸️ Pausar'}
+					{isPaused ? `▶️ ${$t('timer.continue')}` : `⏸️ ${$t('timer.pause')}`}
 				</button>
 				
 				<button
 					on:click={resetTimer}
 					class="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-full text-white font-medium transition-colors backdrop-blur-sm"
 				>
-					🔄 Reiniciar
+					🔄 {$t('timer.restart')}
 				</button>
 			{/if}
 			
@@ -265,15 +266,15 @@
 				on:click={stopTimer}
 				class="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-full text-white font-medium transition-colors backdrop-blur-sm"
 			>
-				{isRunning ? '⏹️ Detener' : '← Volver'}
+				{isRunning ? `⏹️ ${$t('timer.stop')}` : `← ${$t('common.back')}`}
 			</button>
 		</div>
 		
 		{#if isCompleted}
 			<div class="mt-8">
-				<h2 class="text-4xl font-light text-white mb-4">¡Rutina Completada! 🎉</h2>
+				<h2 class="text-4xl font-light text-white mb-4">{$t('timer.routineCompleted')} 🎉</h2>
 				<p class="text-white/80 text-lg">
-					{repetitions === 1 ? '¡Excelente trabajo!' : `¡Completaste ${repetitions} repeticiones!`}
+					{repetitions === 1 ? $t('timer.excellentWork') : $t('timer.completedRepetitions', { count: repetitions })}
 				</p>
 			</div>
 		{/if}

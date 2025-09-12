@@ -1,0 +1,146 @@
+{
+  "es": {
+    "app": {
+      "title": "HIITBeep",
+      "description": "Cronómetro HIIT con sonidos y animaciones"
+    },
+    "common": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "start": "Iniciar",
+      "pause": "Pausar",
+      "continue": "Continuar",
+      "stop": "Detener",
+      "restart": "Reiniciar",
+      "back": "Volver",
+      "add": "Agregar",
+      "delete": "Eliminar",
+      "copy": "Copiar",
+      "edit": "Editar",
+      "settings": "Configuración"
+    },
+    "main": {
+      "repetitions": "Repeticiones",
+      "repetition": "repetición",
+      "repetitions_plural": "repeticiones",
+      "intervals_configured": "Intervalos Configurados:",
+      "no_intervals": "No hay intervalos configurados",
+      "use_settings": "Usa el engrane ⚙️ para configurar",
+      "start_routine": "Iniciar Rutina",
+      "configure_intervals": "Configura intervalos para empezar",
+      "total_duration": "Duración total por repetición:",
+      "estimated_time": "Tiempo total estimado:"
+    },
+    "settings": {
+      "title": "Configuración",
+      "repetitions_number": "Número de Repeticiones",
+      "repetitions_help": "¿Cuántas veces quieres repetir el ciclo completo?",
+      "intervals": "Intervalos:",
+      "no_intervals_configured": "No hay intervalos configurados",
+      "add_interval": "+ Agregar Intervalo",
+      "save_configuration": "Guardar Configuración",
+      "new_interval": "Nuevo Intervalo",
+      "interval_name": "Nombre del intervalo",
+      "duration_seconds": "Duración (segundos)",
+      "color": "Color",
+      "copy_interval": "Copiar intervalo al final",
+      "move_up": "Mover hacia arriba",
+      "move_down": "Mover hacia abajo",
+      "delete_interval": "Eliminar intervalo"
+    },
+    "timer": {
+      "completed": "¡Rutina Completada! 🎉",
+      "excellent_work": "¡Excelente trabajo!",
+      "completed_reps": "¡Completaste {reps} repeticiones!",
+      "repetition_of": "Repetición {current} de {total}",
+      "interval_of": "Intervalo {current} de {total}",
+      "duration": "Duración:"
+    },
+    "intervals": {
+      "preparation": "Preparación",
+      "exercise": "Ejercicio",
+      "rest": "Descanso"
+    },
+    "colors": {
+      "yellow": "Amarillo",
+      "red": "Rojo",
+      "blue": "Azul",
+      "green": "Verde",
+      "purple": "Morado",
+      "pink": "Rosa",
+      "orange": "Naranja"
+    }
+  },
+  "en": {
+    "app": {
+      "title": "HIITBeep",
+      "description": "HIIT Timer with sounds and animations"
+    },
+    "common": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "start": "Start",
+      "pause": "Pause",
+      "continue": "Continue",
+      "stop": "Stop",
+      "restart": "Restart",
+      "back": "Back",
+      "add": "Add",
+      "delete": "Delete",
+      "copy": "Copy",
+      "edit": "Edit",
+      "settings": "Settings"
+    },
+    "main": {
+      "repetitions": "Repetitions",
+      "repetition": "repetition",
+      "repetitions_plural": "repetitions",
+      "intervals_configured": "Configured Intervals:",
+      "no_intervals": "No intervals configured",
+      "use_settings": "Use the gear ⚙️ to configure",
+      "start_routine": "Start Routine",
+      "configure_intervals": "Configure intervals to start",
+      "total_duration": "Total duration per repetition:",
+      "estimated_time": "Total estimated time:"
+    },
+    "settings": {
+      "title": "Settings",
+      "repetitions_number": "Number of Repetitions",
+      "repetitions_help": "How many times do you want to repeat the complete cycle?",
+      "intervals": "Intervals:",
+      "no_intervals_configured": "No intervals configured",
+      "add_interval": "+ Add Interval",
+      "save_configuration": "Save Configuration",
+      "new_interval": "New Interval",
+      "interval_name": "Interval name",
+      "duration_seconds": "Duration (seconds)",
+      "color": "Color",
+      "copy_interval": "Copy interval to end",
+      "move_up": "Move up",
+      "move_down": "Move down",
+      "delete_interval": "Delete interval"
+    },
+    "timer": {
+      "completed": "Routine Completed! 🎉",
+      "excellent_work": "Excellent work!",
+      "completed_reps": "You completed {reps} repetitions!",
+      "repetition_of": "Repetition {current} of {total}",
+      "interval_of": "Interval {current} of {total}",
+      "duration": "Duration:"
+    },
+    "intervals": {
+      "preparation": "Preparation",
+      "exercise": "Exercise",
+      "rest": "Rest"
+    },
+    "colors": {
+      "yellow": "Yellow",
+      "red": "Red",
+      "blue": "Blue",
+      "green": "Green",
+      "purple": "Purple",
+      "pink": "Pink",
+      "orange": "Orange"
+    }
+  }
+}
