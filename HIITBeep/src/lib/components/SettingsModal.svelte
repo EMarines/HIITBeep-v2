@@ -6,10 +6,10 @@
 	const dispatch = createEventDispatcher();
 	
 	export let repetitions: number = 3;
-	export let intervals: Array<{ name: string; duration: number; color: string }> = [
-		{ name: 'Preparación', duration: 3, color: 'bg-yellow-500' },
-		{ name: 'Ejercicio', duration: 60, color: 'bg-red-500' },
-		{ name: 'Descanso', duration: 30, color: 'bg-blue-500' }
+	export let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' }> = [
+		{ name: 'Preparación', duration: 3, color: 'bg-yellow-500', type: 'interval' },
+		{ name: 'Ejercicio', duration: 60, color: 'bg-red-500', type: 'interval' },
+		{ name: 'Descanso', duration: 30, color: 'bg-blue-500', type: 'interval' }
 	];
 	
 	// Copias locales para editar
@@ -17,7 +17,11 @@
 	let localIntervals = [...intervals];
 	
 	function addInterval() {
-		localIntervals = [...localIntervals, { name: $t('settings.new_interval'), duration: 30, color: 'bg-green-500' }];
+		localIntervals = [...localIntervals, { name: $t('settings.new_interval'), duration: 30, color: 'bg-green-500', type: 'interval' }];
+	}
+	
+	function addRepeatMarker() {
+		localIntervals = [...localIntervals, { name: $t('settings.repeat_marker'), duration: 2, color: 'bg-purple-500', type: 'repeat' }];
 	}
 	
 	function removeInterval(index: number) {
@@ -29,7 +33,8 @@
 		const copiedInterval = {
 			name: intervalToCopy.name,
 			duration: intervalToCopy.duration,
-			color: intervalToCopy.color
+			color: intervalToCopy.color,
+			type: intervalToCopy.type || 'interval'
 		};
 		localIntervals = [...localIntervals, copiedInterval];
 	}
@@ -133,78 +138,116 @@
 				<h3 class="text-lg font-medium text-white">{$t('settings.intervals')}:</h3>
 				{#each localIntervals as interval, index}
 					<div class="bg-gray-800 rounded-lg border-l-4 {interval.color} relative">
-						<!-- Barra superior con botones -->
-						<div class="flex justify-between items-center p-2 border-b border-gray-700">
-							<button 
-								on:click={() => copyInterval(index)}
-								class="text-blue-400 hover:text-blue-300 transition-colors text-xs p-2 rounded bg-gray-700 hover:bg-gray-600"
-								title="{$t('settings.copy_interval')}"
-							>
-								📄 {$t('common.copy')}
-							</button>
-							<div class="flex gap-3">
-								<button 
-									on:click={() => moveIntervalUp(index)}
-									disabled={index === 0}
-									class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-									title="{$t('settings.move_up')}"
-								>
-									⬆️
-								</button>
-								<button 
-									on:click={() => moveIntervalDown(index)}
-									disabled={index === localIntervals.length - 1}
-									class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-									title="{$t('settings.move_down')}"
-								>
-									⬇️
-								</button>
-								<button 
-									on:click={() => removeInterval(index)}
-									class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
-									title="{$t('settings.delete_interval')}"
-								>
-									🗑️
-								</button>
-							</div>
-						</div>
-						
-						<!-- Contenido de datos -->
-						<div class="p-4">
-							<div class="mb-3">
-								<input 
-									bind:value={interval.name} 
-									class="bg-gray-700 text-lg font-medium outline-none rounded px-3 py-2 hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 transition-colors text-white w-full"
-									placeholder="{$t('settings.interval_name')}"
-								/>
+						{#if interval.type === 'repeat'}
+							<!-- Marcador de repetición especial -->
+							<div class="flex justify-between items-center p-2 border-b border-gray-700 bg-purple-900/30">
+								<span class="text-purple-300 font-medium">🔄 {$t('settings.repeat_marker')}</span>
+								<div class="flex gap-3">
+									<button 
+										on:click={() => moveIntervalUp(index)}
+										disabled={index === 0}
+										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+										title="{$t('settings.move_up')}"
+									>
+										⬆️
+									</button>
+									<button 
+										on:click={() => moveIntervalDown(index)}
+										disabled={index === localIntervals.length - 1}
+										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+										title="{$t('settings.move_down')}"
+									>
+										⬇️
+									</button>
+									<button 
+										on:click={() => removeInterval(index)}
+										class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
+										title="{$t('settings.delete_interval')}"
+									>
+										🗑️
+									</button>
+								</div>
 							</div>
 							
-						<div class="flex items-center gap-4">
-							<div class="flex-1">
-								<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration_seconds')}</label>
-								<input 
-									id="{generateIntervalId(index, 'duration')}"
-									type="number" 
-									bind:value={interval.duration} 
-									min="1"
-									class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-white"
-								/>
+							<div class="p-4 text-center">
+								<p class="text-purple-300 text-sm">
+									{$t('settings.repeat_description', { duration: interval.duration })}
+								</p>
+							</div>
+						{:else}
+							<!-- Intervalo normal -->
+							<div class="flex justify-between items-center p-2 border-b border-gray-700">
+								<button 
+									on:click={() => copyInterval(index)}
+									class="text-blue-400 hover:text-blue-300 transition-colors text-xs p-2 rounded bg-gray-700 hover:bg-gray-600"
+									title="{$t('settings.copy_interval')}"
+								>
+									📄 {$t('common.copy')}
+								</button>
+								<div class="flex gap-3">
+									<button 
+										on:click={() => moveIntervalUp(index)}
+										disabled={index === 0}
+										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+										title="{$t('settings.move_up')}"
+									>
+										⬆️
+									</button>
+									<button 
+										on:click={() => moveIntervalDown(index)}
+										disabled={index === localIntervals.length - 1}
+										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+										title="{$t('settings.move_down')}"
+									>
+										⬇️
+									</button>
+									<button 
+										on:click={() => removeInterval(index)}
+										class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
+										title="{$t('settings.delete_interval')}"
+									>
+										🗑️
+									</button>
+								</div>
 							</div>
 							
-							<div class="flex-1">
-								<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">{$t('settings.color')}</label>
-								<select 
-									id="{generateIntervalId(index, 'color')}"
-									bind:value={interval.color}
-									class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-white"
-								>
-									{#each colorOptions as color}
-										<option value={color.value}>{color.name}</option>
-									{/each}
-								</select>
+							<!-- Contenido de datos -->
+							<div class="p-4">
+								<div class="mb-3">
+									<input 
+										bind:value={interval.name} 
+										class="bg-gray-700 text-lg font-medium outline-none rounded px-3 py-2 hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 transition-colors text-white w-full"
+										placeholder="{$t('settings.interval_name')}"
+									/>
+								</div>
+								
+							<div class="flex items-center gap-4">
+								<div class="flex-1">
+									<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration_seconds')}</label>
+									<input 
+										id="{generateIntervalId(index, 'duration')}"
+										type="number" 
+										bind:value={interval.duration} 
+										min="1"
+										class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-white"
+									/>
+								</div>
+								
+								<div class="flex-1">
+									<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">{$t('settings.color')}</label>
+									<select 
+										id="{generateIntervalId(index, 'color')}"
+										bind:value={interval.color}
+										class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-white"
+									>
+										{#each colorOptions as color}
+											<option value={color.value}>{color.name}</option>
+										{/each}
+									</select>
+								</div>
+								</div>
 							</div>
-						</div>
-						</div>
+						{/if}
 					</div>
 				{/each}
 				
@@ -215,13 +258,23 @@
 				{/if}
 			</div>
 			
-			<!-- Botón agregar intervalo -->
-			<button 
-				on:click={addInterval}
-				class="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white mb-4"
-			>
-				{$t('settings.add_interval')}
-			</button>
+			<!-- Botones agregar intervalo y marcador de repetición -->
+			<div class="flex gap-2 mb-4">
+				<button 
+					on:click={addInterval}
+					class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white font-medium"
+					style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);"
+				>
+					📝 {$t('settings.add_interval')}
+				</button>
+				<button 
+					on:click={addRepeatMarker}
+					class="flex-1 py-3 bg-purple-700 hover:bg-purple-600 rounded-lg transition-colors text-white font-medium border-2 border-purple-500"
+					style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);"
+				>
+					🔄 {$t('settings.add_repeat_marker')}
+				</button>
+			</div>
 		</div>
 		
 		<!-- Footer del modal -->

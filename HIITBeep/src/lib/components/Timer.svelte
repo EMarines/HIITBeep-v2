@@ -5,7 +5,7 @@
 	
 	const dispatch = createEventDispatcher();
 	
-	export let intervals: Array<{ name: string; duration: number; color: string }>;
+	export let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' }>;
 	export let repetitions: number = 1;
 	
 	let currentIntervalIndex = 0;
@@ -16,6 +16,7 @@
 	let isCompleted = false; // Nueva variable para indicar rutina completada
 	let timer: number;
 	let audioContext: AudioContext | null = null;
+	let repeatMarkersExecuted: Map<number, number> = new Map(); // Controla cuántas veces se ha ejecutado cada marcador
 	
 	$: currentInterval = intervals[currentIntervalIndex];
 	$: progress = currentInterval && !isCompleted 
@@ -94,6 +95,7 @@
 		timeRemaining = intervals[0].duration;
 		isRunning = true;
 		isPaused = false;
+		repeatMarkersExecuted.clear(); // Limpiar contadores de marcadores
 		
 		// Beep inicial de preparación
 		setTimeout(() => playBeep(1000, 150), 100);
@@ -120,7 +122,29 @@
 					
 					// Pequeña pausa para mostrar el círculo completado
 					setTimeout(() => {
-						currentIntervalIndex++;
+						// Verificar si el intervalo actual es un marcador de repetición
+						const currentIntervalData = intervals[currentIntervalIndex];
+						if (currentIntervalData && currentIntervalData.type === 'repeat') {
+							// Manejar marcador de repetición
+							const executed = repeatMarkersExecuted.get(currentIntervalIndex) || 0;
+							if (executed < currentIntervalData.duration) {
+								// Aún hay repeticiones pendientes, volver al inicio
+								repeatMarkersExecuted.set(currentIntervalIndex, executed + 1);
+								currentIntervalIndex = 0;
+								timeRemaining = intervals[0].duration;
+								// Beep especial para repetición desde marcador
+								setTimeout(() => playBeep(1000, 200), 100);
+								setTimeout(() => playBeep(1000, 200), 300);
+								setTimeout(() => playBeep(1200, 300), 500);
+								return;
+							} else {
+								// Se completaron todas las repeticiones del marcador, continuar
+								currentIntervalIndex++;
+							}
+						} else {
+							// Intervalo normal, avanzar
+							currentIntervalIndex++;
+						}
 						
 						// Si hemos completado todos los intervalos del ciclo actual
 						if (currentIntervalIndex >= intervals.length) {
@@ -129,6 +153,8 @@
 								currentRepetition++;
 								currentIntervalIndex = 0; // Volver al primer intervalo
 								timeRemaining = intervals[0].duration;
+								// Limpiar contadores de marcadores para nueva repetición
+								repeatMarkersExecuted.clear();
 								// Beep especial para nueva repetición
 								setTimeout(() => playBeep(1000, 300), 100);
 								setTimeout(() => playBeep(1200, 300), 500);

@@ -11,7 +11,7 @@
 	const dispatch = createEventDispatcher();
 	
 	export let repetitions: number;
-	export let intervals: Array<{ name: string; duration: number; color: string }>;
+	export let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' }>;
 	
 	function openSettings() {
 		dispatch('open-settings');
@@ -52,15 +52,29 @@
 		<div class="space-y-3 mb-8">
 			<h3 class="text-lg font-medium text-gray-300 mb-4" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{$t('main.intervals_configured')}</h3>
 			{#each intervals as interval, index}
-				<div class="bg-gray-800 rounded-lg p-3 border-l-4 {interval.color} flex items-center justify-between">
-					<div>
-						<p class="font-medium text-white" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{interval.name}</p>
-						<p class="text-sm text-gray-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{$t('timer.duration')} {formatTime(interval.duration)}</p>
+				{#if interval.type === 'repeat'}
+					<!-- Marcador de repetición especial -->
+					<div class="bg-purple-900/30 rounded-lg p-3 border-l-4 border-purple-500 flex items-center justify-between">
+						<div>
+							<p class="font-medium text-purple-300" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">🔄 {interval.name}</p>
+							<p class="text-sm text-purple-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{$t('main.repeat_times', { times: interval.duration })}</p>
+						</div>
+						<div class="text-right">
+							<p class="text-lg font-light text-purple-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">🔄</p>
+						</div>
 					</div>
-					<div class="text-right">
-						<p class="text-lg font-light text-gray-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
+				{:else}
+					<!-- Intervalo normal -->
+					<div class="bg-gray-800 rounded-lg p-3 border-l-4 {interval.color} flex items-center justify-between">
+						<div>
+							<p class="font-medium text-white" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{interval.name}</p>
+							<p class="text-sm text-gray-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{$t('timer.duration')} {formatTime(interval.duration)}</p>
+						</div>
+						<div class="text-right">
+							<p class="text-lg font-light text-gray-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
+						</div>
 					</div>
-				</div>
+				{/if}
 			{/each}
 			
 			{#if intervals.length === 0}
