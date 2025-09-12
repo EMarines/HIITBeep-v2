@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { t } from '$lib/i18n';
 	
 	const dispatch = createEventDispatcher();
@@ -64,6 +65,10 @@
 		dispatch('cancel');
 	}
 	
+	function openPreferences() {
+		goto('/preferences');
+	}
+	
 	const colorOptions = [
 		{ name: $t('colors.yellow'), value: 'bg-yellow-500' },
 		{ name: $t('colors.red'), value: 'bg-red-500' },
@@ -89,12 +94,21 @@
 		<div class="sticky top-0 bg-gray-900 border-b border-gray-700 p-4 rounded-t-lg">
 			<div class="flex items-center justify-between">
 				<h2 class="text-2xl font-bold text-white">{$t('settings.title')}</h2>
-				<button 
-					on:click={cancelConfiguration}
-					class="text-gray-400 hover:text-white text-2xl"
-				>
-					✕
-				</button>
+				<div class="flex items-center gap-3">
+					<button 
+						on:click={openPreferences}
+						class="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
+						title="{$t('preferences.title')}"
+					>
+						🔧
+					</button>
+					<button 
+						on:click={cancelConfiguration}
+						class="text-gray-400 hover:text-white text-2xl"
+					>
+						✕
+					</button>
+				</div>
 			</div>
 		</div>
 		
