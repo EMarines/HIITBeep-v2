@@ -21,7 +21,7 @@
 	}
 	
 	function addRepeatMarker() {
-		localIntervals = [...localIntervals, { name: $t('settings.repeat_marker'), duration: 2, color: 'bg-purple-500', type: 'repeat' }];
+		localIntervals = [...localIntervals, { name: $t('settings.repeat_marker'), duration: 2, color: 'bg-gray-700', type: 'repeat' }];
 	}
 	
 	function removeInterval(index: number) {
@@ -57,6 +57,8 @@
 	
 	function saveConfiguration() {
 		if (localIntervals.length === 0) return;
+		// Asegurar que las repeticiones sean al menos 1
+		if (localRepetitions < 1) localRepetitions = 1;
 		dispatch('save-config', { 
 			intervals: localIntervals, 
 			repetitions: localRepetitions 
@@ -137,16 +139,16 @@
 			<div class="space-y-4 mb-6">
 				<h3 class="text-lg font-medium text-white">{$t('settings.intervals')}:</h3>
 				{#each localIntervals as interval, index}
-					<div class="bg-gray-800 rounded-lg border-l-4 {interval.color} relative">
-						{#if interval.type === 'repeat'}
-							<!-- Marcador de repetición especial -->
-							<div class="flex justify-between items-center p-2 border-b border-gray-700 bg-purple-900/30">
-								<span class="text-purple-300 font-medium">🔄 {$t('settings.repeat_marker')}</span>
+					{#if interval.type === 'repeat'}
+						<!-- Marcador de repetición especial con fondo gris fuerte -->
+						<div class="bg-gray-700 rounded-lg border-2 border-gray-600 relative">
+							<div class="flex justify-between items-center p-2 border-b border-gray-600 bg-gray-700">
+								<span class="text-gray-200 font-medium">🔄 {$t('settings.repeat_marker')}</span>
 								<div class="flex gap-3">
 									<button 
 										on:click={() => moveIntervalUp(index)}
 										disabled={index === 0}
-										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
 										title="{$t('settings.move_up')}"
 									>
 										⬆️
@@ -154,14 +156,14 @@
 									<button 
 										on:click={() => moveIntervalDown(index)}
 										disabled={index === localIntervals.length - 1}
-										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
 										title="{$t('settings.move_down')}"
 									>
 										⬇️
 									</button>
 									<button 
 										on:click={() => removeInterval(index)}
-										class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
+										class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-600 hover:bg-gray-500"
 										title="{$t('settings.delete_interval')}"
 									>
 										🗑️
@@ -169,13 +171,29 @@
 								</div>
 							</div>
 							
-							<div class="p-4 text-center">
-								<p class="text-purple-300 text-sm">
+							<div class="p-4 bg-gray-800">
+								<div class="flex items-center gap-4">
+									<label class="text-sm text-gray-300 font-medium">
+										{$t('settings.repeat_times')}:
+									</label>
+									<select 
+										bind:value={interval.duration}
+										class="bg-gray-600 text-white rounded px-3 py-2 text-sm border border-gray-500 focus:ring-2 focus:ring-gray-400 outline-none"
+									>
+										{#each Array.from({length: 10}, (_, i) => i + 1) as num}
+											<option value={num}>{num}</option>
+										{/each}
+									</select>
+									<span class="text-sm text-gray-400">{$t('settings.times')}</span>
+								</div>
+								<p class="text-gray-300 text-sm mt-2">
 									{$t('settings.repeat_description', { duration: interval.duration })}
 								</p>
 							</div>
-						{:else}
-							<!-- Intervalo normal -->
+						</div>
+					{:else}
+						<!-- Intervalo normal -->
+						<div class="bg-gray-800 rounded-lg border-l-4 {interval.color} relative">
 							<div class="flex justify-between items-center p-2 border-b border-gray-700">
 								<button 
 									on:click={() => copyInterval(index)}
@@ -247,8 +265,8 @@
 								</div>
 								</div>
 							</div>
-						{/if}
-					</div>
+						</div>
+					{/if}
 				{/each}
 				
 				{#if localIntervals.length === 0}
@@ -269,7 +287,7 @@
 				</button>
 				<button 
 					on:click={addRepeatMarker}
-					class="flex-1 py-3 bg-purple-700 hover:bg-purple-600 rounded-lg transition-colors text-white font-medium border-2 border-purple-500"
+					class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white font-medium border-2 border-gray-500"
 					style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);"
 				>
 					🔄 {$t('settings.add_repeat_marker')}

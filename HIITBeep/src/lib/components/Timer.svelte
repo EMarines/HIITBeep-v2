@@ -18,6 +18,13 @@
 	let audioContext: AudioContext | null = null;
 	let repeatMarkersExecuted: Map<number, number> = new Map(); // Controla cuántas veces se ha ejecutado cada marcador
 	
+	// Variables para el contador visual
+	let showRepeatCounter = false;
+	let repeatCounterValue = 0;
+	
+	// Validar que repeticiones sea al menos 1
+	$: if (repetitions < 1) repetitions = 1;
+	
 	$: currentInterval = intervals[currentIntervalIndex];
 	$: progress = currentInterval && !isCompleted 
 		? Math.max(0, Math.min(1, (currentInterval.duration - timeRemaining) / currentInterval.duration)) 
@@ -87,15 +94,30 @@
 		}
 	}
 	
+	function showRepeatCountdown(currentRep: number) {
+		showRepeatCounter = true;
+		repeatCounterValue = currentRep;
+		
+		setTimeout(() => {
+			showRepeatCounter = false;
+		}, 500); // medio segundo
+	}
+	
 	function startTimer() {
-		if (intervals.length === 0) return;
+		if (intervals.length === 0 || repetitions < 1) return;
 		
 		currentIntervalIndex = 0;
-		currentRepetition = 1;
+		currentRepetition = repetitions; // Empezar desde el número total (cuenta regresiva)
 		timeRemaining = intervals[0].duration;
 		isRunning = true;
 		isPaused = false;
+		isCompleted = false;
 		repeatMarkersExecuted.clear(); // Limpiar contadores de marcadores
+		
+		// Mostrar el número de repetición actual al inicio
+		if (repetitions > 1) {
+			showRepeatCountdown(currentRepetition);
+		}
 		
 		// Beep inicial de preparación
 		setTimeout(() => playBeep(1000, 150), 100);
@@ -130,12 +152,21 @@
 							if (executed < currentIntervalData.duration) {
 								// Aún hay repeticiones pendientes, volver al inicio
 								repeatMarkersExecuted.set(currentIntervalIndex, executed + 1);
-								currentIntervalIndex = 0;
-								timeRemaining = intervals[0].duration;
+								const remaining = currentIntervalData.duration - executed;
+								
+								// Mostrar contador visual con el número restante del marcador
+								showRepeatCountdown(remaining);
+								
 								// Beep especial para repetición desde marcador
 								setTimeout(() => playBeep(1000, 200), 100);
 								setTimeout(() => playBeep(1000, 200), 300);
 								setTimeout(() => playBeep(1200, 300), 500);
+								
+								// Volver al inicio después del contador
+								setTimeout(() => {
+									currentIntervalIndex = 0;
+									timeRemaining = intervals[0].duration;
+								}, 500);
 								return;
 							} else {
 								// Se completaron todas las repeticiones del marcador, continuar
@@ -148,13 +179,17 @@
 						
 						// Si hemos completado todos los intervalos del ciclo actual
 						if (currentIntervalIndex >= intervals.length) {
-							// Si aún hay repeticiones pendientes
-							if (currentRepetition < repetitions) {
-								currentRepetition++;
+							// Si aún hay repeticiones pendientes (cuenta regresiva)
+							if (currentRepetition > 1) {
+								currentRepetition--; // Decrementar la cuenta regresiva
 								currentIntervalIndex = 0; // Volver al primer intervalo
 								timeRemaining = intervals[0].duration;
 								// Limpiar contadores de marcadores para nueva repetición
 								repeatMarkersExecuted.clear();
+								
+								// Mostrar el número de repetición actual
+								showRepeatCountdown(currentRepetition);
+								
 								// Beep especial para nueva repetición
 								setTimeout(() => playBeep(1000, 300), 100);
 								setTimeout(() => playBeep(1200, 300), 500);
@@ -238,7 +273,18 @@
 				stroke-dasharray="{circumference}"
 				stroke-dashoffset="{strokeDashoffset}"
 			/>
-		</svg>			<!-- Paloma de fondo (solo cuando está completado) -->
+		</svg>			
+			
+			<!-- Contador visual superpuesto para marcadores de repetición -->
+			{#if showRepeatCounter}
+				<div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 rounded-full">
+					<div class="text-8xl font-bold text-white animate-pulse" style="text-shadow: 0 0 20px rgba(0, 0, 0, 1), 3px 3px 15px rgba(0, 0, 0, 0.9), -3px -3px 6px rgba(0, 0, 0, 0.8);">
+						{repeatCounterValue}
+					</div>
+				</div>
+			{/if}
+			
+			<!-- Paloma de fondo (solo cuando está completado) -->
 			{#if isCompleted}
 				<div class="absolute inset-0 flex items-center justify-center">
 					<span class="text-[12rem] text-green-500 opacity-60" style="line-height: 1; font-weight: 900;">
@@ -258,7 +304,9 @@
 		<!-- Información adicional -->
 		{#if isRunning}
 			<p class="text-white/80 mb-1 text-lg" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
-				{$t('timer.repetition')} {currentRepetition} {$t('common.of')} {repetitions}
+				{#if repetitions > 1}
+					{$t('timer.repetition')} {currentRepetition} {$t('common.of')} {repetitions}
+				{/if}
 			</p>
 			<p class="text-white/70 mb-2 text-base" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
 				{$t('timer.interval')} {currentIntervalIndex + 1} {$t('common.of')} {intervals.length}

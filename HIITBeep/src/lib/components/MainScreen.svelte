@@ -53,14 +53,14 @@
 			<h3 class="text-lg font-medium text-gray-300 mb-4" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{$t('main.intervals_configured')}</h3>
 			{#each intervals as interval, index}
 				{#if interval.type === 'repeat'}
-					<!-- Marcador de repetición especial -->
-					<div class="bg-purple-900/30 rounded-lg p-3 border-l-4 border-purple-500 flex items-center justify-between">
+					<!-- Marcador de repetición especial con fondo gris fuerte -->
+					<div class="bg-gray-700 rounded-lg p-3 border-2 border-gray-600 flex items-center justify-between">
 						<div>
-							<p class="font-medium text-purple-300" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">🔄 {interval.name}</p>
-							<p class="text-sm text-purple-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{$t('main.repeat_times', { times: interval.duration })}</p>
+							<p class="font-medium text-gray-200" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">🔄 {interval.name}</p>
+							<p class="text-sm text-gray-300" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{$t('main.repeat_times', { times: interval.duration })}</p>
 						</div>
 						<div class="text-right">
-							<p class="text-lg font-light text-purple-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">🔄</p>
+							<p class="text-lg font-light text-gray-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">🔄</p>
 						</div>
 					</div>
 				{:else}
