@@ -6,7 +6,14 @@
 	const dispatch = createEventDispatcher();
 	
 	export let repetitions: number = 3;
-	export let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' }> = [
+	export let intervals: Array<{ 
+		name: string; 
+		duration: number; 
+		color: string; 
+		type?: 'interval' | 'repeat' | 'weights';
+		sets?: number; // Para intervalos de pesas
+		restTime?: number; // Tiempo de descanso para pesas
+	}> = [
 		{ name: 'Preparación', duration: 3, color: 'bg-yellow-500', type: 'interval' },
 		{ name: 'Ejercicio', duration: 60, color: 'bg-red-500', type: 'interval' },
 		{ name: 'Descanso', duration: 30, color: 'bg-blue-500', type: 'interval' }
@@ -18,6 +25,17 @@
 	
 	function addInterval() {
 		localIntervals = [...localIntervals, { name: $t('settings.new_interval'), duration: 30, color: 'bg-green-500', type: 'interval' }];
+	}
+	
+	function addWeightsInterval() {
+		localIntervals = [...localIntervals, { 
+			name: $t('settings.new_weights_interval'), 
+			duration: 0, // No usado en pesas
+			color: 'bg-purple-600', 
+			type: 'weights',
+			sets: 3,
+			restTime: 90
+		}];
 	}
 	
 	function addRepeatMarker() {
@@ -34,7 +52,11 @@
 			name: intervalToCopy.name,
 			duration: intervalToCopy.duration,
 			color: intervalToCopy.color,
-			type: intervalToCopy.type || 'interval'
+			type: intervalToCopy.type || 'interval',
+			...(intervalToCopy.type === 'weights' && {
+				sets: intervalToCopy.sets,
+				restTime: intervalToCopy.restTime
+			})
 		};
 		localIntervals = [...localIntervals, copiedInterval];
 	}
@@ -173,10 +195,11 @@
 							
 							<div class="p-4 bg-gray-800">
 								<div class="flex items-center gap-4">
-									<label class="text-sm text-gray-300 font-medium">
+									<label for="repeat-times-{i}" class="text-sm text-gray-300 font-medium">
 										{$t('settings.repeat_times')}:
 									</label>
 									<select 
+										id="repeat-times-{i}"
 										bind:value={interval.duration}
 										class="bg-gray-600 text-white rounded px-3 py-2 text-sm border border-gray-500 focus:ring-2 focus:ring-gray-400 outline-none"
 									>
@@ -191,8 +214,100 @@
 								</p>
 							</div>
 						</div>
+					{:else if interval.type === 'weights'}
+						<!-- Intervalo de Pesas -->
+						<div class="bg-gray-800 rounded-lg border-l-4 {interval.color} relative">
+							<div class="flex justify-between items-center p-2 border-b border-gray-700">
+								<div class="flex items-center gap-2">
+									<span class="text-purple-400">🏋️</span>
+									<span class="text-xs text-purple-400 font-medium">{$t('intervals.weights')}</span>
+								</div>
+								<div class="flex gap-3">
+									<button 
+										on:click={() => copyInterval(index)}
+										class="text-blue-400 hover:text-blue-300 transition-colors text-xs p-2 rounded bg-gray-700 hover:bg-gray-600"
+										title="{$t('settings.copy_interval')}"
+									>
+										📄
+									</button>
+									<button 
+										on:click={() => moveIntervalUp(index)}
+										disabled={index === 0}
+										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+										title="{$t('settings.move_up')}"
+									>
+										⬆️
+									</button>
+									<button 
+										on:click={() => moveIntervalDown(index)}
+										disabled={index === localIntervals.length - 1}
+										class="text-gray-400 hover:text-white transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+										title="{$t('settings.move_down')}"
+									>
+										⬇️
+									</button>
+									<button 
+										on:click={() => removeInterval(index)}
+										class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
+										title="{$t('settings.delete_interval')}"
+									>
+										🗑️
+									</button>
+								</div>
+							</div>
+							
+							<!-- Contenido de datos para Pesas -->
+							<div class="p-4">
+								<div class="mb-3">
+									<input 
+										bind:value={interval.name} 
+										class="bg-gray-700 text-lg font-medium outline-none rounded px-3 py-2 hover:bg-gray-600 focus:ring-2 focus:ring-purple-500 transition-colors text-white w-full"
+										placeholder="{$t('settings.exercise_name')}"
+									/>
+								</div>
+								
+								<div class="flex items-center gap-4">
+									<div class="flex-1">
+										<label for="{generateIntervalId(index, 'sets')}" class="block text-sm text-gray-400 mb-1">{$t('settings.number_of_sets')}</label>
+										<input 
+											id="{generateIntervalId(index, 'sets')}"
+											type="number" 
+											bind:value={interval.sets} 
+											min="1"
+											max="20"
+											class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500 text-white"
+										/>
+									</div>
+									
+									<div class="flex-1">
+										<label for="{generateIntervalId(index, 'restTime')}" class="block text-sm text-gray-400 mb-1">{$t('settings.rest_seconds')}</label>
+										<input 
+											id="{generateIntervalId(index, 'restTime')}"
+											type="number" 
+											bind:value={interval.restTime} 
+											min="10"
+											max="600"
+											class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500 text-white"
+										/>
+									</div>
+									
+									<div class="flex-1">
+										<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">{$t('settings.color')}</label>
+										<select 
+											id="{generateIntervalId(index, 'color')}"
+											bind:value={interval.color}
+											class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500 text-white"
+										>
+											{#each colorOptions as color}
+												<option value={color.value}>{color.name}</option>
+											{/each}
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
 					{:else}
-						<!-- Intervalo normal -->
+						<!-- Intervalo normal HIIT -->
 						<div class="bg-gray-800 rounded-lg border-l-4 {interval.color} relative">
 							<div class="flex justify-between items-center p-2 border-b border-gray-700">
 								<button 
@@ -276,7 +391,7 @@
 				{/if}
 			</div>
 			
-			<!-- Botones agregar intervalo y marcador de repetición -->
+			<!-- Botones agregar intervalo, pesas y marcador de repetición -->
 			<div class="flex gap-2 mb-4">
 				<button 
 					on:click={addInterval}
@@ -284,6 +399,13 @@
 					style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);"
 				>
 					📝 {$t('settings.add_interval')}
+				</button>
+				<button 
+					on:click={addWeightsInterval}
+					class="flex-1 py-3 bg-purple-700 hover:bg-purple-600 rounded-lg transition-colors text-white font-medium"
+					style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);"
+				>
+					🏋️ {$t('settings.add_weights_interval')}
 				</button>
 				<button 
 					on:click={addRepeatMarker}

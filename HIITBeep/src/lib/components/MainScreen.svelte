@@ -11,7 +11,14 @@
 	const dispatch = createEventDispatcher();
 	
 	export let repetitions: number;
-	export let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' }>;
+	export let intervals: Array<{ 
+		name: string; 
+		duration: number; 
+		color: string; 
+		type?: 'interval' | 'repeat' | 'weights';
+		sets?: number;
+		restTime?: number;
+	}>;
 	
 	function openSettings() {
 		dispatch('open-settings');
@@ -63,8 +70,24 @@
 							<p class="text-lg font-light text-gray-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">🔄</p>
 						</div>
 					</div>
+				{:else if interval.type === 'weights'}
+					<!-- Intervalo de Pesas con diseño distintivo -->
+					<div class="bg-gray-800 rounded-lg p-3 border-l-4 {interval.color} flex items-center justify-between">
+						<div>
+							<div class="flex items-center gap-2 mb-1">
+								<span class="text-purple-400">🏋️</span>
+								<p class="font-medium text-white" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{interval.name}</p>
+							</div>
+							<p class="text-sm text-gray-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">
+								{interval.sets} {$t('intervals.series')} • {formatTime(interval.restTime || 0)} {$t('intervals.rest_time')}
+							</p>
+						</div>
+						<div class="text-right">
+							<p class="text-lg font-light text-purple-400" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
+						</div>
+					</div>
 				{:else}
-					<!-- Intervalo normal -->
+					<!-- Intervalo normal HIIT -->
 					<div class="bg-gray-800 rounded-lg p-3 border-l-4 {interval.color} flex items-center justify-between">
 						<div>
 							<p class="font-medium text-white" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{interval.name}</p>

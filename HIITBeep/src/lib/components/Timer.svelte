@@ -5,7 +5,14 @@
 	
 	const dispatch = createEventDispatcher();
 	
-	export let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' }>;
+	export let intervals: Array<{ 
+		name: string; 
+		duration: number; 
+		color: string; 
+		type?: 'interval' | 'repeat' | 'weights';
+		sets?: number;
+		restTime?: number;
+	}>;
 	export let repetitions: number = 1;
 	
 	let currentIntervalIndex = 0;
@@ -22,12 +29,25 @@
 	let showRepeatCounter = false;
 	let repeatCounterValue = 0;
 	
+	// Variables para intervalos de pesas
+	let currentSet = 1; // Serie actual en intervalos de pesas
+	let isWaitingForTap = false; // Esperando que el usuario toque para iniciar descanso
+	let isRestingWeights = false; // En descanso de pesas
+	
 	// Validar que repeticiones sea al menos 1
 	$: if (repetitions < 1) repetitions = 1;
 	
 	$: currentInterval = intervals[currentIntervalIndex];
 	$: progress = currentInterval && !isCompleted 
-		? Math.max(0, Math.min(1, (currentInterval.duration - timeRemaining) / currentInterval.duration)) 
+		? (() => {
+			// Para pesas en descanso, usar restTime en lugar de duration
+			if (currentInterval.type === 'weights' && isRestingWeights) {
+				const totalRestTime = currentInterval.restTime || 90;
+				return Math.max(0, Math.min(1, (totalRestTime - timeRemaining) / totalRestTime));
+			}
+			// Para intervalos normales
+			return Math.max(0, Math.min(1, (currentInterval.duration - timeRemaining) / currentInterval.duration));
+		})()
 		: (isCompleted ? 1 : 0);
 	$: circumference = 2 * Math.PI * 120;
 	$: strokeDashoffset = circumference * (1 - progress);
@@ -41,13 +61,13 @@
 				'bg-blue-500': '#3b82f6',
 				'bg-green-500': '#22c55e',
 				'bg-purple-500': '#a855f7',
+				'bg-purple-600': '#9333ea',
 				'bg-pink-500': '#ec4899',
 				'bg-orange-500': '#f97316'
 			};
 			return colorMap[currentInterval.color] || '#111827';
 		})()
 		: '#111827';
-	$: console.log('backgroundColor changed:', backgroundColor);
 	
 	onMount(() => {
 		if (browser && intervals.length > 0) {
@@ -94,36 +114,122 @@
 		}
 	}
 	
-	function showRepeatCountdown(currentRep: number) {
-		showRepeatCounter = true;
-		repeatCounterValue = currentRep;
+	// Sonido especial para finalización de descanso en pesas
+	function playWeightsRestComplete() {
+		if (!audioContext) return;
 		
-		setTimeout(() => {
-			showRepeatCounter = false;
-		}, 500); // medio segundo
+		try {
+			// Secuencia de tonos ascendentes para indicar que puede hacer la siguiente serie
+			setTimeout(() => playBeep(600, 150), 0);
+			setTimeout(() => playBeep(800, 150), 200);
+			setTimeout(() => playBeep(1000, 300), 400);
+		} catch (e) {
+			console.log('Error reproduciendo sonido de pesas');
+		}
 	}
 	
-	function startTimer() {
-		if (intervals.length === 0 || repetitions < 1) return;
+	// Manejar tap del usuario en intervalos de pesas
+	function handleWeightsTap() {
+		const currentIntervalData = intervals[currentIntervalIndex];
+		if (!currentIntervalData || currentIntervalData.type !== 'weights') return;
+		if (!isWaitingForTap) return;
 		
-		currentIntervalIndex = 0;
-		currentRepetition = repetitions; // Empezar desde el número total (cuenta regresiva)
-		timeRemaining = intervals[0].duration;
-		isRunning = true;
-		isPaused = false;
-		isCompleted = false;
-		repeatMarkersExecuted.clear(); // Limpiar contadores de marcadores
+		// Usuario tocó, iniciar descanso
+		isWaitingForTap = false;
+		isRestingWeights = true;
+		timeRemaining = currentIntervalData.restTime || 90;
 		
-		// Mostrar el número de repetición actual al inicio
-		if (repetitions > 1) {
-			showRepeatCountdown(currentRepetition);
+		// Beep de confirmación
+		playBeep(1000, 200);
+		
+		// Iniciar countdown de descanso
+		if (timer) clearInterval(timer);
+		timer = setInterval(() => {
+			if (!isPaused) {
+				timeRemaining--;
+				
+				// Beeps de los últimos 5 segundos
+				if (timeRemaining <= 5 && timeRemaining > 0) {
+					playBeep(1200, 200);
+				}
+				
+				// Descanso terminado
+				if (timeRemaining <= 0) {
+					playWeightsRestComplete();
+					isRestingWeights = false;
+					clearInterval(timer); // Detener el timer
+					
+					setTimeout(() => {
+						currentSet++;
+						
+						// Verificar si completamos todas las series
+						if (currentSet > (currentIntervalData.sets || 3)) {
+							// Avanzar al siguiente intervalo
+							currentSet = 1;
+							currentIntervalIndex++;
+							
+							if (currentIntervalIndex >= intervals.length) {
+								// Verificar repeticiones globales
+								if (currentRepetition > 1) {
+									currentRepetition--;
+									currentIntervalIndex = 0;
+									repeatMarkersExecuted.clear();
+									showRepeatCountdown(currentRepetition);
+									initializeInterval();
+								} else {
+									// Rutina completada
+									isRunning = false;
+									isCompleted = true;
+									setTimeout(() => playBeep(400, 800), 100);
+									setTimeout(() => playBeep(500, 800), 600);
+								}
+							} else {
+								initializeInterval();
+							}
+						} else {
+							// Más series pendientes, esperar tap del usuario
+							isWaitingForTap = true;
+							timeRemaining = 0; // Resetear tiempo
+							// Beep para indicar que puede empezar la siguiente serie
+							setTimeout(() => playBeep(800, 200), 100);
+						}
+					}, 300);
+				}
+			}
+		}, 1000);
+	}
+	
+	// Inicializar intervalo actual (HIIT o Pesas)
+	function initializeInterval() {
+		const currentIntervalData = intervals[currentIntervalIndex];
+		
+		// IMPORTANTE: Limpiar cualquier timer activo antes de inicializar
+		if (timer) {
+			clearInterval(timer);
 		}
 		
-		// Beep inicial de preparación
-		setTimeout(() => playBeep(1000, 150), 100);
-		setTimeout(() => playBeep(1000, 150), 350);
-		setTimeout(() => playBeep(1200, 300), 600);
-		
+		if (currentIntervalData.type === 'weights') {
+			// Intervalo de pesas: esperar tap del usuario
+			isWaitingForTap = true;
+			isRestingWeights = false;
+			timeRemaining = 0;
+			currentSet = 1;
+			
+			// Beep para indicar que puede empezar
+			setTimeout(() => playBeep(800, 200), 100);
+		} else if (currentIntervalData.type === 'repeat') {
+			// Marcador de repetición
+			timeRemaining = currentIntervalData.duration;
+			startHIITTimer();
+		} else {
+			// Intervalo HIIT normal
+			timeRemaining = currentIntervalData.duration;
+			startHIITTimer();
+		}
+	}
+	
+	// Timer para intervalos HIIT (código existente movido aquí)
+	function startHIITTimer() {
 		timer = setInterval(() => {
 			if (!isPaused) {
 				timeRemaining--;
@@ -142,73 +248,103 @@
 				if (timeRemaining <= 0) {
 					playBeep(600, 400);
 					
-					// Pequeña pausa para mostrar el círculo completado
 					setTimeout(() => {
-						// Verificar si el intervalo actual es un marcador de repetición
-						const currentIntervalData = intervals[currentIntervalIndex];
-						if (currentIntervalData && currentIntervalData.type === 'repeat') {
-							// Manejar marcador de repetición
-							const executed = repeatMarkersExecuted.get(currentIntervalIndex) || 0;
-							if (executed < currentIntervalData.duration) {
-								// Aún hay repeticiones pendientes, volver al inicio
-								repeatMarkersExecuted.set(currentIntervalIndex, executed + 1);
-								const remaining = currentIntervalData.duration - executed;
-								
-								// Mostrar contador visual con el número restante del marcador
-								showRepeatCountdown(remaining);
-								
-								// Beep especial para repetición desde marcador
-								setTimeout(() => playBeep(1000, 200), 100);
-								setTimeout(() => playBeep(1000, 200), 300);
-								setTimeout(() => playBeep(1200, 300), 500);
-								
-								// Volver al inicio después del contador
-								setTimeout(() => {
-									currentIntervalIndex = 0;
-									timeRemaining = intervals[0].duration;
-								}, 500);
-								return;
-							} else {
-								// Se completaron todas las repeticiones del marcador, continuar
-								currentIntervalIndex++;
-							}
-						} else {
-							// Intervalo normal, avanzar
-							currentIntervalIndex++;
-						}
-						
-						// Si hemos completado todos los intervalos del ciclo actual
-						if (currentIntervalIndex >= intervals.length) {
-							// Si aún hay repeticiones pendientes (cuenta regresiva)
-							if (currentRepetition > 1) {
-								currentRepetition--; // Decrementar la cuenta regresiva
-								currentIntervalIndex = 0; // Volver al primer intervalo
-								timeRemaining = intervals[0].duration;
-								// Limpiar contadores de marcadores para nueva repetición
-								repeatMarkersExecuted.clear();
-								
-								// Mostrar el número de repetición actual
-								showRepeatCountdown(currentRepetition);
-								
-								// Beep especial para nueva repetición
-								setTimeout(() => playBeep(1000, 300), 100);
-								setTimeout(() => playBeep(1200, 300), 500);
-							} else {
-								// Todas las repeticiones completadas
-								isRunning = false;
-								isCompleted = true; // Activar estado de completado
-								clearInterval(timer);
-								// Beep final más largo
-								setTimeout(() => playBeep(400, 800), 100);
-								setTimeout(() => playBeep(500, 800), 600);
-							}
-						} else {
-							// Siguiente intervalo en la misma repetición
-							timeRemaining = intervals[currentIntervalIndex].duration;
-						}
-					}, 300); // 300ms para ver el círculo completo
+						handleIntervalChange();
+					}, 300);
 				}
 			}
+		}, 1000);
+	}
+	
+	// Manejar cambio de intervalo (lógica existente refactorizada)
+	function handleIntervalChange() {
+		const currentIntervalData = intervals[currentIntervalIndex];
+		
+		if (currentIntervalData && currentIntervalData.type === 'repeat') {
+			// Manejar marcador de repetición
+			const executed = repeatMarkersExecuted.get(currentIntervalIndex) || 0;
+			// Cambiado: ahora executed < duration - 1 porque queremos duration ejecuciones totales, no duration + 1
+			if (executed < currentIntervalData.duration - 1) {
+				repeatMarkersExecuted.set(currentIntervalIndex, executed + 1);
+				const remaining = currentIntervalData.duration - executed;
+				showRepeatCountdown(remaining);
+				
+				setTimeout(() => playBeep(1000, 200), 100);
+				setTimeout(() => playBeep(1000, 200), 300);
+				setTimeout(() => playBeep(1200, 300), 500);
+				
+				setTimeout(() => {
+					currentIntervalIndex = 0;
+					initializeInterval();
+				}, 500);
+				return;
+			} else {
+				currentIntervalIndex++;
+			}
+		} else {
+			currentIntervalIndex++;
+		}
+		
+		if (currentIntervalIndex >= intervals.length) {
+			if (currentRepetition > 1) {
+				currentRepetition--;
+				currentIntervalIndex = 0;
+				repeatMarkersExecuted.clear();
+				showRepeatCountdown(currentRepetition);
+				
+				setTimeout(() => playBeep(1000, 300), 100);
+				setTimeout(() => playBeep(1200, 300), 500);
+				
+				setTimeout(() => {
+					initializeInterval();
+				}, 500);
+			} else {
+				isRunning = false;
+				isCompleted = true;
+				clearInterval(timer);
+				setTimeout(() => playBeep(400, 800), 100);
+				setTimeout(() => playBeep(500, 800), 600);
+			}
+		} else {
+			initializeInterval();
+		}
+	}
+	
+	function showRepeatCountdown(currentRep: number) {
+		showRepeatCounter = true;
+		repeatCounterValue = currentRep;
+		
+		setTimeout(() => {
+			showRepeatCounter = false;
+		}, 500); // medio segundo
+	}
+	
+	function startTimer() {
+		if (intervals.length === 0 || repetitions < 1) return;
+		
+		currentIntervalIndex = 0;
+		currentRepetition = repetitions;
+		isRunning = true;
+		isPaused = false;
+		isCompleted = false;
+		repeatMarkersExecuted.clear();
+		currentSet = 1;
+		isWaitingForTap = false;
+		isRestingWeights = false;
+		
+		// Mostrar el número de repetición actual al inicio
+		if (repetitions > 1) {
+			showRepeatCountdown(currentRepetition);
+		}
+		
+		// Beep inicial de preparación
+		setTimeout(() => playBeep(1000, 150), 100);
+		setTimeout(() => playBeep(1000, 150), 350);
+		setTimeout(() => playBeep(1200, 300), 600);
+		
+		// Inicializar primer intervalo después de beeps
+		setTimeout(() => {
+			initializeInterval();
 		}, 1000);
 	}
 	
@@ -246,34 +382,57 @@
 	<div class="text-center text-white">
 		<!-- Nombre del intervalo actual -->
 		<h1 class="text-3xl font-light mb-8" style="text-shadow: 0 0 10px rgba(0, 0, 0, 1), 2px 2px 8px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(0, 0, 0, 0.8)">
-			{currentInterval ? currentInterval.name : $t('timer.completed')}
+			{#if currentInterval && currentInterval.type === 'weights'}
+				🏋️ {currentInterval.name}
+			{:else}
+				{currentInterval ? currentInterval.name : $t('timer.completed')}
+			{/if}
 		</h1>
 		
-		<!-- Círculo animado con tiempo -->
+		<!-- Círculo animado con tiempo o botón de tap para pesas -->
 		<div class="relative mb-8 flex items-center justify-center">
-			<svg width="280" height="280" viewBox="0 0 280 280" class="transform -rotate-90">
-				<!-- Círculo de fondo -->
-				<circle
-					cx="140"
-					cy="140"
-					r="120"
-					stroke="rgba(255,255,255,0.2)"
-					stroke-width="8"
-					fill="none"
-			/>
-			<!-- Círculo de progreso -->
-			<circle
-				cx="140"
-				cy="140"
-				r="120"
-				stroke="rgba(255,255,255,0.9)"
-				stroke-width="8"
-				fill="none"
-				stroke-linecap="round"
-				stroke-dasharray="{circumference}"
-				stroke-dashoffset="{strokeDashoffset}"
-			/>
-		</svg>			
+			{#if currentInterval && currentInterval.type === 'weights' && isWaitingForTap}
+				<!-- Botón interactivo para iniciar descanso en pesas -->
+				<button
+					on:click={handleWeightsTap}
+					class="w-[280px] h-[280px] rounded-full bg-purple-600 hover:bg-purple-500 active:bg-purple-700 flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 shadow-2xl"
+				>
+					<div class="text-center">
+						<div class="text-6xl mb-4">💪</div>
+						<div class="text-2xl font-bold" style="text-shadow: 0 0 10px rgba(0, 0, 0, 1);">
+							{$t('intervals.tap_to_start_rest')}
+						</div>
+						<div class="text-lg mt-2 text-purple-200" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1);">
+							{$t('intervals.set')} {currentSet}/{currentInterval.sets}
+						</div>
+					</div>
+				</button>
+			{:else}
+				<!-- Círculo de progreso normal para HIIT y descanso de pesas -->
+				<svg width="280" height="280" viewBox="0 0 280 280" class="transform -rotate-90">
+					<!-- Círculo de fondo -->
+					<circle
+						cx="140"
+						cy="140"
+						r="120"
+						stroke="rgba(255,255,255,0.2)"
+						stroke-width="8"
+						fill="none"
+					/>
+					<!-- Círculo de progreso -->
+					<circle
+						cx="140"
+						cy="140"
+						r="120"
+						stroke="rgba(255,255,255,0.9)"
+						stroke-width="8"
+						fill="none"
+						stroke-linecap="round"
+						stroke-dasharray="{circumference}"
+						stroke-dashoffset="{strokeDashoffset}"
+					/>
+				</svg>
+			{/if}			
 			
 			<!-- Contador visual superpuesto para marcadores de repetición -->
 			{#if showRepeatCounter}
@@ -293,12 +452,14 @@
 				</div>
 			{/if}
 			
-			<!-- Tiempo en el centro -->
-			<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-				<span class="text-6xl font-light text-white" style="line-height: 1; text-shadow: 0 0 15px rgba(0, 0, 0, 1), 3px 3px 10px rgba(0, 0, 0, 0.9), -2px -2px 4px rgba(0, 0, 0, 0.8);">
-					{isRunning ? formatTime(timeRemaining) : (isCompleted ? '00:00' : '00:00')}
-				</span>
-			</div>
+			<!-- Tiempo en el centro (solo si no es pesas esperando tap) -->
+			{#if !(currentInterval && currentInterval.type === 'weights' && isWaitingForTap)}
+				<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+					<span class="text-6xl font-light text-white" style="line-height: 1; text-shadow: 0 0 15px rgba(0, 0, 0, 1), 3px 3px 10px rgba(0, 0, 0, 0.9), -2px -2px 4px rgba(0, 0, 0, 0.8);">
+						{isRunning || isRestingWeights ? formatTime(timeRemaining) : (isCompleted ? '00:00' : '00:00')}
+					</span>
+				</div>
+			{/if}
 		</div>
 		
 		<!-- Información adicional -->
@@ -312,9 +473,25 @@
 				{$t('timer.interval')} {currentIntervalIndex + 1} {$t('common.of')} {intervals.length}
 			</p>
 			{#if currentInterval}
-				<p class="text-white/60 text-base mb-8" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
-					{$t('timer.duration')}: {formatTime(currentInterval.duration)}
-				</p>
+				{#if currentInterval.type === 'weights'}
+					<!-- Información específica para pesas -->
+					<p class="text-white/80 text-base mb-2" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
+						{$t('intervals.set')} {currentSet} {$t('common.of')} {currentInterval.sets}
+					</p>
+					{#if isRestingWeights}
+						<p class="text-purple-300 text-lg mb-4 font-medium animate-pulse" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
+							⏱️ {$t('intervals.rest_between_sets')}
+						</p>
+					{:else if isWaitingForTap}
+						<p class="text-purple-300 text-lg mb-4 font-medium animate-pulse" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
+							👆 {$t('intervals.complete_set')}
+						</p>
+					{/if}
+				{:else}
+					<p class="text-white/60 text-base mb-8" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
+						{$t('timer.duration')}: {formatTime(currentInterval.duration)}
+					</p>
+				{/if}
 			{/if}
 		{/if}
 		
