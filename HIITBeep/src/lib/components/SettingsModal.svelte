@@ -195,11 +195,11 @@
 							
 							<div class="p-4 bg-gray-800">
 								<div class="flex items-center gap-4">
-									<label for="repeat-times-{i}" class="text-sm text-gray-300 font-medium">
+									<label for="repeat-times-{index}" class="text-sm text-gray-300 font-medium">
 										{$t('settings.repeat_times')}:
 									</label>
 									<select 
-										id="repeat-times-{i}"
+										id="repeat-times-{index}"
 										bind:value={interval.duration}
 										class="bg-gray-600 text-white rounded px-3 py-2 text-sm border border-gray-500 focus:ring-2 focus:ring-gray-400 outline-none"
 									>
