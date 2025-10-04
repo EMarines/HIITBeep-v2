@@ -269,12 +269,23 @@
 				const remaining = currentIntervalData.duration - executed;
 				showRepeatCountdown(remaining);
 				
+				// Buscar el último marcador de repetición anterior a este
+				// Si existe, volver al índice siguiente a ese marcador
+				// Si no existe, volver al índice 0
+				let returnIndex = 0;
+				for (let i = currentIntervalIndex - 1; i >= 0; i--) {
+					if (intervals[i].type === 'repeat') {
+						returnIndex = i + 1;
+						break;
+					}
+				}
+				
 				setTimeout(() => playBeep(1000, 200), 100);
 				setTimeout(() => playBeep(1000, 200), 300);
 				setTimeout(() => playBeep(1200, 300), 500);
 				
 				setTimeout(() => {
-					currentIntervalIndex = 0;
+					currentIntervalIndex = returnIndex;
 					initializeInterval();
 				}, 500);
 				return;
