@@ -32,7 +32,8 @@
       "configure_intervals": "Configura intervalos para empezar",
       "total_duration": "Duración total por repetición:",
       "estimated_time": "Tiempo total estimado:",
-      "repeat_times": "Repetir {times} veces"
+      "repeat_times": "Repetir {times} veces",
+      "repeat_full_routine": "Repetir toda la rutina"
     },
     "settings": {
       "title": "Configuración",
@@ -147,7 +148,8 @@
       "configure_intervals": "Configure intervals to start",
       "total_duration": "Total duration per repetition:",
       "estimated_time": "Total estimated time:",
-      "repeat_times": "Repeat {times} times"
+      "repeat_times": "Repeat {times} times",
+      "repeat_full_routine": "Repeat full routine"
     },
     "settings": {
       "title": "Settings",

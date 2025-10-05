@@ -28,60 +28,7 @@
         if (intervals.length === 0) return;
         dispatch('start-workout');
     }
-    
-    // Encontrar el índice del primer intervalo después de cada marcador "repeat"
-    function getFirstIntervalAfterRepeat(repeatIndex: number): number {
-        return repeatIndex + 1;
-    }
-    
-    // Calcular el índice del nodo donde debe apuntar la flecha amarilla de ENTRADA
-    // Este es el nodo donde COMIENZA la repetición (el PRIMER intervalo no-repeat después del marcador repeat anterior)
-    function getRepeatStartIndex(repeatIndex: number): number {
-        const repeatInterval = intervals[repeatIndex];
-        if (!repeatInterval || repeatInterval.type !== 'repeat') return -1;
-        
-        // Encontrar el marcador repeat anterior (si existe)
-        let previousRepeatIndex = -1;
-        for (let i = repeatIndex - 1; i >= 0; i--) {
-            if (intervals[i].type === 'repeat') {
-                previousRepeatIndex = i;
-                break;
-            }
-        }
-        
-        // Buscar desde después del marcador anterior (o desde el inicio si no hay anterior)
-        const startFrom = previousRepeatIndex >= 0 ? previousRepeatIndex + 1 : 0;
-        
-        // Buscar el PRIMER intervalo válido (no-repeat) desde startFrom hasta el marcador actual
-        for (let i = startFrom; i < repeatIndex; i++) {
-            if (intervals[i].type !== 'repeat') {
-                return i; // Retornar el índice del PRIMER intervalo no-repeat en esta sección
-            }
-        }
-        return -1; // No se encontró
-    }
 </script>
-
-<style>
-    /* Flecha amarilla desde marcador repeat hacia primer intervalo */
-    .repeat-arrow {
-        position: absolute;
-        left: -4rem;
-        top: 50%;
-        width: 3.75rem;
-        pointer-events: none;
-        z-index: 10;
-    }
-    
-    /* Flecha morada desde último intervalo hacia primer intervalo (repeticiones globales) */
-    .global-repeat-arrow {
-        position: absolute;
-        right: -5rem;
-        top: 50%;
-        width: 3.75rem;
-        pointer-events: none;
-    }
-</style>
 
 <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-900 text-white">
     <div class="max-w-md w-full">
@@ -120,13 +67,13 @@
                             <p class="text-lg font-light text-gray-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">🔄</p>
                         </div>
                         
-                        <!-- Flecha amarilla SALIDA: L hacia arriba desde lado izquierdo -->
+                        <!-- Flecha amarilla SALIDA -->
                         <div style="position: absolute; left: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                            <svg width="32" height="32" viewBox="0 0 32 32">
-                                <line x1="32" y1="16" x2="10" y2="16" stroke="#facc15" stroke-width="2" />
-                                <line x1="10" y1="16" x2="10" y2="4" stroke="#facc15" stroke-width="2" />
-                                <polygon points="10,4 6,10 14,10" fill="#facc15" />
-                                <text x="16" y="12" class="text-[10px] font-bold" fill="#facc15">{interval.duration}</text>
+                            <svg width="32" height="32" viewBox="0 0 32 32" class="text-yellow-400">
+                                <line x1="32" y1="16" x2="10" y2="16" stroke="currentColor" stroke-width="2" />
+                                <line x1="10" y1="16" x2="10" y2="4" stroke="currentColor" stroke-width="2" />
+                                <polygon points="10,4 7,8 13,8" fill="currentColor" />
+                                <text x="12" y="12" class="text-[10px] font-bold fill-yellow-400">{interval.duration}x</text>
                             </svg>
                         </div>
                     </div>
@@ -142,41 +89,27 @@
                             </p>
                         </div>
                         <div class="text-right">
-                            <p class="text-lg font-light text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
+                            <p class="text-lg font-light text-purple-400" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
                         </div>
                         
-                        <!-- Flecha amarilla ENTRADA: si este nodo es el inicio de una repetición -->
-                        {#each intervals as checkInterval, checkIndex}
-                            {#if checkInterval.type === 'repeat' && getRepeatStartIndex(checkIndex) === index}
-                                <div style="position: absolute; left: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                    <svg width="32" height="32" viewBox="0 0 32 32">
-                                        <line x1="10" y1="28" x2="10" y2="16" stroke="#facc15" stroke-width="2" />
-                                        <line x1="10" y1="16" x2="32" y2="16" stroke="#facc15" stroke-width="2" />
-                                        <polygon points="32,16 26,12 26,20" fill="#facc15" />
-                                    </svg>
-                                </div>
-                            {/if}
-                        {/each}
-                        
-                        <!-- Flecha morada ENTRADA: si es el primer nodo y hay repeticiones globales -->
-                        {#if index === 0 && repetitions > 1}
-                            <div style="position: absolute; right: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                <svg width="32" height="32" viewBox="0 0 32 32" class="text-purple-400">
-                                    <line x1="22" y1="28" x2="22" y2="16" stroke="currentColor" stroke-width="2" />
-                                    <line x1="22" y1="16" x2="0" y2="16" stroke="currentColor" stroke-width="2" />
-                                    <polygon points="0,16 6,12 6,20" fill="currentColor" />
+                        <!-- Flecha amarilla ENTRADA (si viene después de repeat) -->
+                        {#if index > 0 && intervals[index - 1].type === 'repeat'}
+                            <div style="position: absolute; left: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                                <svg width="32" height="32" viewBox="0 0 32 32" class="text-yellow-400">
+                                    <line x1="10" y1="4" x2="10" y2="16" stroke="currentColor" stroke-width="2" />
+                                    <line x1="10" y1="16" x2="32" y2="16" stroke="currentColor" stroke-width="2" />
+                                    <polygon points="32,16 28,14 28,18" fill="currentColor" />
                                 </svg>
                             </div>
                         {/if}
-
-                        <!-- Flecha morada SALIDA: si es el último nodo y hay repeticiones globales -->
-                        {#if index === intervals.length - 1 && repetitions > 1}
+                        
+                        <!-- Flecha morada ENTRADA (si es primer nodo y hay repeticiones) -->
+                        {#if index === 0 && repetitions > 1}
                             <div style="position: absolute; right: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                <svg width="32" height="32" viewBox="0 0 32 32">
-                                    <line x1="0" y1="16" x2="22" y2="16" stroke="#a78bfa" stroke-width="2" />
-                                    <line x1="22" y1="16" x2="22" y2="4" stroke="#a78bfa" stroke-width="2" />
-                                    <polygon points="22,4 18,10 26,10" fill="#a78bfa" />
-                                    <text x="8" y="12" class="text-[10px] font-bold" fill="#a78bfa">{repetitions}</text>
+                                <svg width="32" height="32" viewBox="0 0 32 32" class="text-purple-400">
+                                    <line x1="22" y1="4" x2="22" y2="16" stroke="currentColor" stroke-width="2" />
+                                    <line x1="22" y1="16" x2="0" y2="16" stroke="currentColor" stroke-width="2" />
+                                    <polygon points="0,16 4,14 4,18" fill="currentColor" />
                                 </svg>
                             </div>
                         {/if}
@@ -188,41 +121,39 @@
                             <p class="text-sm text-gray-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{$t('timer.duration')} {formatTime(interval.duration)}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-lg font-light text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
+                            <p class="text-lg font-light text-gray-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
                         </div>
                         
-                        <!-- Flecha amarilla ENTRADA: si este nodo es el inicio de una repetición -->
-                        {#each intervals as checkInterval, checkIndex}
-                            {#if checkInterval.type === 'repeat' && getRepeatStartIndex(checkIndex) === index}
-                                <div style="position: absolute; left: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                    <svg width="32" height="32" viewBox="0 0 32 32">
-                                        <line x1="10" y1="28" x2="10" y2="16" stroke="#facc15" stroke-width="2" />
-                                        <line x1="10" y1="16" x2="32" y2="16" stroke="#facc15" stroke-width="2" />
-                                        <polygon points="32,16 26,12 26,20" fill="#facc15" />
-                                    </svg>
-                                </div>
-                            {/if}
-                        {/each}
-                        
-                        <!-- Flecha morada ENTRADA: si es el primer nodo y hay repeticiones globales -->
-                        {#if index === 0 && repetitions > 1}
-                            <div style="position: absolute; right: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                <svg width="32" height="32" viewBox="0 0 32 32" class="text-purple-400">
-                                    <line x1="22" y1="28" x2="22" y2="16" stroke="currentColor" stroke-width="2" />
-                                    <line x1="22" y1="16" x2="0" y2="16" stroke="currentColor" stroke-width="2" />
-                                    <polygon points="0,16 6,12 6,20" fill="currentColor" />
+                        <!-- Flecha amarilla ENTRADA (si viene después de repeat) -->
+                        {#if index > 0 && intervals[index - 1].type === 'repeat'}
+                            <div style="position: absolute; left: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                                <svg width="32" height="32" viewBox="0 0 32 32" class="text-yellow-400">
+                                    <line x1="10" y1="4" x2="10" y2="16" stroke="currentColor" stroke-width="2" />
+                                    <line x1="10" y1="16" x2="32" y2="16" stroke="currentColor" stroke-width="2" />
+                                    <polygon points="32,16 28,14 28,18" fill="currentColor" />
                                 </svg>
                             </div>
                         {/if}
-
-                        <!-- Flecha morada SALIDA: si es el último nodo y hay repeticiones globales -->
+                        
+                        <!-- Flecha morada ENTRADA (si es primer nodo y hay repeticiones) -->
+                        {#if index === 0 && repetitions > 1}
+                            <div style="position: absolute; right: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                                <svg width="32" height="32" viewBox="0 0 32 32" class="text-purple-400">
+                                    <line x1="22" y1="4" x2="22" y2="16" stroke="currentColor" stroke-width="2" />
+                                    <line x1="22" y1="16" x2="0" y2="16" stroke="currentColor" stroke-width="2" />
+                                    <polygon points="0,16 4,14 4,18" fill="currentColor" />
+                                </svg>
+                            </div>
+                        {/if}
+                        
+                        <!-- Flecha morada SALIDA (si es último nodo y hay repeticiones) -->
                         {#if index === intervals.length - 1 && repetitions > 1}
                             <div style="position: absolute; right: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                <svg width="32" height="32" viewBox="0 0 32 32">
-                                    <line x1="0" y1="16" x2="22" y2="16" stroke="#a78bfa" stroke-width="2" />
-                                    <line x1="22" y1="16" x2="22" y2="4" stroke="#a78bfa" stroke-width="2" />
-                                    <polygon points="22,4 18,10 26,10" fill="#a78bfa" />
-                                    <text x="8" y="12" class="text-[10px] font-bold" fill="#a78bfa">{repetitions}</text>
+                                <svg width="32" height="32" viewBox="0 0 32 32" class="text-purple-400">
+                                    <line x1="0" y1="16" x2="22" y2="16" stroke="currentColor" stroke-width="2" />
+                                    <line x1="22" y1="16" x2="22" y2="4" stroke="currentColor" stroke-width="2" />
+                                    <polygon points="22,4 19,8 25,8" fill="currentColor" />
+                                    <text x="24" y="12" class="text-[10px] font-bold fill-purple-400">{repetitions}x</text>
                                 </svg>
                             </div>
                         {/if}
