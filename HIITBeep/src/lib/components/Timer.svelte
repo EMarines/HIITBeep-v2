@@ -218,8 +218,8 @@
 			// Beep para indicar que puede empezar
 			setTimeout(() => playBeep(800, 200), 100);
 		} else if (currentIntervalData.type === 'repeat') {
-			// Marcador de repetición
-			timeRemaining = currentIntervalData.duration;
+			// Marcador de repetición: SIEMPRE 2 segundos, sin importar duration
+			timeRemaining = 2;
 			startHIITTimer();
 		} else {
 			// Intervalo HIIT normal
@@ -402,7 +402,26 @@
 		
 		<!-- Círculo animado con tiempo o botón de tap para pesas -->
 		<div class="relative mb-8 flex items-center justify-center">
-			{#if currentInterval && currentInterval.type === 'weights' && isWaitingForTap}
+			{#if currentInterval && currentInterval.type === 'repeat'}
+				<!-- Mostrar series faltantes para marcador "Repetir desde aquí" -->
+				<div class="w-[280px] h-[280px] rounded-full bg-gray-800 bg-opacity-80 flex items-center justify-center shadow-2xl">
+					<div class="text-center">
+						<div class="text-2xl font-light mb-4 text-white" style="text-shadow: 0 0 10px rgba(0, 0, 0, 1);">
+							Series restantes
+						</div>
+						<div class="text-8xl font-bold text-yellow-400 animate-pulse" style="text-shadow: 0 0 20px rgba(0, 0, 0, 1), 3px 3px 15px rgba(0, 0, 0, 0.9);">
+							{(() => {
+								const executed = repeatMarkersExecuted.get(currentIntervalIndex) || 0;
+								// Restantes = total - (ejecutadas + 1 porque ya está en ejecución)
+								return currentInterval.duration - executed - 1;
+							})()}
+						</div>
+						<div class="text-xl font-light mt-4 text-gray-300" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1);">
+							faltantes
+						</div>
+					</div>
+				</div>
+			{:else if currentInterval && currentInterval.type === 'weights' && isWaitingForTap}
 				<!-- Botón interactivo para iniciar descanso en pesas -->
 				<button
 					on:click={handleWeightsTap}
@@ -463,8 +482,8 @@
 				</div>
 			{/if}
 			
-			<!-- Tiempo en el centro (solo si no es pesas esperando tap) -->
-			{#if !(currentInterval && currentInterval.type === 'weights' && isWaitingForTap)}
+			<!-- Tiempo en el centro (solo si no es pesas esperando tap y no es repeat) -->
+			{#if !(currentInterval && currentInterval.type === 'weights' && isWaitingForTap) && !(currentInterval && currentInterval.type === 'repeat')}
 				<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center">
 					<span class="text-6xl font-light text-white" style="line-height: 1; text-shadow: 0 0 15px rgba(0, 0, 0, 1), 3px 3px 10px rgba(0, 0, 0, 0.9), -2px -2px 4px rgba(0, 0, 0, 0.8);">
 						{isRunning || isRestingWeights ? formatTime(timeRemaining) : (isCompleted ? '00:00' : '00:00')}
@@ -480,9 +499,13 @@
 					{$t('timer.repetition')} {currentRepetition} {$t('common.of')} {repetitions}
 				{/if}
 			</p>
-			<p class="text-white/70 mb-2 text-base" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
-				{$t('timer.interval')} {currentIntervalIndex + 1} {$t('common.of')} {intervals.length}
-			</p>
+			
+			{#if currentInterval && currentInterval.type !== 'repeat'}
+				<p class="text-white/70 mb-2 text-base" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
+					{$t('timer.interval')} {currentIntervalIndex + 1} {$t('common.of')} {intervals.length}
+				</p>
+			{/if}
+			
 			{#if currentInterval}
 				{#if currentInterval.type === 'weights'}
 					<!-- Información específica para pesas -->
@@ -498,7 +521,7 @@
 							👆 {$t('intervals.complete_set')}
 						</p>
 					{/if}
-				{:else}
+				{:else if currentInterval.type !== 'repeat'}
 					<p class="text-white/60 text-base mb-8" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1), 2px 2px 6px rgba(0, 0, 0, 0.9);">
 						{$t('timer.duration')}: {formatTime(currentInterval.duration)}
 					</p>
