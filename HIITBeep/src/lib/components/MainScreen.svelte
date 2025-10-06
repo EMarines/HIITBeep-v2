@@ -19,7 +19,7 @@
         sets?: number;
         restTime?: number;
     }>;
-    
+    export let routineName: string = '';    
     function openSettings() {
         dispatch('open-settings');
     }
@@ -27,6 +27,14 @@
     function startWorkout() {
         if (intervals.length === 0) return;
         dispatch('start-workout');
+    }
+    
+    function openRoutines() {
+        dispatch('open-routines');
+    }
+    
+    function saveRoutine() {
+        dispatch('save-routine');
     }
     
     // Encontrar el índice del primer intervalo después de cada marcador "repeat"
@@ -87,10 +95,27 @@
     <div class="max-w-md w-full">
         <div class="flex items-center justify-between mb-8">
             <h1 class="text-4xl font-bold" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{$t('app.title')}</h1>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+                <button 
+                    on:click={saveRoutine}
+                    disabled={intervals.length === 0}
+                    class="text-xl text-gray-400 hover:text-white disabled:text-gray-600 disabled:cursor-not-allowed transition-colors p-2 rounded-full hover:bg-gray-800"
+                    title="Guardar rutina"
+                    style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);"
+                >
+                    💾
+                </button>
+                <button 
+                    on:click={openRoutines}
+                    class="text-xl text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
+                    title="Mis rutinas"
+                    style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);"
+                >
+                    📋
+                </button>
                 <button 
                     on:click={openSettings}
-                    class="text-2xl text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
+                    class="text-xl text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
                     title={$t('common.settings')}
                     style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);"
                 >
@@ -98,6 +123,18 @@
                 </button>
             </div>
         </div>
+        
+        {#if routineName}
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-3 mb-6 shadow-lg">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📋</span>
+                    <div class="flex-1">
+                        <p class="text-xs text-blue-200 uppercase tracking-wider">{$t('main.current_routine')}</p>
+                        <p class="text-lg font-semibold text-white" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{routineName}</p>
+                    </div>
+                </div>
+            </div>
+        {/if}
         
         <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500 mb-6">
             <h2 class="text-lg font-medium mb-2" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{$t('main.repetitions')}</h2>

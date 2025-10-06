@@ -18,10 +18,12 @@
 		{ name: 'Ejercicio', duration: 60, color: 'bg-red-500', type: 'interval' },
 		{ name: 'Descanso', duration: 30, color: 'bg-blue-500', type: 'interval' }
 	];
+	export let routineName: string = '';
 	
 	// Copias locales para editar
 	let localRepetitions = repetitions;
 	let localIntervals = [...intervals];
+	let localRoutineName = routineName;
 	
 	function addInterval() {
 		localIntervals = [...localIntervals, { name: $t('settings.new_interval'), duration: 30, color: 'bg-green-500', type: 'interval' }];
@@ -83,7 +85,8 @@
 		if (localRepetitions < 1) localRepetitions = 1;
 		dispatch('save-config', { 
 			intervals: localIntervals, 
-			repetitions: localRepetitions 
+			repetitions: localRepetitions,
+			routineName: localRoutineName.trim()
 		});
 	}
 	
@@ -91,6 +94,7 @@
 		// Restaurar valores originales
 		localRepetitions = repetitions;
 		localIntervals = [...intervals];
+		localRoutineName = routineName;
 		dispatch('cancel');
 	}
 	
@@ -143,6 +147,20 @@
 		
 		<!-- Contenido del modal -->
 		<div class="p-4">
+			<!-- Campo de Nombre de Rutina -->
+			<div class="bg-gray-800 rounded-lg p-4 border-l-4 border-blue-500 mb-6">
+				<label for="routine-name-input" class="block text-lg font-medium mb-2 text-white">{$t('settings.routine_name')}</label>
+				<p class="text-sm text-gray-400 mb-3">{$t('settings.routine_name_help')}</p>
+				<input 
+					id="routine-name-input"
+					type="text" 
+					bind:value={localRoutineName} 
+					placeholder={$t('settings.routine_name_placeholder')}
+					maxlength="50"
+					class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-lg text-white placeholder-gray-500"
+				/>
+			</div>
+		
 			<!-- Campo de Repeticiones -->
 			<div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500 mb-6">
 				<label for="{repetitionsId}" class="block text-lg font-medium mb-2 text-white">{$t('settings.repetitions_number')}</label>
