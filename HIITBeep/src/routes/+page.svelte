@@ -7,7 +7,7 @@
 	import MyRoutines from '$lib/components/MyRoutines.svelte';
 	import WorkoutHistory from '$lib/components/WorkoutHistory.svelte';
 	import { t } from '$lib/i18n';
-	import { saveRoutine, logWorkout, type SavedRoutine } from '$lib/services/routineStorage';
+	import { saveRoutine, updateRoutine, logWorkout, type SavedRoutine } from '$lib/services/routineStorage';
 	
 	// Estados de la aplicación
 	let currentView: 'dashboard' | 'main' | 'settings' | 'timer' | 'routines' | 'history' = 'dashboard';
@@ -35,10 +35,8 @@
 	}
 	
 	function openSettings() {
-		// Si ya hay una rutina guardada, limpiar Settings para crear una nueva
-		if (currentRoutineId) {
-			resetConfiguration();
-		}
+		// NO resetear cuando viene desde MainScreen (ya tiene intervalos cargados)
+		// Solo resetear si no hay intervalos (viene desde Dashboard sin rutina)
 		// Incrementar key para forzar recreación del componente
 		settingsKey++;
 		// Usar setTimeout para asegurar que la reactividad se ejecute
@@ -88,7 +86,15 @@
 		
 		// Si hay nombre en Settings, usarlo; si no, pedir uno
 		if (routineNameFromSettings && routineNameFromSettings.trim()) {
-			const result = saveRoutine(routineNameFromSettings.trim(), routineIntervals, routineRepetitions);
+			let result;
+			
+			// Si ya existe currentRoutineId, ACTUALIZAR la rutina existente
+			if (currentRoutineId) {
+				result = updateRoutine(currentRoutineId, routineNameFromSettings.trim(), routineIntervals, routineRepetitions);
+			} else {
+				// Si no hay ID, crear nueva rutina
+				result = saveRoutine(routineNameFromSettings.trim(), routineIntervals, routineRepetitions);
+			}
 			
 			if (result.success) {
 				// Actualizar la configuración actual
@@ -101,7 +107,10 @@
 				// hiitbeep-config es solo para configuraciones temporales ("Just Start")
 				localStorage.removeItem('hiitbeep-config');
 				
-				alert(`✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`);
+				const message = currentRoutineId && currentRoutineId === result.routine?.id 
+					? `✅ Rutina "${currentRoutineName}" actualizada`
+					: `✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`;
+				alert(message);
 				
 				// Ir a Main para que el usuario pueda iniciar la rutina
 				currentView = 'main';
@@ -163,7 +172,15 @@
 			return;
 		}
 		
-		const result = saveRoutine(routineName.trim(), intervals, repetitions);
+		let result;
+		
+		// Si ya existe currentRoutineId, ACTUALIZAR la rutina existente
+		if (currentRoutineId) {
+			result = updateRoutine(currentRoutineId, routineName.trim(), intervals, repetitions);
+		} else {
+			// Si no hay ID, crear nueva rutina
+			result = saveRoutine(routineName.trim(), intervals, repetitions);
+		}
 		
 		if (result.success) {
 			currentRoutineId = result.routine?.id || null;
@@ -174,7 +191,10 @@
 			// Limpiar config temporal ya que ahora está guardada con nombre
 			localStorage.removeItem('hiitbeep-config');
 			
-			alert(`✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`);
+			const message = currentRoutineId && currentRoutineId === result.routine?.id 
+				? `✅ Rutina "${currentRoutineName}" actualizada`
+				: `✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`;
+			alert(message);
 			// Ir a Main para que el usuario pueda iniciar la rutina
 			currentView = 'main';
 		} else {

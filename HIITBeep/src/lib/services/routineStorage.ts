@@ -64,6 +64,37 @@ export function saveRoutine(name: string, intervals: Interval[], repetitions: nu
 }
 
 /**
+ * Actualizar una rutina existente
+ */
+export function updateRoutine(id: string, name: string, intervals: Interval[], repetitions: number): { success: boolean; error?: string; routine?: SavedRoutine } {
+	try {
+		const routines = loadRoutines();
+		const routineIndex = routines.findIndex(r => r.id === id);
+		
+		if (routineIndex === -1) {
+			return { success: false, error: 'Rutina no encontrada' };
+		}
+		
+		// Actualizar rutina manteniendo el ID y fecha de creación original
+		const updatedRoutine: SavedRoutine = {
+			...routines[routineIndex],
+			name,
+			intervals: JSON.parse(JSON.stringify(intervals)), // Deep clone
+			repetitions,
+			lastUsed: Date.now()
+		};
+		
+		routines[routineIndex] = updatedRoutine;
+		localStorage.setItem(STORAGE_KEY_ROUTINES, JSON.stringify(routines));
+		
+		return { success: true, routine: updatedRoutine };
+	} catch (error) {
+		console.error('Error actualizando rutina:', error);
+		return { success: false, error: 'Error al actualizar la rutina' };
+	}
+}
+
+/**
  * Cargar todas las rutinas guardadas
  */
 export function loadRoutines(): SavedRoutine[] {
