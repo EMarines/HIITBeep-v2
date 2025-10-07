@@ -6,7 +6,7 @@
 	const dispatch = createEventDispatcher();
 	// Force recompilation - button colors updated
 	
-	export let repetitions: number = 3;
+	export let repetitions: number = 1;
 	export let intervals: Array<{ 
 		name: string; 
 		duration: number; 
@@ -28,17 +28,17 @@
 	$: localRoutineName = routineName;
 	
 	function addInterval() {
-		localIntervals = [...localIntervals, { name: $t('settings.new_interval'), duration: 30, color: 'bg-green-500', type: 'interval' }];
+		localIntervals = [...localIntervals, { name: '', duration: null as any, color: 'bg-green-500', type: 'interval' }];
 	}
 	
 	function addWeightsInterval() {
 		localIntervals = [...localIntervals, { 
-			name: $t('settings.new_weights_interval'), 
+			name: '',
 			duration: 0, // No usado en pesas
-			color: 'bg-purple-600', 
+			color: 'bg-purple-500',
 			type: 'weights',
-			sets: 3,
-			restTime: 90
+			sets: null as any,
+			restTime: null as any
 		}];
 	}
 	
@@ -298,31 +298,31 @@
 								</div>
 								
 								<div class="flex items-center gap-4">
-									<div class="flex-1">
-										<label for="{generateIntervalId(index, 'sets')}" class="block text-sm text-gray-400 mb-1">{$t('settings.number_of_sets')}</label>
-										<input 
-											id="{generateIntervalId(index, 'sets')}"
-											type="number" 
-											bind:value={interval.sets} 
-											min="1"
-											max="20"
-											class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500 text-white"
-										/>
-									</div>
-									
-									<div class="flex-1">
-										<label for="{generateIntervalId(index, 'restTime')}" class="block text-sm text-gray-400 mb-1">{$t('settings.rest_seconds')}</label>
-										<input 
-											id="{generateIntervalId(index, 'restTime')}"
-											type="number" 
-											bind:value={interval.restTime} 
-											min="10"
-											max="600"
-											class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500 text-white"
-										/>
-									</div>
-									
-									<div class="flex-1">
+								<div class="flex-1">
+									<label for="{generateIntervalId(index, 'sets')}" class="block text-sm text-gray-400 mb-1">{$t('settings.number_of_sets')}</label>
+									<input 
+										id="{generateIntervalId(index, 'sets')}"
+										type="number" 
+										bind:value={interval.sets} 
+										min="1"
+										max="20"
+										placeholder="3"
+										class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500 text-white"
+									/>
+								</div>
+								
+								<div class="flex-1">
+									<label for="{generateIntervalId(index, 'restTime')}" class="block text-sm text-gray-400 mb-1">{$t('settings.rest_seconds')}</label>
+									<input 
+										id="{generateIntervalId(index, 'restTime')}"
+										type="number" 
+										bind:value={interval.restTime} 
+										min="10"
+										max="600"
+										placeholder="90"
+										class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500 text-white"
+									/>
+								</div>									<div class="flex-1">
 										<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">{$t('settings.color')}</label>
 										<select 
 											id="{generateIntervalId(index, 'color')}"
@@ -393,6 +393,7 @@
 										type="number" 
 										bind:value={interval.duration} 
 										min="1"
+										placeholder="30"
 										class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-white"
 									/>
 								</div>
@@ -459,7 +460,8 @@
 				<button 
 					on:click={saveConfiguration}
 					disabled={localIntervals.length === 0}
-					class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
+					class="flex-1 py-3 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
+					style="background: linear-gradient(to right, #2563eb, #1d4ed8);"
 				>
 					✅ {$t('settings.save_configuration')}
 				</button>
@@ -467,7 +469,8 @@
 				<button 
 					on:click={saveAsRoutine}
 					disabled={localIntervals.length === 0}
-					class="flex-1 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
+					class="flex-1 py-3 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
+					style="background: linear-gradient(to right, #9333ea, #7e22ce);"
 				>
 					💾 {$t('settings.save_as_routine')}
 				</button>

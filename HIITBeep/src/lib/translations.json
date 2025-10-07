@@ -5,6 +5,18 @@
       "subtitle": "Configura tus intervalos de entrenamiento",
       "description": "Cronómetro HIIT con sonidos y animaciones"
     },
+    "dashboard": {
+      "subtitle": "Tu Entrenador de Intervalos",
+      "tagline": "Entrena con precisión, escucha tu progreso",
+      "configure_routines": "Configurar Rutinas",
+      "configure_description": "Crea y personaliza tus entrenamientos",
+      "my_routines": "Mis Rutinas",
+      "routine_saved": "rutina guardada",
+      "routines_saved": "rutinas guardadas",
+      "history": "Historial",
+      "workout_completed": "entrenamiento completado",
+      "workouts_completed": "entrenamientos completados"
+    },
     "common": {
       "save": "Guardar",
       "cancel": "Cancelar",
@@ -174,6 +186,18 @@
       "title": "HIITBeep",
       "subtitle": "Configure your training intervals",
       "description": "HIIT Timer with sounds and animations"
+    },
+    "dashboard": {
+      "subtitle": "Your Interval Trainer",
+      "tagline": "Train with precision, hear your progress",
+      "configure_routines": "Configure Routines",
+      "configure_description": "Create and customize your workouts",
+      "my_routines": "My Routines",
+      "routine_saved": "routine saved",
+      "routines_saved": "routines saved",
+      "history": "History",
+      "workout_completed": "workout completed",
+      "workouts_completed": "workouts completed"
     },
     "common": {
       "save": "Save",

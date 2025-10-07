@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Timer from '$lib/components/Timer.svelte';
+	import Dashboard from '$lib/components/Dashboard.svelte';
 	import MainScreen from '$lib/components/MainScreen.svelte';
 	import SettingsModal from '$lib/components/SettingsModal.svelte';
 	import MyRoutines from '$lib/components/MyRoutines.svelte';
@@ -9,10 +10,10 @@
 	import { saveRoutine, logWorkout, type SavedRoutine } from '$lib/services/routineStorage';
 	
 	// Estados de la aplicación
-	let currentView: 'main' | 'settings' | 'timer' | 'routines' | 'history' = 'main';
+	let currentView: 'dashboard' | 'main' | 'settings' | 'timer' | 'routines' | 'history' = 'dashboard';
 	
 	// Configuración persistente
-	let repetitions = 3;
+	let repetitions = 1;
 	let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' | 'weights'; sets?: number; restTime?: number; }> = [];
 	let currentRoutineId: string | null = null; // Para tracking de workout logs
 	let currentRoutineName: string = '';
@@ -47,10 +48,12 @@
 	}
 	
 	function openRoutines() {
+		console.log('Opening routines view');
 		currentView = 'routines';
 	}
 	
 	function openHistory() {
+		console.log('Opening history view');
 		currentView = 'history';
 	}
 	
@@ -94,12 +97,9 @@
 				currentRoutineName = routineNameFromSettings.trim();
 				currentRoutineId = result.routine?.id || null;
 				
-				// Guardar en localStorage
-				localStorage.setItem('hiitbeep-config', JSON.stringify({ 
-					intervals, 
-					repetitions, 
-					routineName: currentRoutineName 
-				}));
+				// NO guardar en hiitbeep-config porque ya está en hiitbeep-routines
+				// hiitbeep-config es solo para configuraciones temporales ("Just Start")
+				localStorage.removeItem('hiitbeep-config');
 				
 				alert(`✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`);
 				
@@ -131,7 +131,7 @@
 	}
 	
 	function cancelSettings() {
-		currentView = 'main';
+		currentView = 'dashboard';
 	}
 	
 	function startWorkout() {
@@ -143,11 +143,11 @@
 	}
 	
 	function backFromRoutines() {
-		currentView = 'main';
+		currentView = 'dashboard';
 	}
 	
 	function backFromHistory() {
-		currentView = 'main';
+		currentView = 'dashboard';
 	}
 	
 	function confirmSaveRoutine() {
@@ -166,6 +166,10 @@
 			currentRoutineName = routineName.trim();
 			showSaveModal = false;
 			routineName = '';
+			
+			// Limpiar config temporal ya que ahora está guardada con nombre
+			localStorage.removeItem('hiitbeep-config');
+			
 			alert(`✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`);
 			// Ir a Main para que el usuario pueda iniciar la rutina
 			currentView = 'main';
@@ -214,21 +218,11 @@
 		});
 	}
 	
-	// Cargar configuración guardada al iniciar
+	// No cargar automáticamente configuración al iniciar
+	// El usuario elegirá desde Dashboard: crear nueva rutina o cargar una guardada
 	onMount(() => {
-		try {
-			const saved = localStorage.getItem('hiitbeep-config');
-			if (saved) {
-				const config = JSON.parse(saved);
-				intervals = config.intervals;
-				repetitions = config.repetitions;
-				currentRoutineName = config.routineName || '';
-			}
-			// Si no hay configuración guardada, intervals queda vacío []
-		} catch (e) {
-			console.log('No se pudo cargar configuración guardada');
-			// intervals queda vacío []
-		}
+		// intervals inicia vacío [], el usuario debe elegir qué hacer desde Dashboard
+		console.log('App iniciada - Dashboard mode');
 	});
 </script>
 
@@ -237,7 +231,13 @@
 </svelte:head>
 
 <main class="min-h-screen transition-colors duration-500 bg-gray-900 text-white">
-	{#if currentView === 'main'}
+	{#if currentView === 'dashboard'}
+		<Dashboard 
+			on:open-settings={openSettings}
+			on:open-routines={openRoutines}
+			on:open-history={openHistory}
+		/>
+	{:else if currentView === 'main'}
 		<MainScreen 
 			{repetitions} 
 			{intervals}
