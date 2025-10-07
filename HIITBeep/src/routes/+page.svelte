@@ -4,11 +4,12 @@
 	import MainScreen from '$lib/components/MainScreen.svelte';
 	import SettingsModal from '$lib/components/SettingsModal.svelte';
 	import MyRoutines from '$lib/components/MyRoutines.svelte';
+	import WorkoutHistory from '$lib/components/WorkoutHistory.svelte';
 	import { t } from '$lib/i18n';
 	import { saveRoutine, logWorkout, type SavedRoutine } from '$lib/services/routineStorage';
 	
 	// Estados de la aplicación
-	let currentView: 'main' | 'settings' | 'timer' | 'routines' = 'main';
+	let currentView: 'main' | 'settings' | 'timer' | 'routines' | 'history' = 'main';
 	
 	// Configuración persistente
 	let repetitions = 3;
@@ -20,6 +21,9 @@
 	let showSaveModal = false;
 	let routineName = '';
 	
+	// Key para forzar recreación de SettingsModal
+	let settingsKey = 0;
+	
 	// Función para crear intervalos por defecto usando traducciones
 	function createDefaultIntervals() {
 		return [
@@ -30,11 +34,24 @@
 	}
 	
 	function openSettings() {
-		currentView = 'settings';
+		// Si ya hay una rutina guardada, limpiar Settings para crear una nueva
+		if (currentRoutineId) {
+			resetConfiguration();
+		}
+		// Incrementar key para forzar recreación del componente
+		settingsKey++;
+		// Usar setTimeout para asegurar que la reactividad se ejecute
+		setTimeout(() => {
+			currentView = 'settings';
+		}, 0);
 	}
 	
 	function openRoutines() {
 		currentView = 'routines';
+	}
+	
+	function openHistory() {
+		currentView = 'history';
 	}
 	
 	function saveConfiguration(event: any) {
@@ -50,6 +67,67 @@
 			repetitions, 
 			routineName: currentRoutineName 
 		}));
+	}
+	
+	function handleSaveRoutineFromSettings(event: any) {
+		let currentT: any;
+		t.subscribe(value => currentT = value)();
+		
+		const config = event.detail;
+		const routineIntervals = config.intervals;
+		const routineRepetitions = config.repetitions;
+		const routineNameFromSettings = config.routineName || '';
+		
+		if (routineIntervals.length === 0) {
+			alert(currentT('routines.no_intervals_error'));
+			return;
+		}
+		
+		// Si hay nombre en Settings, usarlo; si no, pedir uno
+		if (routineNameFromSettings && routineNameFromSettings.trim()) {
+			const result = saveRoutine(routineNameFromSettings.trim(), routineIntervals, routineRepetitions);
+			
+			if (result.success) {
+				// Actualizar la configuración actual
+				intervals = routineIntervals;
+				repetitions = routineRepetitions;
+				currentRoutineName = routineNameFromSettings.trim();
+				currentRoutineId = result.routine?.id || null;
+				
+				// Guardar en localStorage
+				localStorage.setItem('hiitbeep-config', JSON.stringify({ 
+					intervals, 
+					repetitions, 
+					routineName: currentRoutineName 
+				}));
+				
+				alert(`✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`);
+				
+				// Ir a Main para que el usuario pueda iniciar la rutina
+				currentView = 'main';
+			} else {
+				alert(`❌ ${currentT('routines.save_error')}: ${result.error}`);
+			}
+		} else {
+			// Si no hay nombre, aplicar configuración y mostrar modal para pedir nombre
+			intervals = routineIntervals;
+			repetitions = routineRepetitions;
+			currentView = 'main';
+			
+			showSaveModal = true;
+			routineName = `Routine ${new Date().toLocaleDateString()}`;
+		}
+	}
+	
+	function resetConfiguration() {
+		// Limpiar completamente para crear una nueva rutina desde cero
+		intervals = []; // Lienzo completamente limpio, sin intervalos
+		repetitions = 3;
+		currentRoutineName = '';
+		currentRoutineId = null;
+		
+		// Limpiar localStorage
+		localStorage.removeItem('hiitbeep-config');
 	}
 	
 	function cancelSettings() {
@@ -68,30 +146,8 @@
 		currentView = 'main';
 	}
 	
-	function handleSaveRoutine() {
-		let currentT: any;
-		t.subscribe(value => currentT = value)();
-		
-		if (intervals.length === 0) {
-			alert(currentT('routines.no_intervals_error'));
-			return;
-		}
-		
-		// Si ya hay un nombre configurado en Settings, guardamos directamente
-		if (currentRoutineName && currentRoutineName.trim()) {
-			const result = saveRoutine(currentRoutineName.trim(), intervals, repetitions);
-			
-			if (result.success) {
-				currentRoutineId = result.routine?.id || null;
-				alert(`✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`);
-			} else {
-				alert(`❌ ${currentT('routines.save_error')}: ${result.error}`);
-			}
-		} else {
-			// Si no hay nombre, mostrar modal para pedir uno
-			showSaveModal = true;
-			routineName = `Routine ${new Date().toLocaleDateString()}`;
-		}
+	function backFromHistory() {
+		currentView = 'main';
 	}
 	
 	function confirmSaveRoutine() {
@@ -111,6 +167,8 @@
 			showSaveModal = false;
 			routineName = '';
 			alert(`✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`);
+			// Ir a Main para que el usuario pueda iniciar la rutina
+			currentView = 'main';
 		} else {
 			alert(`❌ ${currentT('routines.save_error')}: ${result.error}`);
 		}
@@ -138,13 +196,22 @@
 		currentView = 'main';
 	}
 	
-	function handleWorkoutComplete() {
-		// Este evento se dispara cuando se completa un entrenamiento
-		// Lo configuraremos después desde el Timer
-		if (currentRoutineId && currentRoutineName) {
-			// Por ahora dejamos esto preparado para cuando Timer emita el evento
-			// logWorkout(currentRoutineId, currentRoutineName, duration, repetitions);
-		}
+	function handleWorkoutComplete(event: CustomEvent<{ duration: number; repetitionsCompleted: number }>) {
+		const { duration, repetitionsCompleted } = event.detail;
+		
+		// Usar el routineId y routineName actual, o valores por defecto si no existen
+		const workoutRoutineId = currentRoutineId || 'default-routine';
+		const workoutRoutineName = currentRoutineName || 'Unnamed Routine';
+		
+		// Registrar el workout completado
+		logWorkout(workoutRoutineId, workoutRoutineName, duration, repetitionsCompleted);
+		
+		console.log('Workout completado:', {
+			routineId: workoutRoutineId,
+			routineName: workoutRoutineName,
+			duration,
+			repetitionsCompleted
+		});
 	}
 	
 	// Cargar configuración guardada al iniciar
@@ -156,13 +223,11 @@
 				intervals = config.intervals;
 				repetitions = config.repetitions;
 				currentRoutineName = config.routineName || '';
-			} else {
-				// Si no hay configuración guardada, usar intervalos por defecto
-				intervals = createDefaultIntervals();
 			}
+			// Si no hay configuración guardada, intervals queda vacío []
 		} catch (e) {
 			console.log('No se pudo cargar configuración guardada');
-			intervals = createDefaultIntervals();
+			// intervals queda vacío []
 		}
 	});
 </script>
@@ -180,29 +245,37 @@
 			on:open-settings={openSettings}
 			on:start-workout={startWorkout}
 			on:open-routines={openRoutines}
-			on:save-routine={handleSaveRoutine}
+			on:open-history={openHistory}
 		/>
 	{:else if currentView === 'timer'}
 		<Timer 
 			{intervals} 
 			{repetitions} 
-			on:back={backToMain} 
+			on:back={backToMain}
+			on:workout-complete={handleWorkoutComplete}
 		/>
 	{:else if currentView === 'routines'}
 		<MyRoutines
 			on:back={backFromRoutines}
 			on:load-routine={handleLoadRoutine}
 		/>
+	{:else if currentView === 'history'}
+		<WorkoutHistory
+			on:back={backFromHistory}
+		/>
 	{/if}
 	
 	{#if currentView === 'settings'}
-		<SettingsModal 
-			{repetitions} 
-			{intervals}
-			routineName={currentRoutineName}
-			on:save-config={saveConfiguration}
-			on:cancel={cancelSettings}
-		/>
+		{#key settingsKey}
+			<SettingsModal 
+				{repetitions} 
+				{intervals}
+				routineName={currentRoutineName}
+				on:save-config={saveConfiguration}
+				on:save-routine={handleSaveRoutineFromSettings}
+				on:cancel={cancelSettings}
+			/>
+		{/key}
 	{/if}
 	
 	{#if showSaveModal}

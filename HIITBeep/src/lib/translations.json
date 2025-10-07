@@ -45,6 +45,8 @@
       "repetitions_help": "¿Cuántas veces quieres repetir el ciclo completo?",
       "intervals": "Intervalos:",
       "no_intervals_configured": "No hay intervalos configurados",
+      "welcome_title": "¡Crea tu Primera Rutina!",
+      "welcome_message": "Comienza agregando intervalos de ejercicio o pesas usando los botones de abajo",
       "add_interval": "+ Agregar Intervalo",
       "add_weights_interval": "+ Agregar Pesas",
       "add_repeat_marker": "+ Repetición",
@@ -52,7 +54,8 @@
       "repeat_description": "Al llegar aquí, se reiniciará desde el inicio {duration} veces",
       "repeat_times": "Repetir {times} veces",
       "times": "veces",
-      "save_configuration": "Guardar Configuración",
+      "save_configuration": "Solo Iniciar",
+      "save_as_routine": "Guardar e Iniciar",
       "new_interval": "Nuevo Intervalo",
       "new_weights_interval": "Nuevo Intervalo de Pesas",
       "interval_type": "Tipo de Intervalo",
@@ -146,7 +149,24 @@
       "routine_saved": "Rutina \"{name}\" guardada exitosamente",
       "save_error": "Error al guardar rutina",
       "no_intervals_error": "No hay intervalos configurados para guardar",
-      "name_required": "Por favor ingresa un nombre para la rutina"
+      "name_required": "Por favor ingresa un nombre para la rutina",
+      "create_new_routine_prompt": "¿Deseas crear una nueva rutina? (Esto limpiará la configuración actual)"
+    },
+    "calendar": {
+      "today": "Hoy",
+      "completed": "Completado",
+      "no_workouts": "Sin entrenamientos este mes",
+      "workouts_count": "{count} entrenamientos"
+    },
+    "history": {
+      "title": "Historial de Entrenamientos",
+      "total_workouts": "Entrenamientos",
+      "total_minutes": "Minutos",
+      "current_streak": "Racha actual",
+      "longest_streak": "Mejor racha",
+      "workout_list": "Historial de entrenamientos",
+      "no_workouts": "No hay entrenamientos completados",
+      "complete_first_workout": "Completa tu primer entrenamiento para verlo aquí"
     }
   },
   "en": {
@@ -195,6 +215,8 @@
       "repetitions_help": "How many times do you want to repeat the complete cycle?",
       "intervals": "Intervals:",
       "no_intervals_configured": "No intervals configured",
+      "welcome_title": "Create Your First Routine!",
+      "welcome_message": "Start by adding exercise or weights intervals using the buttons below",
       "add_interval": "+ Add Interval",
       "add_weights_interval": "+ Add Weights",
       "add_repeat_marker": "+ Repeat",
@@ -202,7 +224,8 @@
       "repeat_description": "When reaching here, it will restart from the beginning {duration} times",
       "repeat_times": "Repeat {times} times",
       "times": "times",
-      "save_configuration": "Save Configuration",
+      "save_configuration": "Just Start",
+      "save_as_routine": "Save & Start",
       "new_interval": "New Interval",
       "new_weights_interval": "New Weights Interval",
       "interval_type": "Interval Type",
@@ -296,7 +319,24 @@
       "routine_saved": "Routine \"{name}\" saved successfully",
       "save_error": "Error saving routine",
       "no_intervals_error": "No intervals configured to save",
-      "name_required": "Please enter a name for the routine"
+      "name_required": "Please enter a name for the routine",
+      "create_new_routine_prompt": "Do you want to create a new routine? (This will clear the current configuration)"
+    },
+    "calendar": {
+      "today": "Today",
+      "completed": "Completed",
+      "no_workouts": "No workouts this month",
+      "workouts_count": "{count} workouts"
+    },
+    "history": {
+      "title": "Workout History",
+      "total_workouts": "Workouts",
+      "total_minutes": "Minutes",
+      "current_streak": "Current streak",
+      "longest_streak": "Best streak",
+      "workout_list": "Workout history",
+      "no_workouts": "No completed workouts",
+      "complete_first_workout": "Complete your first workout to see it here"
     }
   }
 }

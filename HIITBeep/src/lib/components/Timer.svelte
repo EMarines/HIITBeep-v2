@@ -25,6 +25,10 @@
 	let audioContext: AudioContext | null = null;
 	let repeatMarkersExecuted: Map<number, number> = new Map(); // Controla cuántas veces se ha ejecutado cada marcador
 	
+	// Variables para tracking del workout
+	let workoutStartTime: number = 0;
+	let totalWorkoutDuration: number = 0;
+	
 	// Variables para el contador visual
 	let showRepeatCounter = false;
 	let repeatCounterValue = 0;
@@ -180,6 +184,16 @@
 									// Rutina completada
 									isRunning = false;
 									isCompleted = true;
+									
+									// Calcular duración total del workout en segundos
+									totalWorkoutDuration = Math.floor((Date.now() - workoutStartTime) / 1000);
+									
+									// Emitir evento de workout completado
+									dispatch('workout-complete', {
+										duration: totalWorkoutDuration,
+										repetitionsCompleted: repetitions
+									});
+									
 									setTimeout(() => playBeep(400, 800), 100);
 									setTimeout(() => playBeep(500, 800), 600);
 								}
@@ -313,6 +327,16 @@
 				isRunning = false;
 				isCompleted = true;
 				clearInterval(timer);
+				
+				// Calcular duración total del workout en segundos
+				totalWorkoutDuration = Math.floor((Date.now() - workoutStartTime) / 1000);
+				
+				// Emitir evento de workout completado
+				dispatch('workout-complete', {
+					duration: totalWorkoutDuration,
+					repetitionsCompleted: repetitions
+				});
+				
 				setTimeout(() => playBeep(400, 800), 100);
 				setTimeout(() => playBeep(500, 800), 600);
 			}
@@ -342,6 +366,9 @@
 		currentSet = 1;
 		isWaitingForTap = false;
 		isRestingWeights = false;
+		
+		// Iniciar tracking de tiempo del workout
+		workoutStartTime = Date.now();
 		
 		// Mostrar el número de repetición actual al inicio
 		if (repetitions > 1) {

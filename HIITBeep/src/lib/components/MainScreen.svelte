@@ -33,8 +33,8 @@
         dispatch('open-routines');
     }
     
-    function saveRoutine() {
-        dispatch('save-routine');
+    function openHistory() {
+        dispatch('open-history');
     }
     
     // Encontrar el índice del primer intervalo después de cada marcador "repeat"
@@ -97,13 +97,12 @@
             <h1 class="text-4xl font-bold" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{$t('app.title')}</h1>
             <div class="flex items-center gap-2">
                 <button 
-                    on:click={saveRoutine}
-                    disabled={intervals.length === 0}
-                    class="text-xl text-gray-400 hover:text-white disabled:text-gray-600 disabled:cursor-not-allowed transition-colors p-2 rounded-full hover:bg-gray-800"
-                    title="Guardar rutina"
+                    on:click={openHistory}
+                    class="text-xl text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
+                    title="Historial"
                     style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);"
                 >
-                    💾
+                    📊
                 </button>
                 <button 
                     on:click={openRoutines}

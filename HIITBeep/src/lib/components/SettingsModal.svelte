@@ -4,6 +4,7 @@
 	import { t } from '$lib/i18n';
 	
 	const dispatch = createEventDispatcher();
+	// Force recompilation - button colors updated
 	
 	export let repetitions: number = 3;
 	export let intervals: Array<{ 
@@ -13,17 +14,18 @@
 		type?: 'interval' | 'repeat' | 'weights';
 		sets?: number; // Para intervalos de pesas
 		restTime?: number; // Tiempo de descanso para pesas
-	}> = [
-		{ name: 'Preparación', duration: 3, color: 'bg-yellow-500', type: 'interval' },
-		{ name: 'Ejercicio', duration: 60, color: 'bg-red-500', type: 'interval' },
-		{ name: 'Descanso', duration: 30, color: 'bg-blue-500', type: 'interval' }
-	];
+	}> = [];
 	export let routineName: string = '';
 	
 	// Copias locales para editar
 	let localRepetitions = repetitions;
 	let localIntervals = [...intervals];
 	let localRoutineName = routineName;
+	
+	// Reactividad: actualizar copias locales cuando cambien los props
+	$: localRepetitions = repetitions;
+	$: localIntervals = [...intervals];
+	$: localRoutineName = routineName;
 	
 	function addInterval() {
 		localIntervals = [...localIntervals, { name: $t('settings.new_interval'), duration: 30, color: 'bg-green-500', type: 'interval' }];
@@ -84,6 +86,17 @@
 		// Asegurar que las repeticiones sean al menos 1
 		if (localRepetitions < 1) localRepetitions = 1;
 		dispatch('save-config', { 
+			intervals: localIntervals, 
+			repetitions: localRepetitions,
+			routineName: localRoutineName.trim()
+		});
+	}
+	
+	function saveAsRoutine() {
+		if (localIntervals.length === 0) return;
+		// Asegurar que las repeticiones sean al menos 1
+		if (localRepetitions < 1) localRepetitions = 1;
+		dispatch('save-routine', { 
 			intervals: localIntervals, 
 			repetitions: localRepetitions,
 			routineName: localRoutineName.trim()
@@ -400,16 +413,21 @@
 							</div>
 						</div>
 					{/if}
-				{/each}
-				
-				{#if localIntervals.length === 0}
-					<div class="bg-gray-800 rounded-lg p-4 text-center">
-						<p class="text-gray-400">{$t('settings.no_intervals_configured')}</p>
-					</div>
-				{/if}
-			</div>
+			{/each}
 			
-			<!-- Botones agregar intervalo, pesas y marcador de repetición -->
+			{#if localIntervals.length === 0}
+				<div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-8 text-center border-2 border-dashed border-blue-500/30">
+					<div class="text-6xl mb-4">🏃‍♂️</div>
+					<h3 class="text-xl font-bold text-white mb-2">{$t('settings.welcome_title')}</h3>
+					<p class="text-gray-300 mb-4">{$t('settings.welcome_message')}</p>
+					<div class="flex gap-2 justify-center text-sm text-gray-400">
+						<span>📝 {$t('settings.add_interval')}</span>
+						<span>•</span>
+						<span>🏋️ {$t('settings.add_weights_interval')}</span>
+					</div>
+				</div>
+			{/if}
+		</div>			<!-- Botones agregar intervalo, pesas y marcador de repetición -->
 			<div class="flex gap-2 mb-4">
 				<button 
 					on:click={addInterval}
@@ -420,7 +438,7 @@
 				</button>
 				<button 
 					on:click={addWeightsInterval}
-					class="flex-1 py-3 bg-purple-700 hover:bg-purple-600 rounded-lg transition-colors text-white font-medium"
+					class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white font-medium"
 					style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);"
 				>
 					🏋️ {$t('settings.add_weights_interval')}
@@ -437,22 +455,30 @@
 		
 		<!-- Footer del modal -->
 		<div class="sticky bottom-0 bg-gray-900 border-t border-gray-700 p-4 rounded-b-lg">
-			<div class="flex gap-3">
-				<button 
-					on:click={cancelConfiguration}
-					class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium text-white transition-colors"
-				>
-					{$t('common.cancel')}
-				</button>
-				
+			<div class="flex gap-3 mb-3">
 				<button 
 					on:click={saveConfiguration}
 					disabled={localIntervals.length === 0}
 					class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
 				>
-					{$t('settings.save_configuration')}
+					✅ {$t('settings.save_configuration')}
+				</button>
+				
+				<button 
+					on:click={saveAsRoutine}
+					disabled={localIntervals.length === 0}
+					class="flex-1 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
+				>
+					💾 {$t('settings.save_as_routine')}
 				</button>
 			</div>
+			
+			<button 
+				on:click={cancelConfiguration}
+				class="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium text-white transition-colors text-sm"
+			>
+				{$t('common.cancel')}
+			</button>
 		</div>
 	</div>
 </div>

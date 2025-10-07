@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { t } from '$lib/i18n';
-	import { loadRoutines, deleteRoutine, exportData, importData, getStats, type SavedRoutine } from '$lib/services/routineStorage';
+	import { loadRoutines, deleteRoutine, exportData, importData, type SavedRoutine } from '$lib/services/routineStorage';
 	
 	const dispatch = createEventDispatcher();
 	
 	let routines: SavedRoutine[] = [];
-	let stats = { totalRoutines: 0, totalWorkouts: 0, totalMinutes: 0 };
 	let showDeleteConfirm = false;
 	let routineToDelete: SavedRoutine | null = null;
 	let importFileInput: HTMLInputElement;
@@ -17,7 +16,6 @@
 	
 	function loadData() {
 		routines = loadRoutines();
-		stats = getStats();
 	}
 	
 	function formatDate(timestamp: number): string {
@@ -133,18 +131,10 @@
 		
 		<!-- Stats -->
 		<div class="bg-gray-800 rounded-lg p-4 mb-6 border-l-4 border-purple-500">
-			<div class="flex justify-between items-center">
+			<div class="flex justify-center items-center">
 				<div class="text-center">
-					<p class="text-3xl font-light text-purple-400">{stats.totalRoutines}/15</p>
+					<p class="text-4xl font-light text-purple-400">{routines.length}/15</p>
 					<p class="text-sm text-gray-400 mt-1">{$t('routines.routines')}</p>
-				</div>
-				<div class="text-center">
-					<p class="text-3xl font-light text-blue-400">{stats.totalWorkouts}</p>
-					<p class="text-sm text-gray-400 mt-1">{$t('routines.workouts')}</p>
-				</div>
-				<div class="text-center">
-					<p class="text-3xl font-light text-green-400">{stats.totalMinutes}</p>
-					<p class="text-sm text-gray-400 mt-1">{$t('routines.minutes')}</p>
 				</div>
 			</div>
 		</div>
