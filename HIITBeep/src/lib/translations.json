@@ -46,7 +46,9 @@
       "total_duration": "Duración total por repetición:",
       "estimated_time": "Tiempo total estimado:",
       "repeat_times": "Repetir {times} veces",
-      "repeat_full_routine": "Repetir toda la rutina"
+      "repeat_full_routine": "Repetir toda la rutina",
+      "edit_routine": "Editar Rutina",
+      "main_menu": "Menú Principal"
     },
     "settings": {
       "title": "Configuración",
@@ -228,7 +230,9 @@
       "total_duration": "Total duration per repetition:",
       "estimated_time": "Total estimated time:",
       "repeat_times": "Repeat {times} times",
-      "repeat_full_routine": "Repeat full routine"
+      "repeat_full_routine": "Repeat full routine",
+      "edit_routine": "Edit Routine",
+      "main_menu": "Main Menu"
     },
     "settings": {
       "title": "Settings",

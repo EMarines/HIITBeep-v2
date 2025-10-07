@@ -142,6 +142,10 @@
 		currentView = 'main';
 	}
 	
+	function goToDashboard() {
+		currentView = 'dashboard';
+	}
+	
 	function backFromRoutines() {
 		currentView = 'dashboard';
 	}
@@ -244,8 +248,7 @@
 			routineName={currentRoutineName}
 			on:open-settings={openSettings}
 			on:start-workout={startWorkout}
-			on:open-routines={openRoutines}
-			on:open-history={openHistory}
+			on:go-dashboard={goToDashboard}
 		/>
 	{:else if currentView === 'timer'}
 		<Timer 

@@ -20,21 +20,18 @@
         restTime?: number;
     }>;
     export let routineName: string = '';    
+    
     function openSettings() {
         dispatch('open-settings');
+    }
+    
+    function goToDashboard() {
+        dispatch('go-dashboard');
     }
     
     function startWorkout() {
         if (intervals.length === 0) return;
         dispatch('start-workout');
-    }
-    
-    function openRoutines() {
-        dispatch('open-routines');
-    }
-    
-    function openHistory() {
-        dispatch('open-history');
     }
     
     // Encontrar el índice del primer intervalo después de cada marcador "repeat"
@@ -93,34 +90,27 @@
 
 <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-900 text-white">
     <div class="max-w-md w-full">
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center justify-between mb-6">
             <h1 class="text-4xl font-bold" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{$t('app.title')}</h1>
-            <div class="flex items-center gap-2">
-                <button 
-                    on:click={openHistory}
-                    class="text-xl text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
-                    title="Historial"
-                    style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);"
-                >
-                    📊
-                </button>
-                <button 
-                    on:click={openRoutines}
-                    class="text-xl text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
-                    title="Mis rutinas"
-                    style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);"
-                >
-                    📋
-                </button>
-                <button 
-                    on:click={openSettings}
-                    class="text-xl text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
-                    title={$t('common.settings')}
-                    style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);"
-                >
-                    ⚙️
-                </button>
-            </div>
+        </div>
+        
+        <!-- Botones de navegación -->
+        <div class="flex gap-3 mb-6">
+            <button 
+                on:click={openSettings}
+                class="flex-1 py-2 px-4 rounded-lg font-medium text-white transition-colors flex items-center justify-center gap-2"
+                style="background: linear-gradient(to right, #2563eb, #1d4ed8);"
+            >
+                <span>✏️</span>
+                <span>{$t('main.edit_routine')}</span>
+            </button>
+            <button 
+                on:click={goToDashboard}
+                class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium text-white transition-colors flex items-center justify-center gap-2"
+            >
+                <span>🏠</span>
+                <span>{$t('main.main_menu')}</span>
+            </button>
         </div>
         
         {#if routineName}
