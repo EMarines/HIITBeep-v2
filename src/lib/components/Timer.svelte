@@ -249,11 +249,15 @@
 			if (!isPaused) {
 				timeRemaining--;
 				
-				// Beeps cada 10 segundos (mejorado con lastBeepTime para evitar duplicados)
-				const elapsedInInterval = currentInterval.duration - timeRemaining;
-				if (elapsedInInterval > 0 && elapsedInInterval % 10 === 0 && elapsedInInterval !== lastBeepTime) {
-					playBeep(800, 150);
-					lastBeepTime = elapsedInInterval;
+				// Beeps cada 10 segundos durante el intervalo (no en los últimos 5 segundos)
+				// Solo si el intervalo es mayor a 10 segundos
+				if (currentInterval.duration > 10 && timeRemaining > 5) {
+					const elapsedInInterval = currentInterval.duration - timeRemaining;
+					// Beep en 10s, 20s, 30s, etc. (evitando duplicados con lastBeepTime)
+					if (elapsedInInterval > 0 && elapsedInInterval % 10 === 0 && elapsedInInterval !== lastBeepTime) {
+						playBeep(800, 150);
+						lastBeepTime = elapsedInInterval;
+					}
 				}
 				
 				// Beeps de los últimos 5 segundos
