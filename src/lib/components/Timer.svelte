@@ -24,6 +24,7 @@
 	let timer: number;
 	let audioContext: AudioContext | null = null;
 	let repeatMarkersExecuted: Map<number, number> = new Map(); // Controla cuántas veces se ha ejecutado cada marcador
+	let lastBeepTime = 0; // Para trackear beeps cada 10 segundos
 	
 	// Variables para tracking del workout
 	let workoutStartTime: number = 0;
@@ -248,9 +249,11 @@
 			if (!isPaused) {
 				timeRemaining--;
 				
-				// Beeps cada 10 segundos
-				if (timeRemaining > 5 && timeRemaining % 10 === 0) {
+				// Beeps cada 10 segundos (mejorado con lastBeepTime para evitar duplicados)
+				const elapsedInInterval = currentInterval.duration - timeRemaining;
+				if (elapsedInInterval > 0 && elapsedInInterval % 10 === 0 && elapsedInInterval !== lastBeepTime) {
 					playBeep(800, 150);
+					lastBeepTime = elapsedInInterval;
 				}
 				
 				// Beeps de los últimos 5 segundos
@@ -260,6 +263,7 @@
 				
 				// Cambio de intervalo
 				if (timeRemaining <= 0) {
+					lastBeepTime = 0; // Reset para el siguiente intervalo
 					playBeep(600, 400);
 					
 					setTimeout(() => {

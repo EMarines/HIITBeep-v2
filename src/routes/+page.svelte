@@ -35,8 +35,12 @@
 	}
 	
 	function openSettings() {
-		// NO resetear cuando viene desde MainScreen (ya tiene intervalos cargados)
-		// Solo resetear si no hay intervalos (viene desde Dashboard sin rutina)
+		// Si vienes del dashboard (sin rutina activa), resetear para crear nueva
+		if (currentView === 'dashboard') {
+			resetConfiguration();
+		}
+		// Si vienes de MainScreen con "Editar Rutina", mantener los datos actuales
+		
 		// Incrementar key para forzar recreación del componente
 		settingsKey++;
 		// Usar setTimeout para asegurar que la reactividad se ejecute
