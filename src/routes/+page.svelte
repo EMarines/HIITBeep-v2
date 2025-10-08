@@ -13,7 +13,7 @@
 	let currentView: 'dashboard' | 'main' | 'settings' | 'timer' | 'routines' | 'history' = 'dashboard';
 	
 	// Configuración persistente
-	let repetitions = 1;
+	let repetitions: number | null = null;
 	let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' | 'weights'; sets?: number; restTime?: number; }> = [];
 	let currentRoutineId: string | null = null; // Para tracking de workout logs
 	let currentRoutineName: string = '';
@@ -62,7 +62,7 @@
 	function saveConfiguration(event: any) {
 		const config = event.detail;
 		intervals = config.intervals;
-		repetitions = config.repetitions;
+		repetitions = config.repetitions; // Ya validado en el modal, siempre es number
 		currentRoutineName = config.routineName || '';
 		currentView = 'main';
 		
@@ -135,7 +135,7 @@
 	function resetConfiguration() {
 		// Limpiar completamente para crear una nueva rutina desde cero
 		intervals = []; // Lienzo completamente limpio, sin intervalos
-		repetitions = 3;
+		repetitions = null; // Campo vacío con placeholder
 		currentRoutineName = '';
 		currentRoutineId = null;
 		
@@ -173,6 +173,12 @@
 		
 		if (!routineName.trim()) {
 			alert(currentT('routines.name_required'));
+			return;
+		}
+		
+		// Validar que repetitions sea un número válido
+		if (!repetitions || repetitions < 1) {
+			alert(currentT('settings.repetitions_required') || 'Please configure repetitions');
 			return;
 		}
 		
@@ -267,7 +273,7 @@
 		/>
 	{:else if currentView === 'main'}
 		<MainScreen 
-			{repetitions} 
+			repetitions={repetitions || 1} 
 			{intervals}
 			routineName={currentRoutineName}
 			on:open-settings={openSettings}
@@ -277,7 +283,7 @@
 	{:else if currentView === 'timer'}
 		<Timer 
 			{intervals} 
-			{repetitions} 
+			repetitions={repetitions || 1} 
 			on:back={backToMain}
 			on:workout-complete={handleWorkoutComplete}
 		/>

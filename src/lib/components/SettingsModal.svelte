@@ -6,7 +6,7 @@
 	const dispatch = createEventDispatcher();
 	// Force recompilation - button colors updated
 	
-	export let repetitions: number = 1;
+	export let repetitions: number | null = null; // Campo vacío con placeholder
 	export let intervals: Array<{ 
 		name: string; 
 		duration: number; 
@@ -18,7 +18,7 @@
 	export let routineName: string = '';
 	
 	// Copias locales para editar
-	let localRepetitions = repetitions;
+	let localRepetitions = repetitions; // null cuando está vacío
 	let localIntervals = [...intervals];
 	let localRoutineName = routineName;
 	
@@ -83,8 +83,11 @@
 	
 	function saveConfiguration() {
 		if (localIntervals.length === 0) return;
-		// Asegurar que las repeticiones sean al menos 1
-		if (localRepetitions < 1) localRepetitions = 1;
+		// Asegurar que las repeticiones tengan un valor válido
+		if (!localRepetitions || localRepetitions < 1) {
+			alert($t('settings.repetitions_required') || 'Please enter the number of repetitions');
+			return;
+		}
 		dispatch('save-config', { 
 			intervals: localIntervals, 
 			repetitions: localRepetitions,
@@ -94,8 +97,11 @@
 	
 	function saveAsRoutine() {
 		if (localIntervals.length === 0) return;
-		// Asegurar que las repeticiones sean al menos 1
-		if (localRepetitions < 1) localRepetitions = 1;
+		// Asegurar que las repeticiones tengan un valor válido
+		if (!localRepetitions || localRepetitions < 1) {
+			alert($t('settings.repetitions_required') || 'Please enter the number of repetitions');
+			return;
+		}
 		dispatch('save-routine', { 
 			intervals: localIntervals, 
 			repetitions: localRepetitions,
@@ -182,9 +188,10 @@
 					id="{repetitionsId}"
 					type="number" 
 					bind:value={localRepetitions} 
+					placeholder="1"
 					min="1"
 					max="99"
-					class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500 text-lg text-white"
+					class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500 text-lg text-white placeholder-gray-500"
 				/>
 			</div>
 			
