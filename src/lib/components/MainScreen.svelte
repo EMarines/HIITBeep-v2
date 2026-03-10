@@ -18,6 +18,8 @@
         type?: 'interval' | 'repeat' | 'weights';
         sets?: number;
         restTime?: number;
+        prepDuration?: number;
+        restDuration?: number;
     }>;
     export let routineName: string = '';    
     
@@ -211,7 +213,15 @@
                     <div class="relative bg-gray-800 rounded-lg p-3 border-l-4 {interval.color} flex items-center justify-between min-h-[72px]">
                         <div>
                             <p class="font-medium text-white" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{interval.name}</p>
-                            <p class="text-sm text-gray-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{$t('timer.duration')} {formatTime(interval.duration)}</p>
+                            <p class="text-sm text-gray-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">
+                                {#if interval.prepDuration > 0}
+                                    <span class="text-yellow-500/80">{$t('settings.prep_short')}: {formatTime(interval.prepDuration)}</span> • 
+                                {/if}
+                                {$t('settings.duration_short')}: {formatTime(interval.duration)}
+                                {#if interval.restDuration > 0}
+                                    • <span class="text-blue-400/80">{$t('settings.rest_short')}: {formatTime(interval.restDuration)}</span>
+                                {/if}
+                            </p>
                         </div>
                         <div class="text-right">
                             <p class="text-lg font-light text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
@@ -276,10 +286,18 @@
         {#if intervals.length > 0}
             <div class="mt-6 text-center text-gray-400">
                 <p class="text-sm" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">
-                    {$t('main.total_duration')} {formatTime(intervals.reduce((acc, interval) => acc + interval.duration, 0))}
+                    {$t('main.total_duration')} {formatTime(intervals.reduce((acc, interval) => {
+                        if (interval.type === 'repeat') return acc + 2;
+                        if (interval.type === 'weights') return acc + ((interval.restTime || 0) * ((interval.sets || 1) - 1));
+                        return acc + (interval.duration || 0) + (interval.prepDuration || 0) + (interval.restDuration || 0);
+                    }, 0))}
                 </p>
                 <p class="text-xs mt-1" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);">
-                    {$t('main.estimated_time')} {formatTime(intervals.reduce((acc, interval) => acc + interval.duration, 0) * repetitions)}
+                    {$t('main.estimated_time')} {formatTime(intervals.reduce((acc, interval) => {
+                        if (interval.type === 'repeat') return acc + 2;
+                        if (interval.type === 'weights') return acc + ((interval.restTime || 0) * ((interval.sets || 1) - 1));
+                        return acc + (interval.duration || 0) + (interval.prepDuration || 0) + (interval.restDuration || 0);
+                    }, 0) * repetitions)}
                 </p>
             </div>
         {/if}

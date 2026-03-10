@@ -12,6 +12,8 @@
 		type?: 'interval' | 'repeat' | 'weights';
 		sets?: number;
 		restTime?: number;
+		prepDuration?: number;
+		restDuration?: number;
 	}>;
 	export let repetitions: number = 1;
 	
@@ -25,6 +27,7 @@
 	let audioContext: AudioContext | null = null;
 	let repeatMarkersExecuted: Map<number, number> = new Map(); // Controla cuántas veces se ha ejecutado cada marcador
 	let lastBeepTime = 0; // Para trackear beeps cada 10 segundos
+	let currentStage: 'preparation' | 'exercise' | 'rest' = 'exercise';
 	
 	// Variables para tracking del workout
 	let workoutStartTime: number = 0;
@@ -49,6 +52,15 @@
 			if (currentInterval.type === 'weights' && isRestingWeights) {
 				const totalRestTime = currentInterval.restTime || 90;
 				return Math.max(0, Math.min(1, (totalRestTime - timeRemaining) / totalRestTime));
+			}
+			// Para etapas de HIIT (Prep, Exercise, Rest)
+			if (currentInterval.type === 'interval' || !currentInterval.type) {
+				let totalStageTime = currentInterval.duration;
+				if (currentStage === 'preparation') totalStageTime = currentInterval.prepDuration || 0;
+				else if (currentStage === 'rest') totalStageTime = currentInterval.restDuration || 0;
+				
+				if (totalStageTime <= 0) return 0;
+				return Math.max(0, Math.min(1, (totalStageTime - timeRemaining) / totalStageTime));
 			}
 			// Para intervalos normales
 			return Math.max(0, Math.min(1, (currentInterval.duration - timeRemaining) / currentInterval.duration));
@@ -235,24 +247,35 @@
 		} else if (currentIntervalData.type === 'repeat') {
 			// Marcador de repetición: SIEMPRE 2 segundos, sin importar duration
 			timeRemaining = 2;
+			currentStage = 'exercise';
 			startHIITTimer();
 		} else {
 			// Intervalo HIIT normal
-			timeRemaining = currentIntervalData.duration;
+			if (currentIntervalData.prepDuration && currentIntervalData.prepDuration > 0) {
+				currentStage = 'preparation';
+				timeRemaining = currentIntervalData.prepDuration;
+			} else {
+				currentStage = 'exercise';
+				timeRemaining = currentIntervalData.duration;
+			}
 			startHIITTimer();
 		}
 	}
 	
 	// Timer para intervalos HIIT (código existente movido aquí)
 	function startHIITTimer() {
+		if (timer) clearInterval(timer);
 		timer = setInterval(() => {
 			if (!isPaused) {
 				timeRemaining--;
 				
 				// Beeps cada 10 segundos durante el intervalo (no en los últimos 5 segundos)
 				// Solo si el intervalo es mayor a 10 segundos
-				if (currentInterval.duration > 10 && timeRemaining > 5) {
-					const elapsedInInterval = currentInterval.duration - timeRemaining;
+				const totalDuration = currentStage === 'preparation' ? (currentInterval.prepDuration || 0) : 
+				                     (currentStage === 'rest' ? (currentInterval.restDuration || 0) : currentInterval.duration);
+
+				if (totalDuration > 10 && timeRemaining > 5) {
+					const elapsedInInterval = totalDuration - timeRemaining;
 					// Beep en 10s, 20s, 30s, etc. (evitando duplicados con lastBeepTime)
 					if (elapsedInInterval > 0 && elapsedInInterval % 10 === 0 && elapsedInInterval !== lastBeepTime) {
 						playBeep(800, 150);
@@ -282,6 +305,31 @@
 	function handleIntervalChange() {
 		const currentIntervalData = intervals[currentIntervalIndex];
 		
+		if (currentIntervalData && (currentIntervalData.type === 'interval' || !currentIntervalData.type)) {
+			// Lógica de etapas para HIIT
+			if (currentStage === 'preparation') {
+				currentStage = 'exercise';
+				timeRemaining = currentIntervalData.duration;
+				startHIITTimer();
+				return;
+			} else if (currentStage === 'exercise' && currentIntervalData.restDuration && currentIntervalData.restDuration > 0) {
+				// Si es el último intervalo de la última repetición, saltar el descanso
+				const isLastInterval = currentIntervalIndex === intervals.length - 1;
+				const isLastRep = currentRepetition === 1;
+				
+				if (!(isLastInterval && isLastRep)) {
+					currentStage = 'rest';
+					timeRemaining = currentIntervalData.restDuration;
+					startHIITTimer();
+					return;
+				}
+				// Si es el último, cae al final de la función para terminar la rutina
+			}
+		}
+
+		// Reset stage when moving to another interval
+		currentStage = 'exercise';
+
 		if (currentIntervalData && currentIntervalData.type === 'repeat') {
 			// Manejar marcador de repetición
 			const executed = repeatMarkersExecuted.get(currentIntervalIndex) || 0;
@@ -430,6 +478,14 @@
 		<h1 class="text-3xl font-light mb-8" style="text-shadow: 0 0 10px rgba(0, 0, 0, 1), 2px 2px 8px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(0, 0, 0, 0.8)">
 			{#if currentInterval && currentInterval.type === 'weights'}
 				🏋️ {currentInterval.name}
+			{:else if currentInterval && (currentInterval.type === 'interval' || !currentInterval.type)}
+				{#if currentStage === 'preparation'}
+					<span class="text-yellow-400">{$t('intervals.preparation')}:</span> {currentInterval.name}
+				{:else if currentStage === 'rest'}
+					<span class="text-blue-400">{$t('intervals.rest')}</span>
+				{:else}
+					{currentInterval.name}
+				{/if}
 			{:else}
 				{currentInterval ? currentInterval.name : $t('timer.completed')}
 			{/if}

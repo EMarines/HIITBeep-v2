@@ -14,6 +14,8 @@
 		type?: 'interval' | 'repeat' | 'weights';
 		sets?: number; // Para intervalos de pesas
 		restTime?: number; // Tiempo de descanso para pesas
+		prepDuration?: number; // Preparación opcional
+		restDuration?: number; // Descanso opcional
 	}> = [];
 	export let routineName: string = '';
 	
@@ -28,7 +30,14 @@
 	$: localRoutineName = routineName;
 	
 	function addInterval() {
-		localIntervals = [...localIntervals, { name: '', duration: null as any, color: 'bg-green-500', type: 'interval' }];
+		localIntervals = [...localIntervals, { 
+			name: '', 
+			duration: null as any, 
+			color: 'bg-green-500', 
+			type: 'interval',
+			prepDuration: null as any,
+			restDuration: null as any
+		}];
 	}
 	
 	function addWeightsInterval() {
@@ -57,9 +66,12 @@
 			duration: intervalToCopy.duration,
 			color: intervalToCopy.color,
 			type: intervalToCopy.type || 'interval',
-			...(intervalToCopy.type === 'weights' && {
+			...(intervalToCopy.type === 'weights' ? {
 				sets: intervalToCopy.sets,
 				restTime: intervalToCopy.restTime
+			} : {
+				prepDuration: intervalToCopy.prepDuration,
+				restDuration: intervalToCopy.restDuration
 			})
 		};
 		localIntervals = [...localIntervals, copiedInterval];
@@ -392,31 +404,60 @@
 									/>
 								</div>
 								
-							<div class="flex items-center gap-4">
-								<div class="flex-1">
-									<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration_seconds')}</label>
-									<input 
-										id="{generateIntervalId(index, 'duration')}"
-										type="number" 
-										bind:value={interval.duration} 
-										min="1"
-										placeholder="30"
-										class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-white"
-									/>
+								<div class="flex gap-4 mb-3">
+									<div class="flex-1">
+										<div class="flex items-center gap-2 mb-1">
+											<span class="text-xs text-yellow-500 font-bold">{$t('settings.prep_short')}</span>
+											<input 
+												id="{generateIntervalId(index, 'prepDuration')}"
+												type="number" 
+												bind:value={interval.prepDuration} 
+												min="0"
+												placeholder="0s"
+												class="w-full bg-gray-700 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-yellow-500 text-white text-sm"
+											/>
+										</div>
+									</div>
+									<div class="flex-1">
+										<div class="flex items-center gap-2 mb-1">
+											<span class="text-xs text-blue-400 font-bold">{$t('settings.rest_short')}</span>
+											<input 
+												id="{generateIntervalId(index, 'restDuration')}"
+												type="number" 
+												bind:value={interval.restDuration} 
+												min="0"
+												placeholder="0s"
+												class="w-full bg-gray-700 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500 text-white text-sm"
+											/>
+										</div>
+									</div>
 								</div>
 								
-								<div class="flex-1">
-									<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">{$t('settings.color')}</label>
-									<select 
-										id="{generateIntervalId(index, 'color')}"
-										bind:value={interval.color}
-										class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-white"
-									>
-										{#each colorOptions as color}
-											<option value={color.value}>{color.name}</option>
-										{/each}
-									</select>
-								</div>
+								<div class="flex items-center gap-4">
+									<div class="flex-1">
+										<label for="{generateIntervalId(index, 'duration')}" class="block text-sm text-gray-400 mb-1">{$t('settings.duration_seconds')}</label>
+										<input 
+											id="{generateIntervalId(index, 'duration')}"
+											type="number" 
+											bind:value={interval.duration} 
+											min="1"
+											placeholder="30"
+											class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-white"
+										/>
+									</div>
+									
+									<div class="flex-1">
+										<label for="{generateIntervalId(index, 'color')}" class="block text-sm text-gray-400 mb-1">{$t('settings.color')}</label>
+										<select 
+											id="{generateIntervalId(index, 'color')}"
+											bind:value={interval.color}
+											class="w-full bg-gray-700 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-white"
+										>
+											{#each colorOptions as color}
+												<option value={color.value}>{color.name}</option>
+											{/each}
+										</select>
+									</div>
 								</div>
 							</div>
 						</div>

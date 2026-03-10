@@ -6,6 +6,8 @@ export interface Interval {
 	type?: 'interval' | 'repeat' | 'weights';
 	sets?: number;
 	restTime?: number;
+	prepDuration?: number;
+	restDuration?: number;
 }
 
 export interface SavedRoutine {

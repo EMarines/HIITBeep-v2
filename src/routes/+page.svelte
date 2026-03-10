@@ -14,7 +14,7 @@
 	
 	// Configuración persistente
 	let repetitions: number | null = null;
-	let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' | 'weights'; sets?: number; restTime?: number; }> = [];
+	let intervals: Array<{ name: string; duration: number; color: string; type?: 'interval' | 'repeat' | 'weights'; sets?: number; restTime?: number; prepDuration?: number; restDuration?: number; }> = [];
 	let currentRoutineId: string | null = null; // Para tracking de workout logs
 	let currentRoutineName: string = '';
 	
