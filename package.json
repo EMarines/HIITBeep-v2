@@ -48,6 +48,7 @@
 		"vitest-browser-svelte": "^0.1.0"
 	},
 	"dependencies": {
-		"@vite-pwa/sveltekit": "^1.0.0"
+		"@vite-pwa/sveltekit": "^1.0.0",
+		"hiitbeep": "file:../../Users/Propietario/OneDrive/AB GrupoUrbania/OneDrive/Escritorio/Web Projects/HIITBeep"
 	}
 }
