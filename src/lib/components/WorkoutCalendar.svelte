@@ -123,27 +123,27 @@
 	}
 </script>
 
-<div class="bg-gray-800 rounded-lg p-4 mb-6">
+<div class="bg-gray-800/40 border border-white/5 rounded-2xl p-6 mb-8 shadow-xl backdrop-blur-md">
 	<!-- Header con navegación -->
-	<div class="flex items-center justify-between mb-4">
+	<div class="flex items-center justify-between mb-8">
 		<button
 			on:click={previousMonth}
-			class="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+			class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-xl text-white transition-all border border-white/5"
 			title="Previous month"
 			aria-label="Previous month"
 		>
-			<svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
 			</svg>
 		</button>
 		
 		<div class="text-center">
-			<h3 class="text-xl font-bold text-white">
+			<h3 class="text-2xl font-black text-white tracking-tighter">
 				{getMonthName(currentMonth)} {currentYear}
 			</h3>
 			<button
 				on:click={goToToday}
-				class="text-xs text-blue-400 hover:text-blue-300 transition-colors mt-1"
+				class="text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300 transition-colors mt-1"
 			>
 				{currentT ? currentT('calendar.today') : 'Today'}
 			</button>
@@ -151,62 +151,48 @@
 		
 		<button
 			on:click={nextMonth}
-			class="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+			class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-xl text-white transition-all border border-white/5"
 			title="Next month"
 			aria-label="Next month"
 		>
-			<svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
 			</svg>
 		</button>
 	</div>
 	
 	<!-- Días de la semana -->
-	<div class="grid grid-cols-7 gap-1 mb-2">
+	<div class="grid grid-cols-7 gap-2 mb-3">
 		{#each getWeekDays() as day}
-			<div class="text-center text-xs font-semibold text-gray-400 py-1">
+			<div class="text-center text-[10px] font-black text-gray-500 uppercase tracking-tighter">
 				{day}
 			</div>
 		{/each}
 	</div>
 	
 	<!-- Días del mes -->
-	<div class="grid grid-cols-7 gap-1">
+	<div class="grid grid-cols-7 gap-2">
 		{#each calendarDays as { day, date, workouts }}
 			{#if day === 0}
 				<!-- Día vacío -->
-				<div class="aspect-square"></div>
+				<div class="aspect-square opacity-0"></div>
 			{:else}
 				<div
-					class="aspect-square relative rounded-lg transition-all duration-200
-						{workouts.length > 0 ? 'bg-green-900/30 border border-green-500/50' : 'bg-gray-700/30'}
-						{isToday(date) ? 'ring-2 ring-blue-500' : ''}
-						hover:bg-gray-700/50"
+					class="aspect-square relative rounded-xl transition-all duration-300 border
+						{workouts.length > 0 ? 'bg-green-500/10 border-green-500/30' : 'bg-white/5 border-transparent'}
+						{isToday(date) ? 'ring-2 ring-blue-500 border-blue-500/50' : ''}
+						hover:scale-105 active:scale-95 cursor-default"
 				>
 					<!-- Número del día -->
-					<div class="absolute top-1 left-1 text-xs font-medium
-						{isToday(date) ? 'text-blue-400' : workouts.length > 0 ? 'text-green-300' : 'text-gray-400'}">
+					<div class="absolute top-1.5 left-1.5 text-[10px] font-black
+						{isToday(date) ? 'text-blue-400' : workouts.length > 0 ? 'text-green-400' : 'text-gray-500'}">
 						{day}
 					</div>
 					
 					<!-- Checkmark si hay entrenamientos -->
 					{#if workouts.length > 0}
-						<div class="absolute top-1 right-1 text-green-400" title="{workouts.length} workout{workouts.length > 1 ? 's' : ''}">
-							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-							</svg>
-						</div>
-						
-						<!-- Nombre de rutina (solo el primero si hay varios) -->
-						<div class="absolute bottom-1 left-1 right-1">
-							<p class="text-[8px] leading-tight text-green-300 truncate font-medium">
-								{workouts[0].routineName}
-							</p>
-							{#if workouts.length > 1}
-								<p class="text-[7px] text-green-400/70">
-									+{workouts.length - 1} more
-								</p>
-							{/if}
+						<div class="absolute inset-0 flex items-center justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                            <span class="text-base">●</span>
 						</div>
 					{/if}
 				</div>
@@ -215,13 +201,13 @@
 	</div>
 	
 	<!-- Leyenda -->
-	<div class="flex items-center justify-center gap-4 mt-4 text-xs text-gray-400">
-		<div class="flex items-center gap-1">
-			<div class="w-3 h-3 rounded bg-green-900/30 border border-green-500/50"></div>
+	<div class="flex items-center justify-center gap-6 mt-8 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+		<div class="flex items-center gap-2">
+			<div class="w-3 h-3 rounded-full bg-green-500 opacity-40"></div>
 			<span>{currentT ? currentT('calendar.completed') : 'Completed'}</span>
 		</div>
-		<div class="flex items-center gap-1">
-			<div class="w-3 h-3 rounded ring-2 ring-blue-500"></div>
+		<div class="flex items-center gap-2">
+			<div class="w-3 h-3 rounded-full border-2 border-blue-500"></div>
 			<span>{currentT ? currentT('calendar.today') : 'Today'}</span>
 		</div>
 	</div>

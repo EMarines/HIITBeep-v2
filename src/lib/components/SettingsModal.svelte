@@ -146,6 +146,23 @@
 	// Generate unique IDs for form controls
 	const repetitionsId = 'settings-repetitions-input';
 	
+	let intervalToDeleteIndex: number | null = null;
+	
+	function confirmDeleteInterval(index: number) {
+		intervalToDeleteIndex = index;
+	}
+	
+	function cancelDeleteInterval() {
+		intervalToDeleteIndex = null;
+	}
+	
+	function executeDeleteInterval() {
+		if (intervalToDeleteIndex !== null) {
+			removeInterval(intervalToDeleteIndex);
+			intervalToDeleteIndex = null;
+		}
+	}
+
 	function generateIntervalId(index: number, field: string): string {
 		return `settings-interval-${index}-${field}`;
 	}
@@ -234,7 +251,7 @@
 										⬇️
 									</button>
 									<button 
-										on:click={() => removeInterval(index)}
+										on:click={() => confirmDeleteInterval(index)}
 										class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-600 hover:bg-gray-500"
 										title="{$t('settings.delete_interval')}"
 									>
@@ -297,7 +314,7 @@
 										⬇️
 									</button>
 									<button 
-										on:click={() => removeInterval(index)}
+										on:click={() => confirmDeleteInterval(index)}
 										class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
 										title="{$t('settings.delete_interval')}"
 									>
@@ -385,7 +402,7 @@
 										⬇️
 									</button>
 									<button 
-										on:click={() => removeInterval(index)}
+										on:click={() => confirmDeleteInterval(index)}
 										class="text-red-400 hover:text-red-300 transition-colors text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
 										title="{$t('settings.delete_interval')}"
 									>
@@ -462,21 +479,23 @@
 							</div>
 						</div>
 					{/if}
-			{/each}
+				{/each}
 			
-			{#if localIntervals.length === 0}
-				<div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-8 text-center border-2 border-dashed border-blue-500/30">
-					<div class="text-6xl mb-4">🏃‍♂️</div>
-					<h3 class="text-xl font-bold text-white mb-2">{$t('settings.welcome_title')}</h3>
-					<p class="text-gray-300 mb-4">{$t('settings.welcome_message')}</p>
-					<div class="flex gap-2 justify-center text-sm text-gray-400">
-						<span>📝 {$t('settings.add_interval')}</span>
-						<span>•</span>
-						<span>🏋️ {$t('settings.add_weights_interval')}</span>
+				{#if localIntervals.length === 0}
+					<div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-8 text-center border-2 border-dashed border-blue-500/30">
+						<div class="text-6xl mb-4">🏃‍♂️</div>
+						<h3 class="text-xl font-bold text-white mb-2">{$t('settings.welcome_title')}</h3>
+						<p class="text-gray-300 mb-4">{$t('settings.welcome_message')}</p>
+						<div class="flex gap-2 justify-center text-sm text-gray-400">
+							<span>📝 {$t('settings.add_interval')}</span>
+							<span>•</span>
+							<span>🏋️ {$t('settings.add_weights_interval')}</span>
+						</div>
 					</div>
-				</div>
-			{/if}
-		</div>			<!-- Botones agregar intervalo, pesas y marcador de repetición -->
+				{/if}
+			</div>
+
+			<!-- Botones agregar intervalo, pesas y marcador de repetición -->
 			<div class="flex gap-2 mb-4">
 				<button 
 					on:click={addInterval}
@@ -533,3 +552,32 @@
 		</div>
 	</div>
 </div>
+{#if intervalToDeleteIndex !== null}
+	<div class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-6 text-white">
+		<div class="bg-gray-900 border border-white/10 rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
+			<div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+				<span class="text-3xl">🗑️</span>
+			</div>
+			
+			<h3 class="text-2xl font-bold mb-2">{$t('settings.confirm_delete_interval')}</h3>
+			<p class="text-gray-400 text-sm mb-8">
+				{$t('settings.confirm_delete_interval_message')}
+			</p>
+			
+			<div class="flex flex-col gap-3">
+				<button
+					on:click={executeDeleteInterval}
+					class="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-all shadow-lg active:scale-95"
+				>
+					{$t('common.delete')}
+				</button>
+				<button
+					on:click={cancelDeleteInterval}
+					class="w-full py-3 bg-transparent hover:bg-white/5 text-gray-400 hover:text-white rounded-xl font-medium transition-all"
+				>
+					{$t('common.cancel')}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

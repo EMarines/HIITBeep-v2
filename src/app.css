@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* Reset y estilos base */
 * {
   box-sizing: border-box;
@@ -48,6 +50,7 @@ body {
 .text-center { text-align: center; }
 .w-full { width: 100%; }
 .max-w-md { max-width: 28rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
 
 /* Utilidades de espaciado */
 .p-2 { padding: 0.5rem; }
@@ -71,6 +74,7 @@ body {
 .mt-8 { margin-top: 2rem; }
 .mr-4 { margin-right: 1rem; }
 .ml-2 { margin-left: 0.5rem; }
+.ml-4 { margin-left: 1rem; }
 
 /* Utilidades de texto */
 .text-xs { font-size: 0.75rem; }
@@ -88,7 +92,9 @@ body {
 .text-\[12rem\] { font-size: 12rem; }
 .font-light { font-weight: 300; }
 .font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
 .font-bold { font-weight: 700; }
+.font-black { font-weight: 900; }
 .text-right { text-align: right; }
 
 /* Utilidades de borde */
@@ -105,8 +111,10 @@ body {
 .border-gray-700 { border-color: #374151; }
 
 /* Utilidades de espaciado */
+.space-y-2 > * + * { margin-top: 0.5rem; }
 .space-y-3 > * + * { margin-top: 0.75rem; }
 .space-y-4 > * + * { margin-top: 1rem; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
 .gap-3 { gap: 0.75rem; }
 .gap-4 { gap: 1rem; }
 

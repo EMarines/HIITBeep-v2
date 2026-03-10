@@ -154,32 +154,36 @@
 		</div>
 		
 		<!-- Stats Cards -->
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-			<div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-4 shadow-lg">
-				<p class="text-sm text-blue-200 uppercase tracking-wider mb-1">{$t('history.total_workouts')}</p>
-				<p class="text-3xl font-bold text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+			<div class="bg-gray-800/80 border border-white/5 rounded-2xl p-5 shadow-xl backdrop-blur-sm relative overflow-hidden group">
+				<div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+				<p class="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-1 relative z-10">{$t('history.total_workouts')}</p>
+				<p class="text-3xl font-black text-white relative z-10">
 					{totalWorkouts}
 				</p>
 			</div>
 			
-			<div class="bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg p-4 shadow-lg">
-				<p class="text-sm text-purple-200 uppercase tracking-wider mb-1">{$t('history.total_minutes')}</p>
-				<p class="text-3xl font-bold text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">
+			<div class="bg-gray-800/80 border border-white/5 rounded-2xl p-5 shadow-xl backdrop-blur-sm relative overflow-hidden group">
+				<div class="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+				<p class="text-[10px] text-purple-400 font-black uppercase tracking-widest mb-1 relative z-10">{$t('history.total_minutes')}</p>
+				<p class="text-3xl font-black text-white relative z-10">
 					{totalMinutes}
 				</p>
 			</div>
 			
-			<div class="bg-gradient-to-br from-green-600 to-green-700 rounded-lg p-4 shadow-lg">
-				<p class="text-sm text-green-200 uppercase tracking-wider mb-1">{$t('history.current_streak')}</p>
-				<p class="text-3xl font-bold text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">
-					{currentStreak} 🔥
+			<div class="bg-gray-800/80 border border-white/5 rounded-2xl p-5 shadow-xl backdrop-blur-sm relative overflow-hidden group">
+				<div class="absolute inset-0 bg-gradient-to-br from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+				<p class="text-[10px] text-green-400 font-black uppercase tracking-widest mb-1 relative z-10">{$t('history.current_streak')}</p>
+				<p class="text-3xl font-black text-white relative z-10">
+					{currentStreak} <span class="text-sm">🔥</span>
 				</p>
 			</div>
 			
-			<div class="bg-gradient-to-br from-orange-600 to-orange-700 rounded-lg p-4 shadow-lg">
-				<p class="text-sm text-orange-200 uppercase tracking-wider mb-1">{$t('history.longest_streak')}</p>
-				<p class="text-3xl font-bold text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">
-					{longestStreak} 🏆
+			<div class="bg-gray-800/80 border border-white/5 rounded-2xl p-5 shadow-xl backdrop-blur-sm relative overflow-hidden group">
+				<div class="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+				<p class="text-[10px] text-orange-400 font-black uppercase tracking-widest mb-1 relative z-10">{$t('history.longest_streak')}</p>
+				<p class="text-3xl font-black text-white relative z-10">
+					{longestStreak} <span class="text-sm">🏆</span>
 				</p>
 			</div>
 		</div>

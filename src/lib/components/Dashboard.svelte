@@ -40,9 +40,13 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex flex-col items-center justify-center p-6">
+<div class="min-h-screen bg-[#05070a] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+	<!-- Animated Background Glows -->
+	<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full"></div>
+	<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full"></div>
+
 	<!-- Top Bar / User Profile -->
-	<div class="max-w-md w-full flex justify-between items-center mb-8 px-2">
+	<div class="max-w-md w-full flex justify-between items-center mb-12 px-2 z-10">
 		<LanguageSelector />
 		
 		{#if $user}
@@ -127,55 +131,55 @@
 			<!-- Botón Configurar Rutinas -->
 			<button 
 				on:click={openSettings}
-				class="w-full group relative overflow-hidden rounded-xl p-6 shadow-xl transform hover:scale-105 transition-all duration-300"
-				style="background: linear-gradient(to right, #2563eb, #1d4ed8);"
+				class="w-full group relative overflow-hidden rounded-2xl p-6 shadow-2xl transform hover:translate-y-[-4px] transition-all duration-300 border border-white/5"
+				style="background: linear-gradient(135deg, #1e40af, #1e3a8a);"
 			>
-				<div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
-				<div class="relative flex items-center space-x-4">
-					<div class="text-5xl">⚙️</div>
+				<div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+				<div class="relative flex items-center space-x-5">
+					<div class="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform">⚙️</div>
 					<div class="flex-1 text-left">
-						<h3 class="text-2xl font-bold text-white">{$t('dashboard.configure_routines')}</h3>
-						<p class="text-blue-100 text-sm">{$t('dashboard.configure_description')}</p>
+						<h3 class="text-xl font-bold text-white tracking-tight">{$t('dashboard.configure_routines')}</h3>
+						<p class="text-blue-100/70 text-xs font-medium uppercase tracking-wider mt-1">{$t('dashboard.configure_description')}</p>
 					</div>
-					<div class="text-white text-2xl opacity-50">→</div>
+					<div class="text-white/30 group-hover:translate-x-1 group-hover:text-white/100 transition-all font-bold text-xl">→</div>
 				</div>
 			</button>
 			
 			<!-- Botón Mis Rutinas -->
 			<button 
 				on:click={openRoutines}
-				class="w-full group relative overflow-hidden rounded-xl p-6 shadow-xl transform hover:scale-105 transition-all duration-300"
-				style="background: linear-gradient(to right, #16a34a, #15803d);"
+				class="w-full group relative overflow-hidden rounded-2xl p-6 shadow-2xl transform hover:translate-y-[-4px] transition-all duration-300 border border-white/5"
+				style="background: linear-gradient(135deg, #166534, #14532d);"
 			>
-				<div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
-				<div class="relative flex items-center space-x-4">
-					<div class="text-5xl">📋</div>
+				<div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+				<div class="relative flex items-center space-x-5">
+					<div class="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform">📋</div>
 					<div class="flex-1 text-left">
-						<h3 class="text-2xl font-bold text-white">{$t('dashboard.my_routines')}</h3>
-						<p class="text-green-100 text-sm">
-							{$routineStats.totalRoutines} {$routineStats.totalRoutines === 1 ? $t('dashboard.routine_saved') : $t('dashboard.routines_saved')}
+						<h3 class="text-xl font-bold text-white tracking-tight">{$t('dashboard.my_routines')}</h3>
+						<p class="text-green-100/70 text-xs font-medium mt-1">
+							<span class="font-bold text-white">{$routineStats.totalRoutines}</span> {$routineStats.totalRoutines === 1 ? $t('dashboard.routine_saved') : $t('dashboard.routines_saved')}
 						</p>
 					</div>
-					<div class="text-white text-2xl opacity-50">→</div>
+					<div class="text-white/30 group-hover:translate-x-1 group-hover:text-white/100 transition-all font-bold text-xl">→</div>
 				</div>
 			</button>
 			
 			<!-- Botón Historial -->
 			<button 
 				on:click={openHistory}
-				class="w-full group relative overflow-hidden rounded-xl p-6 shadow-xl transform hover:scale-105 transition-all duration-300"
-				style="background: linear-gradient(to right, #9333ea, #7e22ce);"
+				class="w-full group relative overflow-hidden rounded-2xl p-6 shadow-2xl transform hover:translate-y-[-4px] transition-all duration-300 border border-white/5"
+				style="background: linear-gradient(135deg, #6b21a8, #581c87);"
 			>
-				<div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
-				<div class="relative flex items-center space-x-4">
-					<div class="text-5xl">📊</div>
+				<div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+				<div class="relative flex items-center space-x-5">
+					<div class="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform">📊</div>
 					<div class="flex-1 text-left">
-						<h3 class="text-2xl font-bold text-white">{$t('dashboard.history')}</h3>
-						<p class="text-purple-100 text-sm">
-							{$routineStats.totalWorkouts} {$routineStats.totalWorkouts === 1 ? $t('dashboard.workout_completed') : $t('dashboard.workouts_completed')}
+						<h3 class="text-xl font-bold text-white tracking-tight">{$t('dashboard.history')}</h3>
+						<p class="text-purple-100/70 text-xs font-medium mt-1">
+							<span class="font-bold text-white">{$routineStats.totalWorkouts}</span> {$routineStats.totalWorkouts === 1 ? $t('dashboard.workout_completed') : $t('dashboard.workouts_completed')}
 						</p>
 					</div>
-					<div class="text-white text-2xl opacity-50">→</div>
+					<div class="text-white/30 group-hover:translate-x-1 group-hover:text-white/100 transition-all font-bold text-xl">→</div>
 				</div>
 			</button>
 		</div>
