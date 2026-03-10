@@ -1,22 +1,14 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { t } from '$lib/i18n';
-	import { loadRoutines, deleteRoutine, exportData, importData, type SavedRoutine } from '$lib/services/routineStorage';
+	import { routineStore } from '$lib/stores/routineStore';
+	import { exportData, importData, type SavedRoutine } from '$lib/services/routineStorage';
 	
 	const dispatch = createEventDispatcher();
 	
-	let routines: SavedRoutine[] = [];
 	let showDeleteConfirm = false;
 	let routineToDelete: SavedRoutine | null = null;
 	let importFileInput: HTMLInputElement;
-	
-	onMount(() => {
-		loadData();
-	});
-	
-	function loadData() {
-		routines = loadRoutines();
-	}
 	
 	function formatDate(timestamp: number): string {
 		const date = new Date(timestamp);
@@ -44,10 +36,9 @@
 		showDeleteConfirm = true;
 	}
 	
-	function handleDelete() {
+	async function handleDelete() {
 		if (routineToDelete) {
-			deleteRoutine(routineToDelete.id);
-			loadData();
+			await routineStore.delete(routineToDelete.id);
 			showDeleteConfirm = false;
 			routineToDelete = null;
 		}
@@ -81,7 +72,7 @@
 		
 		if (file) {
 			const reader = new FileReader();
-			reader.onload = (e) => {
+			reader.onload = async (e) => {
 				const content = e.target?.result as string;
 				const result = importData(content);
 				
@@ -91,7 +82,7 @@
 				
 				if (result.success) {
 					alert(`✅ ${currentT('routines.import_success')}!\n\n${currentT('routines.routines')}: ${result.imported?.routines || 0}\n${currentT('routines.workouts')}: ${result.imported?.logs || 0}`);
-					loadData();
+					await routineStore.refresh();
 				} else {
 					alert(`❌ ${currentT('routines.import_error')}: ${result.error}`);
 				}
@@ -108,7 +99,7 @@
 	}
 	
 	function getIntervalCount(routine: SavedRoutine): number {
-		return routine.intervals.filter(i => i.type !== 'repeat').length;
+		return routine.intervals ? routine.intervals.filter(i => i.type !== 'repeat').length : 0;
 	}
 </script>
 
@@ -133,7 +124,7 @@
 		<div class="bg-gray-800 rounded-lg p-4 mb-6 border-l-4 border-purple-500">
 			<div class="flex justify-center items-center">
 				<div class="text-center">
-					<p class="text-4xl font-light text-purple-400">{routines.length}/15</p>
+					<p class="text-4xl font-light text-purple-400">{$routineStore.length}/15</p>
 					<p class="text-sm text-gray-400 mt-1">{$t('routines.routines')}</p>
 				</div>
 			</div>
@@ -171,7 +162,7 @@
 				{$t('routines.routines')}
 			</h3>
 			
-			{#if routines.length === 0}
+			{#if $routineStore.length === 0}
 				<div class="bg-gray-800 rounded-lg p-8 text-center">
 					<p class="text-gray-400 mb-2" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">
 						{$t('routines.no_routines')}
@@ -181,7 +172,7 @@
 					</p>
 				</div>
 			{:else}
-				{#each routines as routine (routine.id)}
+				{#each $routineStore as routine (routine.id)}
 					<div class="bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition-colors">
 						<div class="flex items-start justify-between">
 							<div class="flex-1">

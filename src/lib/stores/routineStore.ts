@@ -1,56 +1,96 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
+import { user } from './userStore';
 import {
-	loadRoutines,
-	deleteRoutine as deleteRoutineService,
-	saveRoutine as saveRoutineService,
+	loadRoutines as loadLocalRoutines,
+	deleteRoutine as deleteLocalRoutine,
+	saveRoutine as saveLocalRoutine,
+	updateRoutine as updateLocalRoutine,
 	getStats,
 	type SavedRoutine,
 	type Interval
 } from '$lib/services/routineStorage';
+import { 
+	saveRoutineToFirestore, 
+	updateRoutineInFirestore, 
+	deleteRoutineFromFirestore, 
+	loadRoutinesFromFirestore 
+} from '$lib/services/firestoreService';
 
 function createRoutineStore() {
 	const { subscribe, set, update } = writable<SavedRoutine[]>([]);
 
-	// Cargar rutinas al iniciar
-	set(loadRoutines());
+	// Sync local to Firestore when user logs in, or load from Firestore
+	user.subscribe(async (userData) => {
+		if (userData) {
+			const remoteRoutines = await loadRoutinesFromFirestore(userData.uid);
+			if (remoteRoutines.length > 0) {
+				set(remoteRoutines);
+			} else {
+				// If no remote, sync local to remote
+				const local = loadLocalRoutines();
+				for(const r of local) {
+					await saveRoutineToFirestore(userData.uid, r);
+				}
+				set(local);
+			}
+		} else {
+			// Guest mode
+			set(loadLocalRoutines());
+		}
+	});
 
 	return {
 		subscribe,
 		
-		/**
-		 * Refrescar rutinas desde localStorage
-		 */
-		refresh: () => {
-			set(loadRoutines());
+		refresh: async () => {
+			const userData = get(user);
+			if (userData) {
+				set(await loadRoutinesFromFirestore(userData.uid));
+			} else {
+				set(loadLocalRoutines());
+			}
 		},
 		
-		/**
-		 * Guardar una nueva rutina
-		 */
-		save: (name: string, intervals: Interval[], repetitions: number) => {
-			const result = saveRoutineService(name, intervals, repetitions);
-			if (result.success) {
-				update(routines => [...routines, result.routine!]);
+		save: async (name: string, intervals: Interval[], repetitions: number) => {
+			const userData = get(user);
+			const result = saveLocalRoutine(name, intervals, repetitions);
+			
+			if (result.success && result.routine) {
+				if (userData) {
+					await saveRoutineToFirestore(userData.uid, result.routine);
+				}
+				update(routines => [result.routine!, ...routines]);
+			}
+			return result;
+		},
+
+		update: async (id: string, name: string, intervals: Interval[], repetitions: number) => {
+			const userData = get(user);
+			const result = updateLocalRoutine(id, name, intervals, repetitions);
+			
+			if (result.success && result.routine) {
+				if (userData) {
+					await updateRoutineInFirestore(userData.uid, id, result.routine);
+				}
+				update(routines => routines.map(r => r.id === id ? result.routine! : r));
 			}
 			return result;
 		},
 		
-		/**
-		 * Eliminar una rutina
-		 */
-		delete: (id: string) => {
-			const success = deleteRoutineService(id);
+		delete: async (id: string) => {
+			const userData = get(user);
+			const success = deleteLocalRoutine(id);
 			if (success) {
+				if (userData) {
+					await deleteRoutineFromFirestore(userData.uid, id);
+				}
 				update(routines => routines.filter(r => r.id !== id));
 			}
 			return success;
 		},
 		
-		/**
-		 * Cargar una rutina (devuelve la rutina encontrada)
-		 */
 		load: (id: string): SavedRoutine | undefined => {
-			const routines = loadRoutines();
+			const routines = get({ subscribe });
 			return routines.find(r => r.id === id);
 		}
 	};
@@ -58,7 +98,14 @@ function createRoutineStore() {
 
 export const routineStore = createRoutineStore();
 
-/**
- * Store derivado para estadísticas
- */
-export const routineStats = derived(routineStore, () => getStats());
+import { workoutStore } from './workoutStore';
+
+export const routineStats = derived([routineStore, workoutStore], ([$routines, $workouts]) => {
+	const totalWorkouts = $workouts.length;
+	const totalMinutes = Math.round($workouts.reduce((acc, log) => acc + (log.duration / 60), 0));
+	return {
+		totalRoutines: $routines.length,
+		totalWorkouts,
+		totalMinutes
+	};
+});

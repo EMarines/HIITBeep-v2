@@ -49,6 +49,7 @@
 	},
 	"dependencies": {
 		"@vite-pwa/sveltekit": "^1.0.0",
+		"firebase": "^12.10.0",
 		"hiitbeep": "file:../../Users/Propietario/OneDrive/AB GrupoUrbania/OneDrive/Escritorio/Web Projects/HIITBeep"
 	}
 }

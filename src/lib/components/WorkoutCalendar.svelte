@@ -1,24 +1,19 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { t } from '$lib/i18n';
-	import { loadWorkoutLogs, type WorkoutLog } from '$lib/services/routineStorage';
-	
-	let currentMonth = new Date().getMonth();
-	let currentYear = new Date().getFullYear();
-	let workoutLogs: WorkoutLog[] = [];
-	let calendarDays: Array<{ day: number; date: Date; workouts: WorkoutLog[] }> = [];
+	import { workoutStore } from '$lib/stores/workoutStore';
+	import type { WorkoutLog } from '$lib/services/routineStorage';
 	
 	const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 	const monthNamesES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-	const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+	const weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 	const weekDaysES = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+
+	let currentMonth = new Date().getMonth();
+	let currentYear = new Date().getFullYear();
+	let calendarDays: Array<{ day: number; date: Date; workouts: WorkoutLog[] }> = [];
 	
-	onMount(() => {
-		loadData();
-	});
-	
-	function loadData() {
-		workoutLogs = loadWorkoutLogs();
+	// Reactividad sobre el store de workouts
+	$: if ($workoutStore || currentMonth !== undefined || currentYear !== undefined) {
 		generateCalendar();
 	}
 	
@@ -44,15 +39,18 @@
 	}
 	
 	function getWorkoutsForDate(date: Date): WorkoutLog[] {
+		if (!$workoutStore) return [];
+		
 		// Crear fecha local a medianoche (00:00:00.000) del día especificado
 		const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
 		// Fin del día a las 23:59:59.999
 		const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
 		
-		return workoutLogs.filter(log => {
+		return $workoutStore.filter(log => {
 			return log.completedAt >= startOfDay && log.completedAt <= endOfDay;
 		});
 	}
+	
 	
 	function previousMonth() {
 		if (currentMonth === 0) {

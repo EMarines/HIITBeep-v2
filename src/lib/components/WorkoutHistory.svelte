@@ -1,33 +1,28 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { t } from '$lib/i18n';
-	import { loadWorkoutLogs, type WorkoutLog } from '$lib/services/routineStorage';
+	import { workoutStore } from '$lib/stores/workoutStore';
+	import { type WorkoutLog } from '$lib/services/routineStorage';
 	import WorkoutCalendar from './WorkoutCalendar.svelte';
 	
 	const dispatch = createEventDispatcher();
 	
-	let workoutLogs: WorkoutLog[] = [];
 	let groupedByDate: Map<string, WorkoutLog[]> = new Map();
 	let totalWorkouts = 0;
 	let totalMinutes = 0;
 	let currentStreak = 0;
 	let longestStreak = 0;
 	
-	onMount(() => {
-		loadData();
-	});
-	
-	function loadData() {
-		workoutLogs = loadWorkoutLogs();
-		groupWorkoutsByDate();
-		calculateStats();
+	// Reactividad sobre el store de workouts
+	$: if ($workoutStore) {
+		groupWorkoutsByDate($workoutStore);
+		calculateStats($workoutStore);
 	}
 	
-	function groupWorkoutsByDate() {
+	function groupWorkoutsByDate(logs: WorkoutLog[]) {
 		groupedByDate = new Map();
 		
-		// Ordenar por fecha más reciente primero
-		const sorted = [...workoutLogs].sort((a, b) => b.completedAt - a.completedAt);
+		const sorted = [...logs].sort((a, b) => b.completedAt - a.completedAt);
 		
 		sorted.forEach(log => {
 			const date = new Date(log.completedAt);
@@ -44,19 +39,19 @@
 		});
 	}
 	
-	function calculateStats() {
-		totalWorkouts = workoutLogs.length;
-		totalMinutes = Math.round(workoutLogs.reduce((acc, log) => acc + (log.duration / 60), 0));
+	function calculateStats(logs: WorkoutLog[]) {
+		totalWorkouts = logs.length;
+		totalMinutes = Math.round(logs.reduce((acc, log) => acc + (log.duration / 60), 0));
 		
 		// Calcular rachas
-		if (workoutLogs.length === 0) {
+		if (logs.length === 0) {
 			currentStreak = 0;
 			longestStreak = 0;
 			return;
 		}
 		
 		// Ordenar por fecha
-		const sorted = [...workoutLogs].sort((a, b) => a.completedAt - b.completedAt);
+		const sorted = [...logs].sort((a, b) => a.completedAt - b.completedAt);
 		
 		// Agrupar por días únicos
 		const uniqueDays = new Set<string>();

@@ -2,21 +2,25 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { t } from '$lib/i18n';
 	import { loadRoutines, loadWorkoutLogs } from '$lib/services/routineStorage';
+	import { user } from '$lib/stores/userStore';
 	import LanguageSelector from './LanguageSelector.svelte';
+	import AuthModal from './AuthModal.svelte';
+	import { routineStats } from '$lib/stores/routineStore';
 	
 	const dispatch = createEventDispatcher();
 	
-	let routineCount = 0;
-	let workoutCount = 0;
 	let animate = false;
+	let showAuthModal = false;
+
+	function toggleAuthModal() {
+		showAuthModal = !showAuthModal;
+	}
+
+	function handleLogin() {
+		toggleAuthModal();
+	}
 	
 	onMount(() => {
-		// Cargar contadores
-		const routines = loadRoutines();
-		const workouts = loadWorkoutLogs();
-		routineCount = routines.length;
-		workoutCount = workouts.length;
-		
 		// Activar animación
 		setTimeout(() => {
 			animate = true;
@@ -36,7 +40,39 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center p-6">
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex flex-col items-center justify-center p-6">
+	<!-- Top Bar / User Profile -->
+	<div class="max-w-md w-full flex justify-between items-center mb-8 px-2">
+		<LanguageSelector />
+		
+		{#if $user}
+			<div class="flex items-center gap-3 bg-white/10 rounded-full pl-1 pr-4 py-1 backdrop-blur-sm border border-white/10">
+				{#if $user.photoURL}
+					<img src={$user.photoURL} alt={$user.displayName} class="w-8 h-8 rounded-full border border-white/20" />
+				{:else}
+					<div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold text-white border border-white/20">
+						{($user.displayName || $user.email || 'U').substring(0, 2).toUpperCase()}
+					</div>
+				{/if}
+				<div class="flex flex-col">
+					<span class="text-xs text-white/90 font-medium truncate max-w-[100px]">{$user.displayName || $user.email}</span>
+					<button on:click={user.logout} class="text-[10px] text-blue-300 hover:text-white text-left">Log out</button>
+				</div>
+			</div>
+		{:else}
+			<button 
+				on:click={handleLogin}
+				class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-medium text-white transition-all backdrop-blur-sm border border-white/20 flex items-center gap-2"
+			>
+				<span>👤</span> Login
+			</button>
+		{/if}
+	</div>
+
+	{#if showAuthModal}
+		<AuthModal on:close={toggleAuthModal} />
+	{/if}
+
 	<div class="max-w-md w-full">
 		<!-- Logo animado -->
 		<div class="text-center mb-4" class:animate={animate}>
@@ -117,7 +153,7 @@
 					<div class="flex-1 text-left">
 						<h3 class="text-2xl font-bold text-white">{$t('dashboard.my_routines')}</h3>
 						<p class="text-green-100 text-sm">
-							{routineCount} {routineCount === 1 ? $t('dashboard.routine_saved') : $t('dashboard.routines_saved')}
+							{$routineStats.totalRoutines} {$routineStats.totalRoutines === 1 ? $t('dashboard.routine_saved') : $t('dashboard.routines_saved')}
 						</p>
 					</div>
 					<div class="text-white text-2xl opacity-50">→</div>
@@ -136,7 +172,7 @@
 					<div class="flex-1 text-left">
 						<h3 class="text-2xl font-bold text-white">{$t('dashboard.history')}</h3>
 						<p class="text-purple-100 text-sm">
-							{workoutCount} {workoutCount === 1 ? $t('dashboard.workout_completed') : $t('dashboard.workouts_completed')}
+							{$routineStats.totalWorkouts} {$routineStats.totalWorkouts === 1 ? $t('dashboard.workout_completed') : $t('dashboard.workouts_completed')}
 						</p>
 					</div>
 					<div class="text-white text-2xl opacity-50">→</div>
@@ -144,10 +180,6 @@
 			</button>
 		</div>
 		
-		<!-- Selector de Idioma -->
-		<div class="flex justify-center pt-4">
-			<LanguageSelector />
-		</div>
 	</div>
 </div>
 
