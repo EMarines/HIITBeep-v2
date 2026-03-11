@@ -56,6 +56,23 @@
 	function getIntervalCount(routine: SavedRoutine): number {
 		return routine.intervals ? routine.intervals.filter(i => i.type !== 'repeat').length : 0;
 	}
+
+	function formatTime(seconds: number): string {
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+	}
+
+	function calculateTotalRoutineTime(routine: SavedRoutine): number {
+		if (!routine.intervals || routine.intervals.length === 0) return 0;
+		const totalSeconds = routine.intervals.reduce((acc, interval) => {
+			if (interval.type === 'repeat') return acc + 2;
+			if (interval.type === 'weights') return acc + ((interval.restTime || 0) * ((interval.sets || 1) - 1));
+			return acc + (interval.duration || 0) + (interval.prepDuration || 0) + (interval.restDuration || 0);
+		}, 0) * (routine.repetitions || 1);
+		
+		return totalSeconds;
+	}
 </script>
 
 <div class="min-h-screen bg-[#05070a] text-white p-6 relative">
@@ -101,7 +118,7 @@
 								{routine.name}
 							</h4>
 							<p class="text-sm text-gray-400">
-								{getIntervalCount(routine)} {$t('routines.intervals')} • {routine.repetitions} {$t('routines.repetitions')}
+								{getIntervalCount(routine)} {$t('routines.intervals')} • {routine.repetitions} {$t('routines.repetitions')} • {formatTime(calculateTotalRoutineTime(routine))}
 							</p>
 							<p class="text-[10px] text-gray-500 mt-2 font-medium uppercase tracking-wider">
 								{routine.lastUsed ? `${$t('routines.last_used')}: ${formatDate(routine.lastUsed)}` : formatDate(routine.createdAt)}
