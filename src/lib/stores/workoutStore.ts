@@ -3,6 +3,7 @@ import { user } from './userStore';
 import {
 	loadWorkoutLogs as loadLocalLogs,
 	logWorkout as logLocalWorkout,
+	saveAllWorkoutLogs,
 	type WorkoutLog
 } from '$lib/services/routineStorage';
 import { 
@@ -18,6 +19,7 @@ function createWorkoutStore() {
 		if (userData) {
 			const remoteLogs = await loadWorkoutLogsFromFirestore(userData.uid);
 			if (remoteLogs.length > 0) {
+				saveAllWorkoutLogs(remoteLogs); // Sync logs to local storage
 				set(remoteLogs);
 			} else {
 				// Optional: sync local logs to remote if remote is empty
@@ -55,7 +57,9 @@ function createWorkoutStore() {
 		refresh: async () => {
 			const userData = get(user);
 			if (userData) {
-				set(await loadWorkoutLogsFromFirestore(userData.uid));
+				const remoteLogs = await loadWorkoutLogsFromFirestore(userData.uid);
+				saveAllWorkoutLogs(remoteLogs);
+				set(remoteLogs);
 			} else {
 				set(loadLocalLogs());
 			}

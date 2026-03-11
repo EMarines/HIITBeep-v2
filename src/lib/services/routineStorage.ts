@@ -66,6 +66,18 @@ export function saveRoutine(name: string, intervals: Interval[], repetitions: nu
 }
 
 /**
+ * Guardar todas las rutinas (sobrescribe todo, útil para sincronizar desde remoto)
+ */
+export function saveAllRoutines(routines: SavedRoutine[]): void {
+	try {
+		localStorage.setItem(STORAGE_KEY_ROUTINES, JSON.stringify(routines));
+	} catch (error) {
+		console.error('Error guardando rutinas:', error);
+	}
+}
+
+
+/**
  * Actualizar una rutina existente
  */
 export function updateRoutine(id: string, name: string, intervals: Interval[], repetitions: number): { success: boolean; error?: string; routine?: SavedRoutine } {
@@ -187,6 +199,17 @@ export function loadWorkoutLogs(): WorkoutLog[] {
 	} catch (error) {
 		console.error('Error cargando historial:', error);
 		return [];
+	}
+}
+
+/**
+ * Guardar todo el historial (sobrescribe todo, útil para sincronizar desde remoto)
+ */
+export function saveAllWorkoutLogs(logs: WorkoutLog[]): void {
+	try {
+		localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
+	} catch (error) {
+		console.error('Error guardando historial:', error);
 	}
 }
 

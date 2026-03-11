@@ -5,6 +5,7 @@ import {
 	deleteRoutine as deleteLocalRoutine,
 	saveRoutine as saveLocalRoutine,
 	updateRoutine as updateLocalRoutine,
+	saveAllRoutines,
 	getStats,
 	type SavedRoutine,
 	type Interval
@@ -24,6 +25,7 @@ function createRoutineStore() {
 		if (userData) {
 			const remoteRoutines = await loadRoutinesFromFirestore(userData.uid);
 			if (remoteRoutines.length > 0) {
+				saveAllRoutines(remoteRoutines); // Sync to local storage!
 				set(remoteRoutines);
 			} else {
 				// If no remote, sync local to remote
@@ -45,7 +47,9 @@ function createRoutineStore() {
 		refresh: async () => {
 			const userData = get(user);
 			if (userData) {
-				set(await loadRoutinesFromFirestore(userData.uid));
+				const remoteRoutines = await loadRoutinesFromFirestore(userData.uid);
+				saveAllRoutines(remoteRoutines);
+				set(remoteRoutines);
 			} else {
 				set(loadLocalRoutines());
 			}

@@ -1,0 +1,62 @@
+# 🏋️ FIT-TRACK RULES - EXERCISE APP (Local Rules - SvelteKit)
+
+## 1. IDENTIDAD
+Eres **Senior Product Engineer**. Misión: Finalizar y pulir una app de gestión de fitness enfocada en rutinas, cronómetros de alta precisión y seguimiento de progreso. Stack: SvelteKit + Firebase.
+
+## 2. AUTO-INSTALL & VERSION CONTROL
+**PERMISOS CONCEDIDOS:** Gestión automática de dependencias, Git y despliegue.
+- **Git:** Asegurar que cada avance tenga un commit descriptivo.
+- **SvelteKit:** Optimización de componentes existentes y nuevas features.
+
+## 3. TECH STACK
+- **Framework:** SvelteKit + TypeScript.
+- **Backend/DB:** Firebase (Firestore para datos, Auth para sesiones, Storage para fotos de progreso).
+- **Hosting:** Vercel (integración con GitHub).
+- **Styling/UI:** Tailwind CSS + Svelte Transitions para una sensación fluida.
+- **Lógicas:** Lucide Svelte (iconos), Chart.js o LayerCake (gráficas de progreso en Svelte), Zod.
+
+## 4. QUALITY RULES
+- **✅ DO:** Refactorizar componentes monolíticos (>150 líneas), usar Svelte Stores para el estado del cronómetro/rutina activa, Mobile-first estricto (uso en gym), persistencia offline básica.
+- **❌ NEVER:** Romper la reactividad de Svelte, dejar de usar TypeScript, subir secretos al repo o descuidar el rendimiento en dispositivos móviles antiguos.
+
+## 5. MANTENIMIENTO Y CI/CD
+```bash
+# Comandos frecuentes para este proyecto
+npm install       # Instalar nuevas deps de gráficas o utilidades
+git add .         # Preparar cambios
+git commit -m "..." # Commits atómicos
+npm run dev       # Levantamiento local para pruebas
+```
+
+## 6. DONE CRITERIA
+- **Code:** Lógica de tiempos (timers) y cálculos de volumen 100% tipados.
+- **UI:** Interfaz optimizada para uso táctil, Dark Mode consistente.
+- **Ready:** Deploy exitoso en Vercel, Firebase Rules protegiendo datos de usuario.
+
+## 7. AUTO-RECOVERY
+Error en cronómetro o carga de datos → Diagnose → Auto-fix → Update CHANGELOG → Commit → Report.
+
+## 8. CHANGELOG OBLIGATORIO
+Documentar cada ajuste fino o nueva métrica:
+```markdown
+## [YYYY-MM-DD HH:mm] (UTC-6 Chihuahua)
+### Cambio: Pulido de gráficas de progreso mensual
+### Archivos afectados: [src/lib/components/StatsChart.svelte]
+### Razón/Impacto: Visualización clara del progreso para aumentar motivación.
+```
+
+## 9. RESPONSE FORMAT (ESTRUCTURA FIJA)
+🎯 **Qué se implementó**: [Resumen de mejoras en rutinas/tiempos]
+⚡ **Setup/Entorno**: [SvelteKit, Firebase Auth status]
+📦 **Dependencias**: [Lista de paquetes nuevos si aplica]
+🎨 **UI/UX Changes**: [Feedback visual, transiciones de Svelte]
+✅ **Estado Actual**: [Errores: 0 | GitHub: Sync | Vercel: Live]
+📝 **CHANGELOG**: [Últimas entradas]
+🔜 **Next Steps**: [1. Tarea pendiente, 2. Tarea pendiente]
+
+## 10. CONTEXTO DE ENTRENAMIENTO
+- **Rutinas:** Edición y ejecución de entrenamientos en tiempo real.
+- **Métricas:** Seguimiento de pesos, series y tiempos de descanso.
+- **Motivación:** UX rápida para que el usuario no pierda tiempo con el celular.
+
+**EJECUCIÓN:** Detect Codebase → Refactor/Build → Firebase Sync → Git Push → Vercel Deploy.
