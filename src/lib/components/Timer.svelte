@@ -25,6 +25,7 @@
 	let isCompleted = false; // Nueva variable para indicar rutina completada
 	let timer: number;
 	let audioContext: AudioContext | null = null;
+	let wakeLock: any = null;
 	let repeatMarkersExecuted: Map<number, number> = new Map(); // Controla cuántas veces se ha ejecutado cada marcador
 	let lastBeepTime = 0; // Para trackear beeps cada 10 segundos
 	let currentStage: 'preparation' | 'exercise' | 'rest' = 'exercise';
@@ -91,12 +92,49 @@
 			startTimer();
 			initAudio();
 		}
+		
+		if (browser) {
+			document.addEventListener('visibilitychange', handleVisibilityChange);
+		}
 	});
 	
 	onDestroy(() => {
 		if (timer) clearInterval(timer);
 		if (audioContext) audioContext.close();
+		releaseWakeLock();
+		if (browser) {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		}
 	});
+
+	async function requestWakeLock() {
+		if (browser && 'wakeLock' in navigator) {
+			try {
+				wakeLock = await (navigator as any).wakeLock.request('screen');
+				wakeLock.addEventListener('release', () => {
+					console.log('Screen Wake Lock released');
+				});
+				console.log('Screen Wake Lock acquired');
+			} catch (err: any) {
+				console.error(`${err.name}, ${err.message}`);
+			}
+		}
+	}
+
+	function releaseWakeLock() {
+		if (wakeLock !== null) {
+			wakeLock.release()
+				.then(() => {
+					wakeLock = null;
+				});
+		}
+	}
+
+	async function handleVisibilityChange() {
+		if (wakeLock !== null && document.visibilityState === 'visible' && isRunning && !isPaused && !isCompleted) {
+			await requestWakeLock();
+		}
+	}
 	
 	function initAudio() {
 		if (browser) {
@@ -197,6 +235,7 @@
 									// Rutina completada
 									isRunning = false;
 									isCompleted = true;
+									releaseWakeLock();
 									
 									// Calcular duración total del workout en segundos
 									totalWorkoutDuration = Math.floor((Date.now() - workoutStartTime) / 1000);
@@ -383,6 +422,7 @@
 				isRunning = false;
 				isCompleted = true;
 				clearInterval(timer);
+				releaseWakeLock();
 				
 				// Calcular duración total del workout en segundos
 				totalWorkoutDuration = Math.floor((Date.now() - workoutStartTime) / 1000);
@@ -439,6 +479,7 @@
 		// Inicializar primer intervalo después de beeps
 		setTimeout(() => {
 			initializeInterval();
+			requestWakeLock();
 		}, 1000);
 	}
 	
@@ -448,6 +489,11 @@
 		}
 		
 		isPaused = !isPaused;
+		if (isPaused) {
+			releaseWakeLock();
+		} else {
+			requestWakeLock();
+		}
 		playBeep(isPaused ? 500 : 800, 150);
 	}
 	
@@ -455,6 +501,7 @@
 		isRunning = false;
 		isPaused = false;
 		if (timer) clearInterval(timer);
+		releaseWakeLock();
 		dispatch('back');
 	}
 	
