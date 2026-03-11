@@ -11,10 +11,8 @@ import {
 	type Interval
 } from '$lib/services/routineStorage';
 import { 
-	saveRoutineToFirestore, 
-	updateRoutineInFirestore, 
-	deleteRoutineFromFirestore, 
-	loadRoutinesFromFirestore 
+	syncRoutinesToFirestore, 
+	loadUserDataFromFirestore 
 } from '$lib/services/firestoreService';
 
 function createRoutineStore() {
@@ -23,16 +21,14 @@ function createRoutineStore() {
 	// Sync local to Firestore when user logs in, or load from Firestore
 	user.subscribe(async (userData) => {
 		if (userData) {
-			const remoteRoutines = await loadRoutinesFromFirestore(userData.uid);
-			if (remoteRoutines.length > 0) {
-				saveAllRoutines(remoteRoutines); // Sync to local storage!
-				set(remoteRoutines);
+			const data = await loadUserDataFromFirestore(userData.uid);
+			if (data.routines.length > 0) {
+				saveAllRoutines(data.routines); // Sync to local storage!
+				set(data.routines);
 			} else {
 				// If no remote, sync local to remote
 				const local = loadLocalRoutines();
-				for(const r of local) {
-					await saveRoutineToFirestore(userData.uid, r);
-				}
+				if (local.length > 0) await syncRoutinesToFirestore(userData.uid, local);
 				set(local);
 			}
 		} else {
@@ -47,9 +43,9 @@ function createRoutineStore() {
 		refresh: async () => {
 			const userData = get(user);
 			if (userData) {
-				const remoteRoutines = await loadRoutinesFromFirestore(userData.uid);
-				saveAllRoutines(remoteRoutines);
-				set(remoteRoutines);
+				const data = await loadUserDataFromFirestore(userData.uid, true);
+				saveAllRoutines(data.routines);
+				set(data.routines);
 			} else {
 				set(loadLocalRoutines());
 			}
@@ -60,8 +56,9 @@ function createRoutineStore() {
 			const result = saveLocalRoutine(name, intervals, repetitions);
 			
 			if (result.success && result.routine) {
+				const currentLocal = loadLocalRoutines();
 				if (userData) {
-					await saveRoutineToFirestore(userData.uid, result.routine);
+					await syncRoutinesToFirestore(userData.uid, currentLocal);
 				}
 				update(routines => [result.routine!, ...routines]);
 			}
@@ -73,8 +70,9 @@ function createRoutineStore() {
 			const result = updateLocalRoutine(id, name, intervals, repetitions);
 			
 			if (result.success && result.routine) {
+				const currentLocal = loadLocalRoutines();
 				if (userData) {
-					await updateRoutineInFirestore(userData.uid, id, result.routine);
+					await syncRoutinesToFirestore(userData.uid, currentLocal);
 				}
 				update(routines => routines.map(r => r.id === id ? result.routine! : r));
 			}
@@ -85,8 +83,9 @@ function createRoutineStore() {
 			const userData = get(user);
 			const success = deleteLocalRoutine(id);
 			if (success) {
+				const currentLocal = loadLocalRoutines();
 				if (userData) {
-					await deleteRoutineFromFirestore(userData.uid, id);
+					await syncRoutinesToFirestore(userData.uid, currentLocal);
 				}
 				update(routines => routines.filter(r => r.id !== id));
 			}

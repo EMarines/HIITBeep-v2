@@ -7,8 +7,8 @@ import {
 	type WorkoutLog
 } from '$lib/services/routineStorage';
 import { 
-	logWorkoutToFirestore,
-	loadWorkoutLogsFromFirestore 
+	syncLogsToFirestore,
+	loadUserDataFromFirestore 
 } from '$lib/services/firestoreService';
 
 function createWorkoutStore() {
@@ -17,16 +17,14 @@ function createWorkoutStore() {
 	// Sync or load from Firestore when user changes
 	user.subscribe(async (userData) => {
 		if (userData) {
-			const remoteLogs = await loadWorkoutLogsFromFirestore(userData.uid);
-			if (remoteLogs.length > 0) {
-				saveAllWorkoutLogs(remoteLogs); // Sync logs to local storage
-				set(remoteLogs);
+			const data = await loadUserDataFromFirestore(userData.uid);
+			if (data.logs.length > 0) {
+				saveAllWorkoutLogs(data.logs); // Sync logs to local storage
+				set(data.logs);
 			} else {
 				// Optional: sync local logs to remote if remote is empty
 				const local = loadLocalLogs();
-				for(const log of local) {
-					await logWorkoutToFirestore(userData.uid, log);
-				}
+				if (local.length > 0) await syncLogsToFirestore(userData.uid, local);
 				set(local);
 			}
 		} else {
@@ -43,23 +41,22 @@ function createWorkoutStore() {
 			// Always log locally first
 			logLocalWorkout(routineId, routineName, duration, repetitionsCompleted);
 			
-			// Get the last log created (local logs are unshifted)
-			const localLogs = loadLocalLogs();
-			const newLog = localLogs[0];
-			
-			if (userData && newLog) {
-				await logWorkoutToFirestore(userData.uid, newLog);
+			// Get the local logs (which now includes the new one)
+			const currentLocal = loadLocalLogs();
+			if (userData) {
+				await syncLogsToFirestore(userData.uid, currentLocal);
 			}
 			
+			const newLog = currentLocal[0];
 			update(logs => [newLog, ...logs].slice(0, 100));
 		},
 
 		refresh: async () => {
 			const userData = get(user);
 			if (userData) {
-				const remoteLogs = await loadWorkoutLogsFromFirestore(userData.uid);
-				saveAllWorkoutLogs(remoteLogs);
-				set(remoteLogs);
+				const data = await loadUserDataFromFirestore(userData.uid, true);
+				saveAllWorkoutLogs(data.logs);
+				set(data.logs);
 			} else {
 				set(loadLocalLogs());
 			}
