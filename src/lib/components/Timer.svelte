@@ -43,6 +43,13 @@
 	let isWaitingForTap = false; // Esperando que el usuario toque para iniciar descanso
 	let isRestingWeights = false; // En descanso de pesas
 	
+	// Variable reactiva para el "brillo" falso
+	$: isDimmed = !isCompleted && isRunning && (
+		currentStage === 'rest' || 
+		isWaitingForTap || 
+		isRestingWeights
+	);
+	
 	// Validar que repeticiones sea al menos 1
 	$: if (repetitions < 1) repetitions = 1;
 	
@@ -519,8 +526,14 @@
 
 </script>
 
-<div class="min-h-screen flex flex-col items-center justify-center p-8 transition-all duration-1000" style="background-color: {backgroundColor}">
-	<div class="text-center text-white">
+<div class="min-h-screen flex flex-col items-center justify-center p-8 transition-colors duration-1000 relative overflow-hidden" style="background-color: {backgroundColor}">
+	<!-- Overlay para simular bajo brillo de pantalla en modo descanso -->
+	<div 
+		class="absolute inset-0 bg-black pointer-events-none transition-opacity duration-1000 z-0"
+		style="opacity: {isDimmed ? '0.75' : '0'};"
+	></div>
+
+	<div class="text-center text-white relative z-10 w-full max-w-md">
 		<!-- Nombre del intervalo actual -->
 		<h1 class="text-3xl font-light mb-8" style="text-shadow: 0 0 10px rgba(0, 0, 0, 1), 2px 2px 8px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(0, 0, 0, 0.8)">
 			{#if currentInterval && currentInterval.type === 'weights'}
