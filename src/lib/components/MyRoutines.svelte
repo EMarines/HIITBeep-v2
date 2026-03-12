@@ -78,16 +78,19 @@
 <div class="min-h-screen bg-[#05070a] text-white p-6 relative">
 	<div class="max-w-md mx-auto">
 		<!-- Header -->
-		<div class="flex items-center mb-8 relative">
+		<div class="flex items-center mb-8 relative justify-center">
 			<button
 				on:click={goBack}
 				class="w-10 h-10 flex items-center justify-center bg-gray-800/50 hover:bg-gray-700/50 rounded-lg text-white transition-all shadow-lg border border-white/5 absolute left-0"
 			>
 				←
 			</button>
-			<h1 class="text-3xl font-semibold tracking-tight w-full text-center" style="text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-				{$t('routines.my_routines')}
-			</h1>
+			<div class="flex items-center gap-3">
+				<img src="/logo.png" alt="HiitBeep Logo" class="w-8 h-8 object-contain drop-shadow-md" />
+				<h1 class="text-3xl font-semibold tracking-tight text-center" style="text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+					{$t('routines.my_routines')}
+				</h1>
+			</div>
 		</div>
 		
 		<!-- Stats Card -->

@@ -147,8 +147,9 @@
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
 					</svg>
 				</button>
+				<img src="/logo.png" alt="HiitBeep Logo" class="w-10 h-10 object-contain drop-shadow-md" />
 				<h1 class="text-3xl font-bold" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">
-					📊 {$t('history.title')}
+					{$t('history.title')}
 				</h1>
 			</div>
 		</div>

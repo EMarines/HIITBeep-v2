@@ -533,7 +533,10 @@
 		style="opacity: {isDimmed ? '0.75' : '0'};"
 	></div>
 
-	<div class="text-center text-white relative z-10 w-full max-w-md">
+	<div class="text-center text-white relative z-10 w-full max-w-md flex flex-col items-center">
+		<!-- Logo -->
+		<img src="/logo.png" alt="HiitBeep Logo" class="w-16 h-16 mb-4 object-contain drop-shadow-lg opacity-90" />
+		
 		<!-- Nombre del intervalo actual -->
 		<h1 class="text-3xl font-light mb-8" style="text-shadow: 0 0 10px rgba(0, 0, 0, 1), 2px 2px 8px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(0, 0, 0, 0.8)">
 			{#if currentInterval && currentInterval.type === 'weights'}

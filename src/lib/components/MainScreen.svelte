@@ -93,7 +93,10 @@
 <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-900 text-white">
     <div class="max-w-md w-full">
         <div class="flex items-center justify-between mb-6">
-            <h1 class="text-4xl font-bold" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{$t('app.title')}</h1>
+            <div class="flex items-center gap-4">
+                <img src="/logo.png" alt="HiitBeep Logo" class="w-12 h-12 object-contain drop-shadow-md" />
+                <h1 class="text-4xl font-bold" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{$t('app.title')}</h1>
+            </div>
         </div>
         
         <!-- Botones de navegación -->

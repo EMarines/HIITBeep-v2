@@ -172,9 +172,12 @@
 <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
 	<div class="bg-gray-900 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
 		<!-- Header del modal -->
-		<div class="sticky top-0 bg-gray-900 border-b border-gray-700 p-4 rounded-t-lg">
+		<div class="sticky top-0 bg-gray-900 border-b border-gray-700 p-4 rounded-t-lg z-10">
 			<div class="flex items-center justify-between">
-				<h2 class="text-2xl font-bold text-white">{$t('settings.title')}</h2>
+				<div class="flex items-center gap-3">
+					<img src="/logo.png" alt="HiitBeep Logo" class="w-8 h-8 object-contain drop-shadow-md" />
+					<h2 class="text-2xl font-bold text-white">{$t('settings.title')}</h2>
+				</div>
 				<div class="flex items-center gap-3">
 					<button 
 						on:click={openPreferences}
