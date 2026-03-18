@@ -705,10 +705,17 @@
 			
 			<button
 				on:click={stopTimer}
-				class="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-full text-white font-medium transition-colors backdrop-blur-sm"
+				class="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-full text-white font-medium transition-all backdrop-blur-sm flex items-center gap-2"
 				style="text-shadow: 0 0 6px rgba(0, 0, 0, 1), 1px 1px 4px rgba(0, 0, 0, 0.9);"
 			>
-				{isRunning ? `⏹️ ${$t('timer.stop')}` : `← ${$t('common.back')}`}
+				{#if isRunning}
+					<span>⏹️ {$t('timer.stop')}</span>
+				{:else}
+					<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M15 18l-6-6 6-6"/>
+					</svg>
+					<span>{$t('common.back')}</span>
+				{/if}
 			</button>
 		</div>
 		

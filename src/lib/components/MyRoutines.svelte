@@ -67,7 +67,11 @@
 	<!-- Header -->
 	<header class="mr-header">
 		<div class="mr-header-inner">
-			<button class="hb-back-btn" on:click={goBack} aria-label="Volver">←</button>
+			<button class="hb-back-btn" on:click={goBack} aria-label="Volver">
+				<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M15 18l-6-6 6-6"/>
+				</svg>
+			</button>
 			<div class="mr-title-area">
 				<img src="/logo.png" alt="HIITBeep" class="mr-logo" />
 				<h1 class="mr-title">{$t('routines.my_routines')}</h1>
@@ -182,6 +186,22 @@
 .mr-title-area { display: flex; align-items: center; gap: 0.5rem; }
 .mr-logo { width: 26px; height: 26px; object-fit: contain; }
 .mr-title { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); }
+
+.hb-back-btn {
+	width: 38px; height: 38px;
+	background: var(--bg-card-alt); border: 1.5px solid var(--border-card);
+	border-radius: 12px; color: var(--text-primary);
+	display: flex; align-items: center; justify-content: center;
+	cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	flex-shrink: 0;
+}
+.hb-back-btn:hover {
+	background: rgba(255,255,255,0.08);
+	border-color: var(--text-muted);
+	transform: translateX(-3px);
+	box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.hb-back-btn:active { transform: scale(0.92) translateX(-3px); }
 
 /* Content */
 .mr-content {

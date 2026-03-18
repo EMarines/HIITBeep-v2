@@ -136,12 +136,21 @@
 		<!-- Sticky Header -->
 		<div class="sm-header">
 			<div class="sm-header-left">
+				<button class="sm-back-btn" on:click={cancelConfiguration} aria-label="Volver">
+					<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M15 18l-6-6 6-6"/>
+					</svg>
+				</button>
 				<img src="/logo.png" alt="HIITBeep" class="sm-logo" />
 				<h2 class="sm-title">{$t('settings.title')}</h2>
 			</div>
 			<div class="sm-header-right">
-				<button class="sm-icon-btn" on:click={openPreferences} title={$t('preferences.title')}>🔧</button>
-				<button class="sm-icon-btn sm-close-btn" on:click={cancelConfiguration} aria-label="Cerrar">✕</button>
+				<button class="sm-icon-btn" on:click={openPreferences} title={$t('preferences.title')} aria-label={$t('preferences.title')}>
+					<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="3"></circle>
+						<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+					</svg>
+				</button>
 			</div>
 		</div>
 
@@ -455,16 +464,30 @@
 .sm-title { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); }
 .sm-header-right { display: flex; align-items: center; gap: 0.4rem; }
 .sm-icon-btn {
-	width: 34px; height: 34px;
-	background: var(--bg-card-alt); border: 1px solid var(--border-card);
-	border-radius: var(--radius-sm);
+	width: 38px; height: 38px;
+	background: var(--bg-card-alt); border: 1.5px solid var(--border-card);
+	border-radius: 12px;
 	display: flex; align-items: center; justify-content: center;
 	font-size: 0.95rem; cursor: pointer; color: var(--text-secondary);
-	transition: all 0.2s;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.sm-icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
-.sm-close-btn { font-size: 0.8rem; font-weight: 700; }
-.sm-close-btn:hover { color: var(--accent-red); }
+.sm-icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); border-color: var(--text-muted); }
+
+.sm-back-btn {
+	width: 38px; height: 38px;
+	background: var(--bg-card-alt); border: 1.5px solid var(--border-card);
+	border-radius: 12px; color: var(--text-primary);
+	display: flex; align-items: center; justify-content: center;
+	cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	flex-shrink: 0;
+}
+.sm-back-btn:hover {
+	background: rgba(255,255,255,0.08);
+	border-color: var(--text-muted);
+	transform: translateX(-3px);
+	box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.sm-back-btn:active { transform: scale(0.92) translateX(-3px); }
 
 /* ── Body (scrollable) ── */
 .sm-body {
