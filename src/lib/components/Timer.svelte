@@ -535,7 +535,7 @@
 
 	<div class="text-center text-white relative z-10 w-full max-w-md flex flex-col items-center">
 		<!-- Logo -->
-		<img src="/logo.png" alt="HiitBeep Logo" class="w-16 h-16 mb-4 object-contain drop-shadow-lg opacity-90" />
+		<img src="/logo.png" alt="HiitBeep Logo" class="opacity-90" style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 1.5rem; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));" />
 		
 		<!-- Nombre del intervalo actual -->
 		<h1 class="text-3xl font-light mb-8" style="text-shadow: 0 0 10px rgba(0, 0, 0, 1), 2px 2px 8px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(0, 0, 0, 0.8)">
