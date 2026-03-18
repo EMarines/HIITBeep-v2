@@ -3,25 +3,57 @@
 	import { t } from '$lib/i18n';
 	import { loadRoutines, loadWorkoutLogs } from '$lib/services/routineStorage';
 	import { user } from '$lib/stores/userStore';
-	import LanguageSelector from './LanguageSelector.svelte';
+	import { userProfile } from '$lib/stores/userProfileStore';
 	import AuthModal from './AuthModal.svelte';
+	import ProfileModal from './ProfileModal.svelte';
 	import { routineStats } from '$lib/stores/routineStore';
 	
 	const dispatch = createEventDispatcher();
 	
 	let animate = false;
 	let showAuthModal = false;
+	let showUserMenu = false;
+	let showProfileModal = false;
+	let profileInitialTab: 'profile' | 'settings' = 'profile';
 
 	function toggleAuthModal() {
 		showAuthModal = !showAuthModal;
 	}
 
+	function toggleUserMenu() {
+		showUserMenu = !showUserMenu;
+	}
+
+	function closeUserMenu() {
+		showUserMenu = false;
+	}
+
+	function openProfile() {
+		profileInitialTab = 'profile';
+		showProfileModal = true;
+		showUserMenu = false;
+	}
+
+	function openPreferences() {
+		profileInitialTab = 'settings';
+		showProfileModal = true;
+		showUserMenu = false;
+	}
+
+	function closeProfileModal() {
+		showProfileModal = false;
+	}
+
 	function handleLogin() {
 		toggleAuthModal();
 	}
+
+	async function handleLogout() {
+		showUserMenu = false;
+		await user.logout();
+	}
 	
 	onMount(() => {
-		// Activar animación
 		setTimeout(() => {
 			animate = true;
 		}, 100);
@@ -46,29 +78,105 @@
 	<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full"></div>
 
 	<!-- Top Bar / User Profile -->
-	<div class="max-w-md w-full flex justify-between items-center mb-12 px-2 z-10">
-		<LanguageSelector />
+	<div class="max-w-md w-full flex justify-end items-center mb-12 px-2 z-10">
 		
 		{#if $user}
-			<div class="flex items-center gap-3 bg-white/10 rounded-full pl-1 pr-4 py-1 backdrop-blur-sm border border-white/10">
-				{#if $user.photoURL}
-					<img src={$user.photoURL} alt={$user.displayName} class="w-8 h-8 rounded-full border border-white/20" />
-				{:else}
-					<div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold text-white border border-white/20">
-						{($user.displayName || $user.email || 'U').substring(0, 2).toUpperCase()}
+			<div class="relative">
+				<!-- Avatar Button -->
+				<button on:click={toggleUserMenu} class="flex items-center gap-3 bg-white/10 hover:bg-white/15 transition-all duration-300 rounded-full pl-1.5 pr-4 py-1.5 backdrop-blur-md border border-white/10 cursor-pointer shadow-lg hover:shadow-blue-500/20 hover:border-white/20">
+					{#if $user.photoURL}
+						<img src={$user.photoURL} alt={$userProfile.username || $user.displayName} class="w-9 h-9 rounded-full border-2 border-blue-500/50 shadow-md" />
+					{:else}
+						<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-purple-500 flex items-center justify-center text-xs font-bold text-white border-2 border-white/20 shadow-md">
+							{($userProfile.username || $user.displayName || $user.email || 'U').substring(0, 2).toUpperCase()}
+						</div>
+					{/if}
+					<div class="flex flex-col items-start text-left">
+						<span class="text-xs text-white/90 font-medium truncate max-w-[120px]">{$userProfile.username || $user.displayName || $user.email}</span>
+						<span class="text-[9px] text-blue-300/60 font-semibold uppercase tracking-widest">Mi cuenta ▾</span>
+					</div>
+				</button>
+				
+				<!-- Dropdown User Menu -->
+				{#if showUserMenu}
+					<div 
+						class="fixed inset-0 z-40" 
+						on:click={closeUserMenu}
+						on:keydown={(e) => e.key === 'Escape' && closeUserMenu()}
+						role="button"
+						tabindex="0"
+					></div>
+					
+					<div class="absolute right-0 mt-2 w-60 rounded-2xl shadow-2xl z-50 overflow-hidden border border-white/10 user-menu-enter">
+						<!-- Gradient top bar -->
+						<div class="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+						
+						<div class="bg-[#111827]/95 backdrop-blur-xl p-2">
+							<!-- User info header -->
+							<div class="flex items-center gap-3 px-3 py-3 mb-1">
+								{#if $user.photoURL}
+									<img src={$user.photoURL} alt="Avatar" class="w-10 h-10 rounded-full border-2 border-purple-500/50" />
+								{:else}
+									<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-sm font-bold text-white border-2 border-white/10">
+										{($userProfile.username || $user.displayName || $user.email || 'U').substring(0, 2).toUpperCase()}
+									</div>
+								{/if}
+								<div class="flex-1 min-w-0">
+									<p class="text-sm font-semibold text-white truncate">{$userProfile.username || $user.displayName || 'Usuario'}</p>
+									<p class="text-[10px] text-gray-400 truncate">{$user.email}</p>
+								</div>
+							</div>
+
+							<div class="h-px bg-white/10 mx-2 mb-1"></div>
+
+							<!-- Menu items -->
+							<button 
+								on:click={openProfile}
+								class="w-full flex items-center gap-3 px-3 py-3 text-sm text-gray-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 group"
+							>
+								<span class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-base group-hover:scale-110 transition-transform">👤</span>
+								<div class="text-left">
+									<span class="block font-medium">Editar Perfil</span>
+									<span class="block text-[10px] text-gray-500">Nombre, edad, peso, meta</span>
+								</div>
+							</button>
+
+							<button 
+								on:click={openPreferences}
+								class="w-full flex items-center gap-3 px-3 py-3 text-sm text-gray-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 group"
+							>
+								<span class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-base group-hover:scale-110 transition-transform">⚙️</span>
+								<div class="text-left">
+									<span class="block font-medium">Preferencias</span>
+									<span class="block text-[10px] text-gray-500">Idioma, unidades de medida</span>
+								</div>
+							</button>
+
+							<div class="h-px bg-white/10 mx-2 my-1"></div>
+
+							<button 
+								on:click={handleLogout}
+								class="w-full flex items-center gap-3 px-3 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all duration-200 group"
+							>
+								<span class="w-8 h-8 rounded-lg bg-red-500/15 flex items-center justify-center text-base group-hover:scale-110 transition-transform">🚪</span>
+								<span class="font-medium">Cerrar Sesión</span>
+							</button>
+						</div>
 					</div>
 				{/if}
-				<div class="flex flex-col">
-					<span class="text-xs text-white/90 font-medium truncate max-w-[100px]">{$user.displayName || $user.email}</span>
-					<button on:click={user.logout} class="text-[10px] text-blue-300 hover:text-white text-left">Log out</button>
-				</div>
 			</div>
 		{:else}
 			<button 
 				on:click={handleLogin}
-				class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-medium text-white transition-all backdrop-blur-sm border border-white/20 flex items-center gap-2"
+				class="relative inline-flex items-center justify-center px-6 py-2.5 text-sm font-bold text-white transition-all duration-300 rounded-full group focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#05070a] shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40"
 			>
-				<span>👤</span> Login
+				<span class="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-blue-600 via-purple-600 to-blue-500 opacity-80 group-hover:opacity-100 transition-all duration-300"></span>
+				<span class="absolute inset-0 w-full h-full rounded-full opacity-0 group-hover:opacity-40 blur-md bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-300"></span>
+				<span class="absolute inset-[1px] w-[calc(100%-2px)] h-[calc(100%-2px)] rounded-full bg-[#0a0f18] group-hover:bg-opacity-0 transition-all duration-300"></span>
+				<span class="relative flex items-center gap-2 text-white/90 group-hover:text-white">
+					<span class="text-base group-hover:scale-110 transition-transform duration-300">⚡</span>
+					<span class="tracking-widest uppercase">Login</span>
+				</span>
 			</button>
 		{/if}
 	</div>
@@ -77,20 +185,23 @@
 		<AuthModal on:close={toggleAuthModal} />
 	{/if}
 
+	{#if showProfileModal}
+		<ProfileModal initialTab={profileInitialTab} on:close={closeProfileModal} />
+	{/if}
+
 	<div class="max-w-md w-full">
 		<!-- Logo animado -->
 		<div class="text-center mb-4" class:animate={animate}>
 			<div class="relative inline-block">
 				<div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-2xl opacity-50 animate-pulse"></div>
-				<div class="relative bg-gradient-to-br from-blue-600 to-purple-600 rounded-full p-6 shadow-2xl transform hover:scale-110 transition-transform duration-300">
-					<!-- Icono de cronómetro + ondas de sonido -->
-					<img src="/logo.png" alt="HiitBeep Logo" class="w-24 h-24 object-contain drop-shadow-lg" />
+				<div class="relative bg-gradient-to-br from-blue-600 to-purple-600 rounded-full p-2 shadow-2xl transform hover:scale-110 transition-transform duration-300">
+					<img src="/logo.png" alt="HiitBeep Logo" class="w-36 h-36 object-contain drop-shadow-lg" />
 				</div>
 			</div>
 		</div>
 		
 		<!-- Título y Subtítulo -->
-		<div class="text-center space-y-2 mb-12">
+		<div class="text-center space-y-4 mb-12">
 			<h1 class="text-5xl font-bold text-white tracking-tight">
 				{$t('app.title')}
 			</h1>
@@ -191,6 +302,21 @@
 		to {
 			opacity: 1;
 			transform: translateY(0);
+		}
+	}
+
+	:global(.user-menu-enter) {
+		animation: menuSlideIn 0.2s ease-out;
+	}
+
+	@keyframes menuSlideIn {
+		from {
+			opacity: 0;
+			transform: translateY(-8px) scale(0.95);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
 		}
 	}
 </style>
