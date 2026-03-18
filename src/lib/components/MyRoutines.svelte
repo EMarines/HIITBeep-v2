@@ -3,38 +3,31 @@
 	import { t } from '$lib/i18n';
 	import { routineStore } from '$lib/stores/routineStore';
 	import { type SavedRoutine } from '$lib/services/routineStorage';
-	
+
 	const dispatch = createEventDispatcher();
-	
+
 	let showDeleteConfirm = false;
 	let routineToDelete: SavedRoutine | null = null;
 
 	function formatDate(timestamp: number): string {
 		const date = new Date(timestamp);
-		const now = new Date();
-		const diffMs = now.getTime() - date.getTime();
-		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-		
-		// Obtener traducciones directamente
+		const now  = new Date();
+		const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 		let currentT: any;
 		t.subscribe(value => currentT = value)();
-		
 		if (diffDays === 0) return currentT('routines.today');
 		if (diffDays === 1) return currentT('routines.yesterday');
 		if (diffDays < 7) return currentT('routines.days_ago', { days: diffDays.toString() });
-		
 		return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 	}
-	
-	function loadRoutine(routine: SavedRoutine) {
-		dispatch('load-routine', routine);
-	}
-	
+
+	function loadRoutine(routine: SavedRoutine) { dispatch('load-routine', routine); }
+
 	function confirmDelete(routine: SavedRoutine) {
 		routineToDelete = routine;
 		showDeleteConfirm = true;
 	}
-	
+
 	async function handleDelete() {
 		if (routineToDelete) {
 			await routineStore.delete(routineToDelete.id);
@@ -42,17 +35,14 @@
 			routineToDelete = null;
 		}
 	}
-	
+
 	function cancelDelete() {
 		showDeleteConfirm = false;
 		routineToDelete = null;
 	}
-	
 
-	function goBack() {
-		dispatch('back');
-	}
-	
+	function goBack() { dispatch('back'); }
+
 	function getIntervalCount(routine: SavedRoutine): number {
 		return routine.intervals ? routine.intervals.filter(i => i.type !== 'repeat').length : 0;
 	}
@@ -65,116 +55,100 @@
 
 	function calculateTotalRoutineTime(routine: SavedRoutine): number {
 		if (!routine.intervals || routine.intervals.length === 0) return 0;
-		const totalSeconds = routine.intervals.reduce((acc, interval) => {
+		return routine.intervals.reduce((acc, interval) => {
 			if (interval.type === 'repeat') return acc + 2;
 			if (interval.type === 'weights') return acc + ((interval.restTime || 0) * ((interval.sets || 1) - 1));
 			return acc + (interval.duration || 0) + (interval.prepDuration || 0) + (interval.restDuration || 0);
 		}, 0) * (routine.repetitions || 1);
-		
-		return totalSeconds;
 	}
 </script>
 
-<div class="min-h-screen bg-[#05070a] text-white p-6 relative">
-	<div class="max-w-md mx-auto">
-		<!-- Header -->
-		<div class="flex items-center mb-8 relative justify-center">
-			<button
-				on:click={goBack}
-				class="w-10 h-10 flex items-center justify-center bg-gray-800/50 hover:bg-gray-700/50 rounded-lg text-white transition-all shadow-lg border border-white/5 absolute left-0"
-			>
-				←
-			</button>
-			<div class="flex items-center gap-3">
-				<img src="/logo.png" alt="HiitBeep Logo" class="w-8 h-8 object-contain drop-shadow-md" />
-				<h1 class="text-3xl font-semibold tracking-tight text-center" style="text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-					{$t('routines.my_routines')}
-				</h1>
+<div class="mr-root">
+	<!-- Header -->
+	<header class="mr-header">
+		<div class="mr-header-inner">
+			<button class="hb-back-btn" on:click={goBack} aria-label="Volver">←</button>
+			<div class="mr-title-area">
+				<img src="/logo.png" alt="HIITBeep" class="mr-logo" />
+				<h1 class="mr-title">{$t('routines.my_routines')}</h1>
 			</div>
+			<div style="width:38px;"></div><!-- spacer for centering -->
 		</div>
-		
-		<!-- Stats Card -->
-		<div class="bg-gray-800/30 border border-white/5 rounded-2xl p-8 mb-8 text-center shadow-xl backdrop-blur-sm relative overflow-hidden group">
-			<div class="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-			<p class="text-5xl font-semibold text-purple-400 mb-2 relative z-10">
-				{$routineStore.length}/15
-			</p>
-			<p class="text-xs text-gray-400 font-medium uppercase tracking-widest relative z-10">{$t('routines.routines')}</p>
+	</header>
+
+	<div class="mr-content">
+
+		<!-- Stats card -->
+		<div class="mr-stats-card">
+			<div class="mr-stats-number">{$routineStore.length}<span class="mr-stats-total">/15</span></div>
+			<div class="mr-stats-label">{$t('routines.routines')}</div>
 		</div>
-		
-		
-		<!-- List Section -->
-		<div class="space-y-6">
-			<h3 class="text-xl font-semibold text-white/90 px-1 ml-4 uppercase tracking-wider">
-				{$t('routines.routines')}
-			</h3>
-			
-			{#if $routineStore.length === 0}
-				<div class="bg-gray-800/20 border border-dashed border-gray-700 rounded-2xl p-10 text-center">
-					<p class="text-gray-500 font-medium">{$t('routines.no_routines')}</p>
-				</div>
-			{:else}
+
+		<!-- Section label -->
+		<div class="hb-section-label" style="margin-top:1.5rem;">{$t('routines.routines')}</div>
+
+		<!-- Routines list -->
+		{#if $routineStore.length === 0}
+			<div class="mr-empty-state">
+				<div class="mr-empty-icon">📋</div>
+				<p class="mr-empty-title">{$t('routines.no_routines')}</p>
+			</div>
+		{:else}
+			<div class="hb-stack">
 				{#each $routineStore as routine (routine.id)}
-					<div class="bg-gray-800/40 border border-white/5 rounded-lg overflow-hidden hover:bg-gray-800/60 transition-all shadow-lg flex group">
-						<div class="flex-1 p-6 min-w-0">
-							<h4 class="text-lg font-semibold text-white truncate mb-1 group-hover:text-purple-400 transition-colors">
-								{routine.name}
-							</h4>
-							<p class="text-sm text-gray-400">
-								{getIntervalCount(routine)} {$t('routines.intervals')} • {routine.repetitions} {$t('routines.repetitions')} • {formatTime(calculateTotalRoutineTime(routine))}
-							</p>
-							<p class="text-[10px] text-gray-500 mt-2 font-medium uppercase tracking-wider">
-								{routine.lastUsed ? `${$t('routines.last_used')}: ${formatDate(routine.lastUsed)}` : formatDate(routine.createdAt)}
-							</p>
+					<div class="hb-routine-item">
+						<div class="hb-routine-body">
+							<div class="hb-routine-name">{routine.name}</div>
+							<div class="hb-routine-meta">
+								{getIntervalCount(routine)} {$t('routines.intervals')} &nbsp;·&nbsp;
+								{routine.repetitions} {$t('routines.repetitions')} &nbsp;·&nbsp;
+								{formatTime(calculateTotalRoutineTime(routine))}
+							</div>
+							<div class="hb-routine-date">
+								{routine.lastUsed
+									? `${$t('routines.last_used')}: ${formatDate(routine.lastUsed)}`
+									: formatDate(routine.createdAt)}
+							</div>
 						</div>
-						
-						<div class="flex border-l border-white/5 bg-white/5">
+						<div class="hb-routine-actions">
 							<button
+								class="hb-routine-action-btn"
 								on:click={() => loadRoutine(routine)}
-								class="px-6 flex items-center justify-center bg-transparent text-gray-400 hover:text-purple-400 transition-all font-medium text-xs uppercase cursor-pointer"
 							>
 								{$t('routines.load')}
 							</button>
 							<button
+								class="hb-routine-action-btn hb-routine-action-btn-danger"
 								on:click={() => confirmDelete(routine)}
-								class="px-4 flex items-center justify-center bg-transparent hover:bg-red-500/20 text-gray-400 hover:text-red-500 border-l border-white/5 transition-all"
 							>
 								🗑️
 							</button>
 						</div>
 					</div>
 				{/each}
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
 </div>
 
 <!-- Delete Confirmation Modal -->
 {#if showDeleteConfirm && routineToDelete}
-	<div class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-6">
-		<div class="bg-gray-800 border border-white/10 rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
-			<div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-				<span class="text-3xl">⚠️</span>
+	<div class="hb-modal-backdrop">
+		<div class="hb-modal">
+			<div class="mr-del-icon-wrap">
+				<span class="mr-del-icon">⚠️</span>
 			</div>
-			
-			<h3 class="text-2xl font-bold mb-2">{$t('routines.confirm_delete')}</h3>
-			<p class="text-gray-400 text-sm mb-8">
+			<h3 class="mr-del-title">{$t('routines.confirm_delete')}</h3>
+			<p class="mr-del-msg">
 				{$t('routines.confirm_delete_message')}
 				<br/>
-				<span class="text-white font-bold mt-2 block">"{routineToDelete.name}"</span>
+				<span class="mr-del-name">"{routineToDelete.name}"</span>
 			</p>
-			
-			<div class="flex flex-col gap-3">
-				<button
-					on:click={handleDelete}
-					class="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-all shadow-lg active:scale-95"
-				>
+			<div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
+				<button class="hb-btn hb-btn-delete" on:click={handleDelete}>
 					{$t('routines.delete')}
 				</button>
-				<button
-					on:click={cancelDelete}
-					class="w-full py-3 bg-transparent hover:bg-white/5 text-gray-400 hover:text-white rounded-xl font-medium transition-all"
-				>
+				<button class="hb-btn hb-btn-secondary" on:click={cancelDelete}>
 					{$t('common.cancel')}
 				</button>
 			</div>
@@ -182,4 +156,86 @@
 	</div>
 {/if}
 
+<style>
+.mr-root {
+	min-height: 100vh;
+	background: var(--bg-app);
+	color: var(--text-primary);
+	font-family: 'Inter', sans-serif;
+}
 
+/* Header */
+.mr-header {
+	position: sticky; top: 0; z-index: 50;
+	background: rgba(11,17,32,0.88);
+	backdrop-filter: blur(14px);
+	border-bottom: 1px solid var(--border-card);
+}
+.mr-header-inner {
+	max-width: 520px; margin: 0 auto;
+	padding: 0.75rem 1.25rem;
+	display: flex; align-items: center; justify-content: space-between;
+}
+.mr-title-area { display: flex; align-items: center; gap: 0.5rem; }
+.mr-logo { width: 26px; height: 26px; object-fit: contain; }
+.mr-title { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); }
+
+/* Content */
+.mr-content {
+	max-width: 520px; margin: 0 auto;
+	padding: 1.5rem 1.25rem 5rem;
+}
+
+/* Stats */
+.mr-stats-card {
+	background: var(--bg-card);
+	border: 1px solid var(--border-card);
+	border-radius: var(--radius-card);
+	padding: 1.5rem;
+	text-align: center;
+}
+.mr-stats-number {
+	font-size: 3rem; font-weight: 900;
+	color: var(--accent-green); line-height: 1;
+}
+.mr-stats-total { font-size: 1.5rem; color: var(--text-muted); font-weight: 400; margin-left: 0.2rem; }
+.mr-stats-label {
+	font-size: 0.65rem; font-weight: 700;
+	letter-spacing: 0.12em; text-transform: uppercase;
+	color: var(--text-label); margin-top: 0.4rem;
+}
+
+/* Empty state */
+.mr-empty-state {
+	background: var(--bg-card);
+	border: 1px dashed var(--border-card);
+	border-radius: var(--radius-card);
+	padding: 2.5rem; text-align: center;
+}
+.mr-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.mr-empty-title { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
+
+/* Delete modal */
+.mr-del-icon-wrap {
+	width: 60px; height: 60px;
+	background: rgba(239,68,68,0.1);
+	border-radius: 50%; display: flex;
+	align-items: center; justify-content: center;
+	margin: 0 auto 1.25rem;
+}
+.mr-del-icon { font-size: 1.75rem; }
+.mr-del-title { font-size: 1.25rem; font-weight: 800; text-align: center; color: var(--text-primary); }
+.mr-del-msg   { font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin-top: 0.5rem; line-height: 1.6; }
+.mr-del-name  { display: block; font-weight: 700; color: var(--text-primary); margin-top: 0.5rem; }
+
+.hb-btn-delete {
+	width: 100%; padding: 1rem;
+	background: var(--accent-red);
+	color: #fff;
+	font-size: 1rem; font-weight: 700;
+	border-radius: var(--radius-btn);
+	border: none; cursor: pointer;
+	transition: all 0.2s;
+}
+.hb-btn-delete:hover { background: #dc2626; }
+</style>

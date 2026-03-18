@@ -2,213 +2,246 @@
 	import { t } from '$lib/i18n';
 	import { workoutStore } from '$lib/stores/workoutStore';
 	import type { WorkoutLog } from '$lib/services/routineStorage';
-	
-	const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-	const monthNamesES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-	const weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
-	const weekDaysES = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+
+	const monthNamesES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+	const monthNamesEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+	const weekDays = ['D','L','M','M','J','V','S'];
 
 	let currentMonth = new Date().getMonth();
-	let currentYear = new Date().getFullYear();
+	let currentYear  = new Date().getFullYear();
 	let calendarDays: Array<{ day: number; date: Date; workouts: WorkoutLog[] }> = [];
-	
-	// Reactividad sobre el store de workouts
+
+	let currentT: any;
+	$: t.subscribe(v => currentT = v)();
+
 	$: if ($workoutStore || currentMonth !== undefined || currentYear !== undefined) {
 		generateCalendar();
 	}
-	
+
 	function generateCalendar() {
 		const firstDay = new Date(currentYear, currentMonth, 1);
-		const lastDay = new Date(currentYear, currentMonth + 1, 0);
+		const lastDay  = new Date(currentYear, currentMonth + 1, 0);
 		const daysInMonth = lastDay.getDate();
-		const startingDayOfWeek = firstDay.getDay();
-		
+		const startDow   = firstDay.getDay();
+
 		calendarDays = [];
-		
-		// Días en blanco antes del primer día del mes
-		for (let i = 0; i < startingDayOfWeek; i++) {
+		for (let i = 0; i < startDow; i++) {
 			calendarDays.push({ day: 0, date: new Date(), workouts: [] });
 		}
-		
-		// Días del mes
 		for (let day = 1; day <= daysInMonth; day++) {
 			const date = new Date(currentYear, currentMonth, day);
-			const dayWorkouts = getWorkoutsForDate(date);
-			calendarDays.push({ day, date, workouts: dayWorkouts });
+			calendarDays.push({ day, date, workouts: getWorkoutsForDate(date) });
 		}
 	}
-	
+
 	function getWorkoutsForDate(date: Date): WorkoutLog[] {
 		if (!$workoutStore) return [];
-		
-		// Crear fecha local a medianoche (00:00:00.000) del día especificado
-		const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
-		// Fin del día a las 23:59:59.999
-		const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
-		
-		return $workoutStore.filter(log => {
-			return log.completedAt >= startOfDay && log.completedAt <= endOfDay;
-		});
+		const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0,0,0,0).getTime();
+		const endOfDay   = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23,59,59,999).getTime();
+		return $workoutStore.filter(log => log.completedAt >= startOfDay && log.completedAt <= endOfDay);
 	}
-	
-	
+
 	function previousMonth() {
-		if (currentMonth === 0) {
-			currentMonth = 11;
-			currentYear--;
-		} else {
-			currentMonth--;
-		}
+		if (currentMonth === 0) { currentMonth = 11; currentYear--; }
+		else { currentMonth--; }
 		generateCalendar();
 	}
-	
+
 	function nextMonth() {
-		if (currentMonth === 11) {
-			currentMonth = 0;
-			currentYear++;
-		} else {
-			currentMonth++;
-		}
+		if (currentMonth === 11) { currentMonth = 0; currentYear++; }
+		else { currentMonth++; }
 		generateCalendar();
 	}
-	
+
 	function goToToday() {
 		currentMonth = new Date().getMonth();
-		currentYear = new Date().getFullYear();
+		currentYear  = new Date().getFullYear();
 		generateCalendar();
 	}
-	
+
 	function isToday(date: Date): boolean {
 		const today = new Date();
-		// Normalizar ambas fechas a medianoche para comparar solo año/mes/día
-		const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-		const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-		return normalizedDate.getTime() === normalizedToday.getTime();
+		return date.getFullYear() === today.getFullYear()
+			&& date.getMonth()    === today.getMonth()
+			&& date.getDate()     === today.getDate();
 	}
-	
-	function formatTime(minutes: number): string {
-		const hrs = Math.floor(minutes / 60);
-		const mins = minutes % 60;
-		if (hrs > 0) {
-			return `${hrs}h ${mins}m`;
-		}
-		return `${mins}m`;
-	}
-	
-	// Obtener nombre del mes según idioma
-	let currentT: any;
-	$: {
-		t.subscribe(value => currentT = value)();
-	}
-	
+
 	function getMonthName(month: number): string {
-		// Detectar idioma actual
-		let currentLang = 'es';
+		let lang = 'es';
 		if (typeof navigator !== 'undefined') {
 			const saved = localStorage.getItem('hiitbeep-language');
-			currentLang = saved || navigator.language.split('-')[0];
+			lang = saved || navigator.language.split('-')[0];
 		}
-		
-		return currentLang === 'en' ? monthNames[month] : monthNamesES[month];
-	}
-	
-	function getWeekDays(): string[] {
-		let currentLang = 'es';
-		if (typeof navigator !== 'undefined') {
-			const saved = localStorage.getItem('hiitbeep-language');
-			currentLang = saved || navigator.language.split('-')[0];
-		}
-		
-		return currentLang === 'en' ? weekDays : weekDaysES;
+		return lang === 'en' ? monthNamesEN[month] : monthNamesES[month];
 	}
 </script>
 
-<div class="bg-gray-800/40 border border-white/5 rounded-2xl p-6 mb-8 shadow-xl backdrop-blur-md">
-	<!-- Header con navegación -->
-	<div class="flex items-center justify-between mb-8">
-		<button
-			on:click={previousMonth}
-			class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-xl text-white transition-all border border-white/5"
-			title="Previous month"
-			aria-label="Previous month"
-		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="cal-root">
+	<!-- Calendar header -->
+	<div class="cal-header">
+		<button class="cal-nav-btn" on:click={previousMonth} aria-label="Mes anterior">
+			<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
 			</svg>
 		</button>
-		
-		<div class="text-center">
-			<h3 class="text-2xl font-black text-white tracking-tighter">
-				{getMonthName(currentMonth)} {currentYear}
-			</h3>
-			<button
-				on:click={goToToday}
-				class="text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300 transition-colors mt-1"
-			>
+
+		<div class="cal-title-group">
+			<h3 class="cal-month-title">{getMonthName(currentMonth)} {currentYear}</h3>
+			<button class="cal-today-btn" on:click={goToToday}>
 				{currentT ? currentT('calendar.today') : 'Today'}
 			</button>
 		</div>
-		
-		<button
-			on:click={nextMonth}
-			class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-xl text-white transition-all border border-white/5"
-			title="Next month"
-			aria-label="Next month"
-		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+		<button class="cal-nav-btn" on:click={nextMonth} aria-label="Mes siguiente">
+			<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
 			</svg>
 		</button>
 	</div>
-	
-	<!-- Días de la semana -->
-	<div class="grid grid-cols-7 gap-2 mb-3">
-		{#each getWeekDays() as day}
-			<div class="text-center text-[10px] font-black text-gray-500 uppercase tracking-tighter">
-				{day}
-			</div>
+
+	<!-- Week day headers -->
+	<div class="cal-grid">
+		{#each weekDays as day}
+			<div class="cal-weekday">{day}</div>
 		{/each}
-	</div>
-	
-	<!-- Días del mes -->
-	<div class="grid grid-cols-7 gap-2">
+
+		<!-- Calendar days -->
 		{#each calendarDays as { day, date, workouts }}
 			{#if day === 0}
-				<!-- Día vacío -->
-				<div class="aspect-square opacity-0"></div>
+				<div class="cal-day-empty"></div>
 			{:else}
 				<div
-					class="aspect-square relative rounded-xl transition-all duration-300 border
-						{workouts.length > 0 ? 'bg-green-500/10 border-green-500/30' : 'bg-white/5 border-transparent'}
-						{isToday(date) ? 'ring-2 ring-blue-500 border-blue-500/50' : ''}
-						hover:scale-105 active:scale-95 cursor-default"
+					class="cal-day"
+					class:cal-day-worked={workouts.length > 0}
+					class:cal-day-today={isToday(date)}
 				>
-					<!-- Número del día -->
-					<div class="absolute top-1.5 left-1.5 text-[10px] font-black
-						{isToday(date) ? 'text-blue-400' : workouts.length > 0 ? 'text-green-400' : 'text-gray-500'}">
-						{day}
-					</div>
-					
-					<!-- Checkmark si hay entrenamientos -->
+					<span class="cal-day-num">{day}</span>
 					{#if workouts.length > 0}
-						<div class="absolute inset-0 flex items-center justify-center opacity-40 group-hover:opacity-100 transition-opacity">
-                            <span class="text-base">●</span>
-						</div>
+						<span class="cal-dot"></span>
 					{/if}
 				</div>
 			{/if}
 		{/each}
 	</div>
-	
-	<!-- Leyenda -->
-	<div class="flex items-center justify-center gap-6 mt-8 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-		<div class="flex items-center gap-2">
-			<div class="w-3 h-3 rounded-full bg-green-500 opacity-40"></div>
-			<span>{currentT ? currentT('calendar.completed') : 'Completed'}</span>
+
+	<!-- Legend -->
+	<div class="cal-legend">
+		<div class="cal-legend-item">
+			<div class="cal-legend-dot cal-legend-worked"></div>
+			<span>{currentT ? currentT('calendar.completed') : 'Completado'}</span>
 		</div>
-		<div class="flex items-center gap-2">
-			<div class="w-3 h-3 rounded-full border-2 border-blue-500"></div>
-			<span>{currentT ? currentT('calendar.today') : 'Today'}</span>
+		<div class="cal-legend-item">
+			<div class="cal-legend-dot cal-legend-today"></div>
+			<span>{currentT ? currentT('calendar.today') : 'Hoy'}</span>
 		</div>
 	</div>
 </div>
+
+<style>
+.cal-root {
+	background: var(--bg-card);
+	border: 1px solid var(--border-card);
+	border-radius: var(--radius-card);
+	padding: 1.25rem;
+	margin-bottom: 1.25rem;
+}
+
+/* Header */
+.cal-header {
+	display: flex; align-items: center; justify-content: space-between;
+	margin-bottom: 1.1rem;
+}
+.cal-nav-btn {
+	width: 34px; height: 34px;
+	background: var(--bg-card-alt);
+	border: 1px solid var(--border-card);
+	border-radius: var(--radius-sm);
+	display: flex; align-items: center; justify-content: center;
+	color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
+}
+.cal-nav-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.cal-title-group { text-align: center; }
+.cal-month-title {
+	font-size: 1.05rem; font-weight: 800;
+	color: var(--text-primary); letter-spacing: -0.02em;
+}
+.cal-today-btn {
+	display: inline-block; margin-top: 0.2rem;
+	font-size: 0.6rem; font-weight: 700;
+	letter-spacing: 0.1em; text-transform: uppercase;
+	color: var(--accent-green); background: none; border: none; cursor: pointer;
+	transition: color 0.2s;
+}
+.cal-today-btn:hover { color: #16a34a; }
+
+/* Grid */
+.cal-grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 0.3rem;
+}
+.cal-weekday {
+	text-align: center;
+	font-size: 0.6rem; font-weight: 700;
+	letter-spacing: 0.08em; text-transform: uppercase;
+	color: var(--text-muted);
+	padding-bottom: 0.5rem;
+}
+.cal-day-empty {
+	aspect-ratio: 1;
+}
+.cal-day {
+	aspect-ratio: 1;
+	border-radius: 8px;
+	background: var(--bg-card-alt);
+	border: 1px solid transparent;
+	display: flex; flex-direction: column;
+	align-items: center; justify-content: center;
+	gap: 2px;
+	position: relative;
+	transition: all 0.15s;
+	cursor: default;
+}
+.cal-day:hover { border-color: var(--border-card); }
+
+/* Day with workouts */
+.cal-day-worked {
+	background: rgba(34,197,94,0.1);
+	border-color: rgba(34,197,94,0.25);
+}
+.cal-day-worked .cal-day-num { color: var(--accent-green); }
+
+/* Today */
+.cal-day-today {
+	border-color: var(--accent-blue);
+	box-shadow: 0 0 0 1px rgba(59,130,246,0.3);
+}
+.cal-day-today .cal-day-num { color: var(--accent-blue); font-weight: 800; }
+
+.cal-day-num {
+	font-size: 0.68rem; font-weight: 600;
+	color: var(--text-muted); line-height: 1;
+}
+.cal-dot {
+	width: 4px; height: 4px; border-radius: 50%;
+	background: var(--accent-green);
+	opacity: 0.8;
+}
+
+/* Legend */
+.cal-legend {
+	display: flex; align-items: center; justify-content: center;
+	gap: 1.5rem; margin-top: 1rem;
+}
+.cal-legend-item {
+	display: flex; align-items: center; gap: 0.5rem;
+	font-size: 0.62rem; font-weight: 600;
+	letter-spacing: 0.08em; text-transform: uppercase;
+	color: var(--text-muted);
+}
+.cal-legend-dot {
+	width: 10px; height: 10px; border-radius: 50%;
+}
+.cal-legend-worked { background: rgba(34,197,94,0.5); }
+.cal-legend-today  { background: transparent; border: 2px solid var(--accent-blue); }
+</style>

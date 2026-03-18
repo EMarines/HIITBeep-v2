@@ -1,32 +1,23 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { t } from '$lib/i18n';
-	import { loadRoutines, loadWorkoutLogs } from '$lib/services/routineStorage';
 	import { user } from '$lib/stores/userStore';
 	import { userProfile } from '$lib/stores/userProfileStore';
 	import AuthModal from './AuthModal.svelte';
 	import ProfileModal from './ProfileModal.svelte';
 	import { routineStats } from '$lib/stores/routineStore';
-	
+
 	const dispatch = createEventDispatcher();
-	
+
 	let animate = false;
 	let showAuthModal = false;
 	let showUserMenu = false;
 	let showProfileModal = false;
 	let profileInitialTab: 'profile' | 'settings' = 'profile';
 
-	function toggleAuthModal() {
-		showAuthModal = !showAuthModal;
-	}
-
-	function toggleUserMenu() {
-		showUserMenu = !showUserMenu;
-	}
-
-	function closeUserMenu() {
-		showUserMenu = false;
-	}
+	function toggleAuthModal() { showAuthModal = !showAuthModal; }
+	function toggleUserMenu() { showUserMenu = !showUserMenu; }
+	function closeUserMenu() { showUserMenu = false; }
 
 	function openProfile() {
 		profileInitialTab = 'profile';
@@ -40,283 +31,410 @@
 		showUserMenu = false;
 	}
 
-	function closeProfileModal() {
-		showProfileModal = false;
-	}
-
-	function handleLogin() {
-		toggleAuthModal();
-	}
+	function closeProfileModal() { showProfileModal = false; }
+	function handleLogin() { toggleAuthModal(); }
 
 	async function handleLogout() {
 		showUserMenu = false;
 		await user.logout();
 	}
-	
+
 	onMount(() => {
-		setTimeout(() => {
-			animate = true;
-		}, 100);
+		setTimeout(() => { animate = true; }, 80);
 	});
-	
-	function openSettings() {
-		dispatch('open-settings');
-	}
-	
-	function openRoutines() {
-		dispatch('open-routines');
-	}
-	
-	function openHistory() {
-		dispatch('open-history');
-	}
+
+	function openSettings()  { dispatch('open-settings'); }
+	function openRoutines()  { dispatch('open-routines'); }
+	function openHistory()   { dispatch('open-history'); }
+
+	const navCards = [
+		{
+			action: openSettings,
+			icon: '⚙️',
+			titleKey: 'dashboard.configure_routines',
+			descKey: 'dashboard.configure_description',
+			accent: 'var(--accent-blue)',
+			glow: 'rgba(59,130,246,0.15)',
+		},
+		{
+			action: openRoutines,
+			icon: '📋',
+			titleKey: 'dashboard.my_routines',
+			descKey: null,
+			accent: 'var(--accent-green)',
+			glow: 'rgba(34,197,94,0.15)',
+		},
+		{
+			action: openHistory,
+			icon: '📊',
+			titleKey: 'dashboard.history',
+			descKey: null,
+			accent: 'var(--accent-purple)',
+			glow: 'rgba(168,85,247,0.15)',
+		},
+	];
 </script>
 
-<div class="min-h-screen bg-[#05070a] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
-	<!-- Animated Background Glows -->
-	<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full"></div>
-	<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full"></div>
+<div class="dashboard-root" class:loaded={animate}>
+	<!-- Ambient Background Glows -->
+	<div class="ambient-glow glow-tl"></div>
+	<div class="ambient-glow glow-br"></div>
 
-	<!-- Top Bar / User Profile -->
-	<div class="max-w-md w-full flex justify-end items-center mb-12 px-2 z-10">
-		
-		{#if $user}
-			<div class="relative">
-				<!-- Avatar Button -->
-				<button on:click={toggleUserMenu} class="flex items-center gap-3 bg-white/10 hover:bg-white/15 transition-all duration-300 rounded-full pl-1.5 pr-4 py-1.5 backdrop-blur-md border border-white/10 cursor-pointer shadow-lg hover:shadow-blue-500/20 hover:border-white/20">
-					{#if $user.photoURL}
-						<img src={$user.photoURL} alt={$userProfile.username || $user.displayName} class="w-9 h-9 rounded-full border-2 border-blue-500/50 shadow-md" />
-					{:else}
-						<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-purple-500 flex items-center justify-center text-xs font-bold text-white border-2 border-white/20 shadow-md">
-							{($userProfile.username || $user.displayName || $user.email || 'U').substring(0, 2).toUpperCase()}
+	<!-- ── Top Bar ── -->
+	<header class="top-bar">
+		<div class="top-bar-inner">
+			<!-- Logo chip -->
+			<div class="logo-chip">
+				<div class="hb-logo-wrap">
+					<div class="hb-logo-glow"></div>
+					<img src="/logo.png" alt="HIITBeep" class="logo-img" />
+				</div>
+				<span class="logo-text">HIIT<span>Beep</span></span>
+			</div>
+
+			<!-- User Area -->
+			{#if $user}
+				<div style="position:relative;">
+					<button class="user-pill" on:click={toggleUserMenu}>
+						{#if $user.photoURL}
+							<img src={$user.photoURL} alt="avatar" class="user-avatar" />
+						{:else}
+							<div class="user-avatar avatar-initials">
+								{($userProfile.username || $user.displayName || $user.email || 'U').substring(0, 2).toUpperCase()}
+							</div>
+						{/if}
+						<div class="user-pill-info">
+							<span class="user-pill-name">{$userProfile.username || $user.displayName || $user.email}</span>
+							<span class="user-pill-sub">Mi cuenta ▾</span>
 						</div>
-					{/if}
-					<div class="flex flex-col items-start text-left">
-						<span class="text-xs text-white/90 font-medium truncate max-w-[120px]">{$userProfile.username || $user.displayName || $user.email}</span>
-						<span class="text-[9px] text-blue-300/60 font-semibold uppercase tracking-widest">Mi cuenta ▾</span>
-					</div>
-				</button>
-				
-				<!-- Dropdown User Menu -->
-				{#if showUserMenu}
-					<div 
-						class="fixed inset-0 z-40" 
-						on:click={closeUserMenu}
-						on:keydown={(e) => e.key === 'Escape' && closeUserMenu()}
-						role="button"
-						tabindex="0"
-					></div>
-					
-					<div class="absolute right-0 mt-2 w-60 rounded-2xl shadow-2xl z-50 overflow-hidden border border-white/10 user-menu-enter">
-						<!-- Gradient top bar -->
-						<div class="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-						
-						<div class="bg-[#111827]/95 backdrop-blur-xl p-2">
-							<!-- User info header -->
-							<div class="flex items-center gap-3 px-3 py-3 mb-1">
+					</button>
+
+					{#if showUserMenu}
+						<!-- Backdrop -->
+						<div
+							class="menu-backdrop"
+							on:click={closeUserMenu}
+							on:keydown={(e) => e.key === 'Escape' && closeUserMenu()}
+							role="button"
+							tabindex="0"
+						></div>
+						<!-- Dropdown -->
+						<div class="user-dropdown">
+							<div class="dropdown-header">
 								{#if $user.photoURL}
-									<img src={$user.photoURL} alt="Avatar" class="w-10 h-10 rounded-full border-2 border-purple-500/50" />
+									<img src={$user.photoURL} alt="avatar" class="dropdown-avatar" />
 								{:else}
-									<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-sm font-bold text-white border-2 border-white/10">
+									<div class="dropdown-avatar avatar-initials avatar-lg">
 										{($userProfile.username || $user.displayName || $user.email || 'U').substring(0, 2).toUpperCase()}
 									</div>
 								{/if}
-								<div class="flex-1 min-w-0">
-									<p class="text-sm font-semibold text-white truncate">{$userProfile.username || $user.displayName || 'Usuario'}</p>
-									<p class="text-[10px] text-gray-400 truncate">{$user.email}</p>
+								<div>
+									<p class="dropdown-name">{$userProfile.username || $user.displayName || 'Usuario'}</p>
+									<p class="dropdown-email">{$user.email}</p>
 								</div>
 							</div>
-
-							<div class="h-px bg-white/10 mx-2 mb-1"></div>
-
-							<!-- Menu items -->
-							<button 
-								on:click={openProfile}
-								class="w-full flex items-center gap-3 px-3 py-3 text-sm text-gray-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 group"
-							>
-								<span class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-base group-hover:scale-110 transition-transform">👤</span>
-								<div class="text-left">
-									<span class="block font-medium">Editar Perfil</span>
-									<span class="block text-[10px] text-gray-500">Nombre, edad, peso, meta</span>
+							<div class="hb-divider"></div>
+							<button class="dropdown-item" on:click={openProfile}>
+								<span class="dropdown-item-icon" style="background: rgba(59,130,246,0.15);">👤</span>
+								<div>
+									<span class="dropdown-item-label">Editar Perfil</span>
+									<span class="dropdown-item-desc">Nombre, edad, peso, meta</span>
 								</div>
 							</button>
-
-							<button 
-								on:click={openPreferences}
-								class="w-full flex items-center gap-3 px-3 py-3 text-sm text-gray-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 group"
-							>
-								<span class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-base group-hover:scale-110 transition-transform">⚙️</span>
-								<div class="text-left">
-									<span class="block font-medium">Preferencias</span>
-									<span class="block text-[10px] text-gray-500">Idioma, unidades de medida</span>
+							<button class="dropdown-item" on:click={openPreferences}>
+								<span class="dropdown-item-icon" style="background: rgba(168,85,247,0.15);">⚙️</span>
+								<div>
+									<span class="dropdown-item-label">Preferencias</span>
+									<span class="dropdown-item-desc">Idioma, unidades de medida</span>
 								</div>
 							</button>
-
-							<div class="h-px bg-white/10 mx-2 my-1"></div>
-
-							<button 
-								on:click={handleLogout}
-								class="w-full flex items-center gap-3 px-3 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all duration-200 group"
-							>
-								<span class="w-8 h-8 rounded-lg bg-red-500/15 flex items-center justify-center text-base group-hover:scale-110 transition-transform">🚪</span>
-								<span class="font-medium">Cerrar Sesión</span>
+							<div class="hb-divider"></div>
+							<button class="dropdown-item dropdown-item-danger" on:click={handleLogout}>
+								<span class="dropdown-item-icon" style="background: rgba(239,68,68,0.12);">🚪</span>
+								<span class="dropdown-item-label">Cerrar Sesión</span>
 							</button>
 						</div>
-					</div>
-				{/if}
-			</div>
-		{:else}
-			<button 
-				on:click={handleLogin}
-				class="relative inline-flex items-center justify-center px-6 py-2.5 text-sm font-bold text-white transition-all duration-300 rounded-full group focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#05070a] shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40"
-			>
-				<span class="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-blue-600 via-purple-600 to-blue-500 opacity-80 group-hover:opacity-100 transition-all duration-300"></span>
-				<span class="absolute inset-0 w-full h-full rounded-full opacity-0 group-hover:opacity-40 blur-md bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-300"></span>
-				<span class="absolute inset-[1px] w-[calc(100%-2px)] h-[calc(100%-2px)] rounded-full bg-[#0a0f18] group-hover:bg-opacity-0 transition-all duration-300"></span>
-				<span class="relative flex items-center gap-2 text-white/90 group-hover:text-white">
-					<span class="text-base group-hover:scale-110 transition-transform duration-300">⚡</span>
-					<span class="tracking-widest uppercase">Login</span>
-				</span>
-			</button>
-		{/if}
-	</div>
+					{/if}
+				</div>
+			{:else}
+				<button class="login-btn" on:click={handleLogin}>
+					<span class="login-btn-icon">⚡</span>
+					Login
+				</button>
+			{/if}
+		</div>
+	</header>
 
 	{#if showAuthModal}
 		<AuthModal on:close={toggleAuthModal} />
 	{/if}
-
 	{#if showProfileModal}
 		<ProfileModal initialTab={profileInitialTab} on:close={closeProfileModal} />
 	{/if}
 
-	<div class="max-w-md w-full">
-		<!-- Logo animado -->
-		<div class="text-center mb-4" class:animate={animate}>
-			<div class="relative inline-block">
-				<div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-2xl opacity-50 animate-pulse"></div>
-				<div class="relative bg-gradient-to-br from-blue-600 to-purple-600 rounded-full p-2 shadow-2xl transform hover:scale-110 transition-transform duration-300">
-					<img src="/logo.png" alt="HiitBeep Logo" class="w-36 h-36 object-contain drop-shadow-lg" />
-				</div>
+	<!-- ── Main Content ── -->
+	<main class="dashboard-main">
+		<!-- Hero -->
+		<div class="hero-wrap" class:hero-visible={animate}>
+			<div class="hero-logo-container">
+				<div class="hb-logo-glow hero-glow"></div>
+				<img src="/logo.png" alt="HIITBeep" class="hero-logo" />
+			</div>
+			<h1 class="hero-title">{$t('app.title')}</h1>
+			<p class="hero-sub">{$t('dashboard.subtitle')}</p>
+			<p class="hero-tagline">"{$t('dashboard.tagline')}"</p>
+		</div>
+
+		<!-- Stats Row -->
+		<div class="stats-row" class:stats-visible={animate}>
+			<div class="hb-stat-card">
+				<div class="hb-stat-number">{$routineStats.totalRoutines}</div>
+				<div class="hb-stat-label">Rutinas</div>
+			</div>
+			<div class="hb-stat-card">
+				<div class="hb-stat-number">{$routineStats.totalWorkouts}</div>
+				<div class="hb-stat-label">Entrenos</div>
 			</div>
 		</div>
-		
-		<!-- Título y Subtítulo -->
-		<div class="text-center space-y-4 mb-12">
-			<h1 class="text-5xl font-bold text-white tracking-tight">
-				{$t('app.title')}
-			</h1>
-			<p class="text-xl text-blue-200 font-light">
-				{$t('dashboard.subtitle')}
-			</p>
-			<p class="text-sm text-gray-300 italic">
-				"{$t('dashboard.tagline')}"
-			</p>
-		</div>
-		
-		<!-- Botones de Navegación -->
-		<div class="space-y-4" class:animate-buttons={animate}>
-			<!-- Botón Configurar Rutinas -->
-			<button 
-				on:click={openSettings}
-				class="w-full group relative overflow-hidden rounded-2xl p-6 shadow-2xl transform hover:translate-y-[-4px] transition-all duration-300 border border-white/5"
-				style="background: linear-gradient(135deg, #1e40af, #1e3a8a);"
-			>
-				<div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-				<div class="relative flex items-center space-x-5">
-					<div class="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform">⚙️</div>
-					<div class="flex-1 text-left">
-						<h3 class="text-xl font-bold text-white tracking-tight">{$t('dashboard.configure_routines')}</h3>
-						<p class="text-blue-100/70 text-xs font-medium uppercase tracking-wider mt-1">{$t('dashboard.configure_description')}</p>
-					</div>
-					<div class="text-white/30 group-hover:translate-x-1 group-hover:text-white/100 transition-all font-bold text-xl">→</div>
+
+		<!-- Nav Cards -->
+		<div class="nav-cards" class:cards-visible={animate}>
+			<!-- Configure Routines -->
+			<button class="hb-nav-card nav-card-blue" on:click={openSettings}>
+				<div class="hb-nav-card-icon">⚙️</div>
+				<div class="nav-card-body">
+					<div class="hb-nav-card-title">{$t('dashboard.configure_routines')}</div>
+					<div class="hb-nav-card-desc">{$t('dashboard.configure_description')}</div>
 				</div>
 			</button>
-			
-			<!-- Botón Mis Rutinas -->
-			<button 
-				on:click={openRoutines}
-				class="w-full group relative overflow-hidden rounded-2xl p-6 shadow-2xl transform hover:translate-y-[-4px] transition-all duration-300 border border-white/5"
-				style="background: linear-gradient(135deg, #166534, #14532d);"
-			>
-				<div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-				<div class="relative flex items-center space-x-5">
-					<div class="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform">📋</div>
-					<div class="flex-1 text-left">
-						<h3 class="text-xl font-bold text-white tracking-tight">{$t('dashboard.my_routines')}</h3>
-						<p class="text-green-100/70 text-xs font-medium mt-1">
-							<span class="font-bold text-white">{$routineStats.totalRoutines}</span> {$routineStats.totalRoutines === 1 ? $t('dashboard.routine_saved') : $t('dashboard.routines_saved')}
-						</p>
+
+			<!-- My Routines -->
+			<button class="hb-nav-card nav-card-green" on:click={openRoutines}>
+				<div class="hb-nav-card-icon">📋</div>
+				<div class="nav-card-body">
+					<div class="hb-nav-card-title">{$t('dashboard.my_routines')}</div>
+					<div class="hb-nav-card-desc">
+						<span style="font-weight:700;color:#fff;">{$routineStats.totalRoutines}</span>
+						{$routineStats.totalRoutines === 1 ? $t('dashboard.routine_saved') : $t('dashboard.routines_saved')}
 					</div>
-					<div class="text-white/30 group-hover:translate-x-1 group-hover:text-white/100 transition-all font-bold text-xl">→</div>
 				</div>
 			</button>
-			
-			<!-- Botón Historial -->
-			<button 
-				on:click={openHistory}
-				class="w-full group relative overflow-hidden rounded-2xl p-6 shadow-2xl transform hover:translate-y-[-4px] transition-all duration-300 border border-white/5"
-				style="background: linear-gradient(135deg, #6b21a8, #581c87);"
-			>
-				<div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-				<div class="relative flex items-center space-x-5">
-					<div class="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform">📊</div>
-					<div class="flex-1 text-left">
-						<h3 class="text-xl font-bold text-white tracking-tight">{$t('dashboard.history')}</h3>
-						<p class="text-purple-100/70 text-xs font-medium mt-1">
-							<span class="font-bold text-white">{$routineStats.totalWorkouts}</span> {$routineStats.totalWorkouts === 1 ? $t('dashboard.workout_completed') : $t('dashboard.workouts_completed')}
-						</p>
+
+			<!-- History -->
+			<button class="hb-nav-card nav-card-purple" on:click={openHistory}>
+				<div class="hb-nav-card-icon">📊</div>
+				<div class="nav-card-body">
+					<div class="hb-nav-card-title">{$t('dashboard.history')}</div>
+					<div class="hb-nav-card-desc">
+						<span style="font-weight:700;color:#fff;">{$routineStats.totalWorkouts}</span>
+						{$routineStats.totalWorkouts === 1 ? $t('dashboard.workout_completed') : $t('dashboard.workouts_completed')}
 					</div>
-					<div class="text-white/30 group-hover:translate-x-1 group-hover:text-white/100 transition-all font-bold text-xl">→</div>
 				</div>
 			</button>
 		</div>
-		
-	</div>
+	</main>
 </div>
 
 <style>
-	.animate {
-		animation: fadeInScale 0.6s ease-out;
-	}
-	
-	.animate-buttons {
-		animation: slideUp 0.8s ease-out;
-	}
-	
-	@keyframes fadeInScale {
-		from {
-			opacity: 0;
-			transform: scale(0.9);
-		}
-		to {
-			opacity: 1;
-			transform: scale(1);
-		}
-	}
-	
-	@keyframes slideUp {
-		from {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
+.dashboard-root {
+	min-height: 100vh;
+	background: var(--bg-app);
+	color: var(--text-primary);
+	font-family: 'Inter', sans-serif;
+	position: relative;
+	overflow-x: hidden;
+	padding-bottom: 2rem;
+}
 
-	:global(.user-menu-enter) {
-		animation: menuSlideIn 0.2s ease-out;
-	}
+/* Ambient glows */
+.ambient-glow {
+	position: fixed;
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 0;
+	filter: blur(100px);
+}
+.glow-tl {
+	width: 45vw; height: 45vw;
+	top: -15%; left: -15%;
+	background: rgba(34,197,94,0.06);
+}
+.glow-br {
+	width: 40vw; height: 40vw;
+	bottom: -15%; right: -15%;
+	background: rgba(59,130,246,0.06);
+}
 
-	@keyframes menuSlideIn {
-		from {
-			opacity: 0;
-			transform: translateY(-8px) scale(0.95);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0) scale(1);
-		}
-	}
+/* ── Top Bar ── */
+.top-bar {
+	position: sticky; top: 0; z-index: 50;
+	background: rgba(11,17,32,0.82);
+	backdrop-filter: blur(16px);
+	border-bottom: 1px solid var(--border-card);
+}
+.top-bar-inner {
+	max-width: 520px; margin: 0 auto;
+	padding: 0.65rem 1.25rem;
+	display: flex; align-items: center; justify-content: space-between;
+}
+
+/* Logo chip */
+.logo-chip {
+	display: flex; align-items: center; gap: 0.6rem;
+}
+.logo-img { width: 32px; height: 32px; object-fit: contain; }
+.logo-text {
+	font-size: 1.05rem; font-weight: 800;
+	color: #fff; letter-spacing: -0.02em;
+}
+.logo-text span { color: var(--accent-green); }
+
+/* User pill */
+.user-pill {
+	display: flex; align-items: center; gap: 0.65rem;
+	background: var(--bg-card); border: 1px solid var(--border-card);
+	border-radius: 50px; padding: 0.35rem 0.9rem 0.35rem 0.35rem;
+	cursor: pointer; transition: all 0.2s;
+}
+.user-pill:hover { border-color: rgba(255,255,255,0.14); }
+.user-avatar {
+	width: 34px; height: 34px; border-radius: 50%;
+	border: 2px solid var(--accent-green);
+	object-fit: cover;
+}
+.avatar-initials {
+	background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+	display: flex; align-items: center; justify-content: center;
+	font-size: 0.75rem; font-weight: 700; color: #fff;
+}
+.user-pill-info { display: flex; flex-direction: column; text-align: left; }
+.user-pill-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-pill-sub  { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-green); }
+
+/* Login button */
+.login-btn {
+	display: flex; align-items: center; gap: 0.45rem;
+	background: var(--accent-green); color: #0b1120;
+	font-size: 0.85rem; font-weight: 700;
+	padding: 0.55rem 1.1rem; border-radius: 50px; border: none;
+	cursor: pointer; transition: all 0.2s;
+	box-shadow: 0 3px 12px var(--accent-green-glow);
+}
+.login-btn:hover { background: #16a34a; box-shadow: 0 4px 18px rgba(34,197,94,0.5); }
+.login-btn-icon { font-size: 1rem; }
+
+/* Dropdown menu */
+.menu-backdrop { position: fixed; inset: 0; z-index: 40; }
+.user-dropdown {
+	position: absolute; right: 0; top: calc(100% + 0.5rem);
+	width: 240px; z-index: 50;
+	background: var(--bg-card);
+	border: 1px solid var(--border-card);
+	border-radius: var(--radius-card);
+	overflow: hidden;
+	box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+	animation: dropIn 0.18s ease-out;
+}
+.dropdown-header {
+	display: flex; align-items: center; gap: 0.75rem;
+	padding: 1rem;
+}
+.dropdown-avatar {
+	width: 40px; height: 40px; border-radius: 50%;
+	border: 2px solid var(--accent-green);
+	flex-shrink: 0;
+}
+.avatar-lg { width: 40px; height: 40px; font-size: 0.875rem; }
+.dropdown-name  { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); }
+.dropdown-email { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+.dropdown-item {
+	width: 100%; display: flex; align-items: center; gap: 0.75rem;
+	padding: 0.75rem 1rem; background: none; border: none; cursor: pointer;
+	transition: background 0.15s;
+}
+.dropdown-item:hover { background: rgba(255,255,255,0.05); }
+.dropdown-item-danger:hover { background: rgba(239,68,68,0.08); }
+.dropdown-item-icon {
+	width: 34px; height: 34px; border-radius: var(--radius-sm);
+	display: flex; align-items: center; justify-content: center;
+	font-size: 1rem; flex-shrink: 0;
+}
+.dropdown-item-label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-primary); text-align: left; }
+.dropdown-item-desc  { display: block; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; }
+.dropdown-item-danger .dropdown-item-label { color: var(--accent-red); }
+
+/* ── Main ── */
+.dashboard-main {
+	max-width: 520px; margin: 0 auto;
+	padding: 1.5rem 1.25rem 3rem;
+	position: relative; z-index: 1;
+}
+
+/* Hero */
+.hero-wrap {
+	text-align: center;
+	padding: 1.5rem 0 2rem;
+	opacity: 0; transform: translateY(16px);
+	transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.hero-wrap.hero-visible { opacity: 1; transform: translateY(0); }
+.hero-logo-container { position: relative; display: inline-block; margin-bottom: 1rem; }
+.hero-glow {
+	position: absolute; inset: -20px;
+	background: radial-gradient(circle, var(--accent-green-glow) 0%, transparent 70%);
+	border-radius: 50%;
+	animation: pulseGlow 3s ease-in-out infinite;
+}
+.hero-logo { width: 90px; height: 90px; object-fit: contain; position: relative; z-index: 1; }
+.hero-title {
+	font-size: 2.5rem; font-weight: 900;
+	color: var(--text-primary); letter-spacing: -0.03em;
+	line-height: 1;
+}
+.hero-sub {
+	font-size: 1rem; color: var(--accent-green);
+	font-weight: 500; margin-top: 0.4rem;
+}
+.hero-tagline {
+	font-size: 0.8rem; color: var(--text-secondary);
+	font-style: italic; margin-top: 0.35rem;
+}
+
+/* Stats row */
+.stats-row {
+	display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem;
+	margin-bottom: 1.5rem;
+	opacity: 0; transform: translateY(12px);
+	transition: opacity 0.55s 0.12s ease, transform 0.55s 0.12s ease;
+}
+.stats-row.stats-visible { opacity: 1; transform: translateY(0); }
+
+/* Nav cards */
+.nav-cards {
+	display: flex; flex-direction: column; gap: 0.875rem;
+	opacity: 0; transform: translateY(12px);
+	transition: opacity 0.55s 0.22s ease, transform 0.55s 0.22s ease;
+}
+.nav-cards.cards-visible { opacity: 1; transform: translateY(0); }
+
+/* Color variants */
+.nav-card-blue   { border-left: 4px solid var(--accent-blue); }
+.nav-card-blue::before   { content:''; position:absolute; inset:0; background: linear-gradient(90deg, rgba(59,130,246,0.12) 0%, transparent 45%); pointer-events:none; }
+.nav-card-green  { border-left: 4px solid var(--accent-green); }
+.nav-card-green::before  { content:''; position:absolute; inset:0; background: linear-gradient(90deg, var(--accent-green-glow) 0%, transparent 45%); pointer-events:none; }
+.nav-card-purple { border-left: 4px solid var(--accent-purple); }
+.nav-card-purple::before { content:''; position:absolute; inset:0; background: linear-gradient(90deg, rgba(168,85,247,0.12) 0%, transparent 45%); pointer-events:none; }
+
+.nav-card-body { flex: 1; min-width: 0; padding-right: 1.5rem; }
+
+/* Animations */
+@keyframes dropIn {
+	from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+	to   { opacity: 1; transform: none; }
+}
+@keyframes pulseGlow {
+	0%, 100% { opacity: 0.7; transform: scale(1); }
+	50%       { opacity: 1;   transform: scale(1.06); }
+}
 </style>

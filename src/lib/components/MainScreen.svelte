@@ -1,308 +1,468 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import { t } from '$lib/i18n';
-    
+
     function formatTime(seconds: number): string {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
     }
-    
+
     const dispatch = createEventDispatcher();
-    
+
     export let repetitions: number;
-    export let intervals: Array<{ 
-        name: string; 
-        duration: number; 
-        color: string; 
+    export let intervals: Array<{
+        name: string;
+        duration: number;
+        color: string;
         type?: 'interval' | 'repeat' | 'weights';
         sets?: number;
         restTime?: number;
         prepDuration?: number;
         restDuration?: number;
     }>;
-    export let routineName: string = '';    
-    
-    function openSettings() {
-        dispatch('open-settings');
-    }
-    
-    function goToDashboard() {
-        dispatch('go-dashboard');
-    }
-    
+    export let routineName: string = '';
+
+    function openSettings()  { dispatch('open-settings'); }
+    function goToDashboard() { dispatch('go-dashboard'); }
     function startWorkout() {
         if (intervals.length === 0) return;
         dispatch('start-workout');
     }
-    
-    // Encontrar el índice del primer intervalo después de cada marcador "repeat"
-    function getFirstIntervalAfterRepeat(repeatIndex: number): number {
-        return repeatIndex + 1;
-    }
-    
-    // Calcular el índice del nodo donde debe apuntar la flecha amarilla de ENTRADA
-    // Este es el nodo donde COMIENZA la repetición (el PRIMER intervalo no-repeat después del marcador repeat anterior)
+
     function getRepeatStartIndex(repeatIndex: number): number {
         const repeatInterval = intervals[repeatIndex];
         if (!repeatInterval || repeatInterval.type !== 'repeat') return -1;
-        
-        // Encontrar el marcador repeat anterior (si existe)
         let previousRepeatIndex = -1;
         for (let i = repeatIndex - 1; i >= 0; i--) {
-            if (intervals[i].type === 'repeat') {
-                previousRepeatIndex = i;
-                break;
-            }
+            if (intervals[i].type === 'repeat') { previousRepeatIndex = i; break; }
         }
-        
-        // Buscar desde después del marcador anterior (o desde el inicio si no hay anterior)
         const startFrom = previousRepeatIndex >= 0 ? previousRepeatIndex + 1 : 0;
-        
-        // Buscar el PRIMER intervalo válido (no-repeat) desde startFrom hasta el marcador actual
         for (let i = startFrom; i < repeatIndex; i++) {
-            if (intervals[i].type !== 'repeat') {
-                return i; // Retornar el índice del PRIMER intervalo no-repeat en esta sección
-            }
+            if (intervals[i].type !== 'repeat') return i;
         }
-        return -1; // No se encontró
+        return -1;
+    }
+
+    const colorAccentMap: Record<string, string> = {
+        'bg-yellow-500': 'var(--accent-yellow)',
+        'bg-red-500':    'var(--accent-red)',
+        'bg-blue-500':   'var(--accent-blue)',
+        'bg-green-500':  'var(--accent-green)',
+        'bg-purple-500': 'var(--accent-purple)',
+        'bg-pink-500':   '#ec4899',
+        'bg-orange-500': 'var(--accent-orange)',
+    };
+
+    function getAccent(color: string): string {
+        return colorAccentMap[color] ?? 'var(--accent-green)';
+    }
+
+    function totalDuration() {
+        return intervals.reduce((acc, interval) => {
+            if (interval.type === 'repeat') return acc + 2;
+            if (interval.type === 'weights') return acc + ((interval.restTime || 0) * ((interval.sets || 1) - 1));
+            return acc + (interval.duration || 0) + (interval.prepDuration || 0) + (interval.restDuration || 0);
+        }, 0);
     }
 </script>
 
-<style>
-    /* Flecha amarilla desde marcador repeat hacia primer intervalo */
-    .repeat-arrow {
-        position: absolute;
-        left: -4rem;
-        top: 50%;
-        width: 3.75rem;
-        pointer-events: none;
-        z-index: 10;
-    }
-    
-    /* Flecha morada desde último intervalo hacia primer intervalo (repeticiones globales) */
-    .global-repeat-arrow {
-        position: absolute;
-        right: -5rem;
-        top: 50%;
-        width: 3.75rem;
-        pointer-events: none;
-    }
-</style>
-
-<div class="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-900 text-white">
-    <div class="max-w-md w-full">
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-4">
-                <img src="/logo.png" alt="HiitBeep Logo" class="w-12 h-12 object-contain drop-shadow-md" />
-                <h1 class="text-4xl font-bold" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{$t('app.title')}</h1>
+<div class="ms-root">
+    <!-- Top bar with logo & nav -->
+    <header class="ms-top-bar">
+        <div class="ms-top-inner">
+            <div class="ms-logo-area">
+                <img src="/logo.png" alt="HIITBeep" class="ms-logo" />
+                <h1 class="ms-app-title">{$t('app.title')}</h1>
+            </div>
+            <div class="ms-top-actions">
+                <button class="ms-action-btn ms-btn-blue" on:click={openSettings}>
+                    <span>✏️</span>
+                    <span>{$t('main.edit_routine')}</span>
+                </button>
+                <button class="ms-action-btn ms-btn-ghost" on:click={goToDashboard}>
+                    <span>🏠</span>
+                    <span>{$t('main.main_menu')}</span>
+                </button>
             </div>
         </div>
-        
-        <!-- Botones de navegación -->
-        <div class="flex gap-3 mb-6">
-            <button 
-                on:click={openSettings}
-                class="flex-1 py-2 px-4 rounded-lg font-medium text-white transition-colors flex items-center justify-center gap-2"
-                style="background: linear-gradient(to right, #2563eb, #1d4ed8);"
-            >
-                <span>✏️</span>
-                <span>{$t('main.edit_routine')}</span>
-            </button>
-            <button 
-                on:click={goToDashboard}
-                class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium text-white transition-colors flex items-center justify-center gap-2"
-            >
-                <span>🏠</span>
-                <span>{$t('main.main_menu')}</span>
-            </button>
-        </div>
-        
+    </header>
+
+    <div class="ms-content">
+
+        <!-- Routine Name Banner -->
         {#if routineName}
-            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-3 mb-6 shadow-lg">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📋</span>
-                    <div class="flex-1">
-                        <p class="text-xs text-blue-200 uppercase tracking-wider">{$t('main.current_routine')}</p>
-                        <p class="text-lg font-semibold text-white" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{routineName}</p>
-                    </div>
+            <div class="ms-routine-banner">
+                <span class="ms-banner-icon">📋</span>
+                <div>
+                    <p class="ms-banner-label">{$t('main.current_routine')}</p>
+                    <p class="ms-banner-name">{routineName}</p>
                 </div>
             </div>
         {/if}
-        
-        <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500 mb-6">
-            <h2 class="text-lg font-medium mb-2" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{$t('main.repetitions')}</h2>
-            <p class="text-3xl font-light text-purple-400" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">
-                {repetitions} {repetitions === 1 ? $t('main.repetition') : $t('main.repetitions_plural')}
-            </p>
+
+        <!-- Repetitions info card -->
+        <div class="ms-reps-card">
+            <div class="ms-reps-label">Repeticiones</div>
+            <div class="ms-reps-value">
+                {repetitions}
+                <span class="ms-reps-unit">{repetitions === 1 ? $t('main.repetition') : $t('main.repetitions_plural')}</span>
+            </div>
         </div>
-        
-        <div class="space-y-3 mb-8 overflow-visible relative">
-            <h3 class="text-lg font-medium text-gray-300 mb-4" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{$t('main.intervals_configured')}</h3>
-            
+
+        <!-- Intervals list -->
+        <div class="ms-section-label">{$t('main.intervals_configured')}</div>
+
+        <div class="ms-intervals-list">
             {#each intervals as interval, index}
                 {#if interval.type === 'repeat'}
-                    <div class="relative bg-gray-700 rounded-lg p-3 border-2 border-gray-600 flex items-center justify-between min-h-[72px]">
-                        <div>
-                            <p class="font-medium text-gray-200" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">🔄 {interval.name}</p>
-                            <p class="text-sm text-gray-300" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{$t('main.repeat_times', { times: interval.duration })}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-lg font-light text-gray-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">🔄</p>
-                        </div>
-                        
-                        <!-- Flecha amarilla SALIDA: L hacia arriba desde lado izquierdo -->
-                        <div style="position: absolute; left: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                            <svg width="32" height="32" viewBox="0 0 32 32">
-                                <line x1="32" y1="16" x2="10" y2="16" stroke="#facc15" stroke-width="2" />
-                                <line x1="10" y1="16" x2="10" y2="4" stroke="#facc15" stroke-width="2" />
-                                <polygon points="10,4 6,10 14,10" fill="#facc15" />
-                                <text x="16" y="12" class="text-[10px] font-bold" fill="#facc15">{interval.duration}</text>
-                            </svg>
+                    <!-- Repeat marker -->
+                    <div class="ms-repeat-card">
+                        <div class="ms-repeat-inner">
+                            <span class="ms-repeat-icon">🔄</span>
+                            <div>
+                                <p class="ms-repeat-name">{interval.name}</p>
+                                <p class="ms-repeat-sub">{$t('main.repeat_times', { times: interval.duration })}</p>
+                            </div>
+                            <!-- Yellow L arrow (exit) -->
+                            <div class="repeat-arrow-exit">
+                                <svg width="28" height="28" viewBox="0 0 28 28">
+                                    <line x1="28" y1="14" x2="8" y2="14" stroke="#facc15" stroke-width="2"/>
+                                    <line x1="8" y1="14" x2="8" y2="3" stroke="#facc15" stroke-width="2"/>
+                                    <polygon points="8,3 4,9 12,9" fill="#facc15"/>
+                                    <text x="14" y="11" font-size="9" font-weight="700" fill="#facc15">{interval.duration}</text>
+                                </svg>
+                            </div>
                         </div>
                     </div>
+
                 {:else if interval.type === 'weights'}
-                    <div class="relative bg-gray-800 rounded-lg p-3 border-l-4 {interval.color} flex items-center justify-between min-h-[72px]">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-purple-400">🏋️</span>
-                                <p class="font-medium text-white" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{interval.name}</p>
+                    <!-- Weights interval -->
+                    <div class="ms-interval-card" style="border-left-color:{getAccent(interval.color)}">
+                        <div class="ms-interval-inner">
+                            <div class="ms-interval-header">
+                                <span class="ms-interval-badge" style="background:rgba(168,85,247,0.15);">🏋️</span>
+                                <div>
+                                    <p class="ms-interval-name">{interval.name}</p>
+                                    <p class="ms-interval-meta">{interval.sets} {$t('intervals.series')} • {formatTime(interval.restTime || 0)} {$t('intervals.rest_time')}</p>
+                                </div>
+                                <span class="ms-interval-index">{index + 1}</span>
                             </div>
-                            <p class="text-sm text-gray-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">
-                                {interval.sets} {$t('intervals.series')} • {formatTime(interval.restTime || 0)} {$t('intervals.rest_time')}
-                            </p>
                         </div>
-                        <div class="text-right">
-                            <p class="text-lg font-light text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
-                        </div>
-                        
-                        <!-- Flecha amarilla ENTRADA: si este nodo es el inicio de una repetición -->
                         {#each intervals as checkInterval, checkIndex}
                             {#if checkInterval.type === 'repeat' && getRepeatStartIndex(checkIndex) === index}
-                                <div style="position: absolute; left: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                    <svg width="32" height="32" viewBox="0 0 32 32">
-                                        <line x1="10" y1="28" x2="10" y2="16" stroke="#facc15" stroke-width="2" />
-                                        <line x1="10" y1="16" x2="32" y2="16" stroke="#facc15" stroke-width="2" />
-                                        <polygon points="32,16 26,12 26,20" fill="#facc15" />
+                                <div class="arrow-entry">
+                                    <svg width="28" height="28" viewBox="0 0 28 28">
+                                        <line x1="8" y1="28" x2="8" y2="14" stroke="#facc15" stroke-width="2"/>
+                                        <line x1="8" y1="14" x2="28" y2="14" stroke="#facc15" stroke-width="2"/>
+                                        <polygon points="28,14 22,10 22,18" fill="#facc15"/>
                                     </svg>
                                 </div>
                             {/if}
                         {/each}
-                        
-                        <!-- Flecha morada ENTRADA: si es el primer nodo y hay repeticiones globales -->
                         {#if index === 0 && repetitions > 1}
-                            <div style="position: absolute; right: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                <svg width="32" height="32" viewBox="0 0 32 32" class="text-purple-400">
-                                    <line x1="22" y1="28" x2="22" y2="16" stroke="currentColor" stroke-width="2" />
-                                    <line x1="22" y1="16" x2="0" y2="16" stroke="currentColor" stroke-width="2" />
-                                    <polygon points="0,16 6,12 6,20" fill="currentColor" />
+                            <div class="arrow-global-entry">
+                                <svg width="28" height="28" viewBox="0 0 28 28">
+                                    <line x1="20" y1="28" x2="20" y2="14" stroke="#a855f7" stroke-width="2"/>
+                                    <line x1="20" y1="14" x2="0" y2="14" stroke="#a855f7" stroke-width="2"/>
+                                    <polygon points="0,14 6,10 6,18" fill="#a855f7"/>
                                 </svg>
                             </div>
                         {/if}
-
-                        <!-- Flecha morada SALIDA: si es el último nodo y hay repeticiones globales -->
                         {#if index === intervals.length - 1 && repetitions > 1}
-                            <div style="position: absolute; right: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                <svg width="32" height="32" viewBox="0 0 32 32">
-                                    <line x1="0" y1="16" x2="22" y2="16" stroke="#a78bfa" stroke-width="2" />
-                                    <line x1="22" y1="16" x2="22" y2="4" stroke="#a78bfa" stroke-width="2" />
-                                    <polygon points="22,4 18,10 26,10" fill="#a78bfa" />
-                                    <text x="8" y="12" class="text-[10px] font-bold" fill="#a78bfa">{repetitions}</text>
+                            <div class="arrow-global-exit">
+                                <svg width="28" height="28" viewBox="0 0 28 28">
+                                    <line x1="0" y1="14" x2="20" y2="14" stroke="#a855f7" stroke-width="2"/>
+                                    <line x1="20" y1="14" x2="20" y2="3" stroke="#a855f7" stroke-width="2"/>
+                                    <polygon points="20,3 16,9 24,9" fill="#a855f7"/>
+                                    <text x="4" y="11" font-size="9" font-weight="700" fill="#a855f7">{repetitions}</text>
                                 </svg>
                             </div>
                         {/if}
                     </div>
+
                 {:else}
-                    <div class="relative bg-gray-800 rounded-lg p-3 border-l-4 {interval.color} flex items-center justify-between min-h-[72px]">
-                        <div>
-                            <p class="font-medium text-white" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);">{interval.name}</p>
-                            <p class="text-sm text-gray-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">
-                                {#if interval.prepDuration > 0}
-                                    <span class="text-yellow-500/80">{$t('settings.prep_short')}: {formatTime(interval.prepDuration)}</span> • 
+                    <!-- Regular interval -->
+                    <div class="ms-interval-card" style="border-left-color:{getAccent(interval.color)}">
+                        <div class="ms-interval-inner">
+                            <div class="ms-interval-header">
+                                <div class="ms-interval-dot" style="background:{getAccent(interval.color)};"></div>
+                                <p class="ms-interval-name">{interval.name}</p>
+                                <span class="ms-interval-index">{index + 1}</span>
+                            </div>
+                            <!-- Time blocks -->
+                            <div class="hb-time-blocks">
+                                {#if interval.prepDuration && interval.prepDuration > 0}
+                                    <div class="hb-time-block">
+                                        <span class="hb-time-label hb-time-label-prep">PREP</span>
+                                        <span class="hb-time-value">{formatTime(interval.prepDuration)}</span>
+                                    </div>
                                 {/if}
-                                {$t('settings.duration_short')}: {formatTime(interval.duration)}
-                                {#if interval.restDuration > 0}
-                                    • <span class="text-blue-400/80">{$t('settings.rest_short')}: {formatTime(interval.restDuration)}</span>
+                                <div class="hb-time-block hb-time-block-active">
+                                    <span class="hb-time-label hb-time-label-work">WORK</span>
+                                    <span class="hb-time-value">{formatTime(interval.duration)}</span>
+                                </div>
+                                {#if interval.restDuration && interval.restDuration > 0}
+                                    <div class="hb-time-block">
+                                        <span class="hb-time-label hb-time-label-rest">REST</span>
+                                        <span class="hb-time-value">{formatTime(interval.restDuration)}</span>
+                                    </div>
                                 {/if}
-                            </p>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-lg font-light text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">{index + 1}</p>
-                        </div>
-                        
-                        <!-- Flecha amarilla ENTRADA: si este nodo es el inicio de una repetición -->
                         {#each intervals as checkInterval, checkIndex}
                             {#if checkInterval.type === 'repeat' && getRepeatStartIndex(checkIndex) === index}
-                                <div style="position: absolute; left: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                    <svg width="32" height="32" viewBox="0 0 32 32">
-                                        <line x1="10" y1="28" x2="10" y2="16" stroke="#facc15" stroke-width="2" />
-                                        <line x1="10" y1="16" x2="32" y2="16" stroke="#facc15" stroke-width="2" />
-                                        <polygon points="32,16 26,12 26,20" fill="#facc15" />
+                                <div class="arrow-entry">
+                                    <svg width="28" height="28" viewBox="0 0 28 28">
+                                        <line x1="8" y1="28" x2="8" y2="14" stroke="#facc15" stroke-width="2"/>
+                                        <line x1="8" y1="14" x2="28" y2="14" stroke="#facc15" stroke-width="2"/>
+                                        <polygon points="28,14 22,10 22,18" fill="#facc15"/>
                                     </svg>
                                 </div>
                             {/if}
                         {/each}
-                        
-                        <!-- Flecha morada ENTRADA: si es el primer nodo y hay repeticiones globales -->
                         {#if index === 0 && repetitions > 1}
-                            <div style="position: absolute; right: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                <svg width="32" height="32" viewBox="0 0 32 32" class="text-purple-400">
-                                    <line x1="22" y1="28" x2="22" y2="16" stroke="currentColor" stroke-width="2" />
-                                    <line x1="22" y1="16" x2="0" y2="16" stroke="currentColor" stroke-width="2" />
-                                    <polygon points="0,16 6,12 6,20" fill="currentColor" />
+                            <div class="arrow-global-entry">
+                                <svg width="28" height="28" viewBox="0 0 28 28">
+                                    <line x1="20" y1="28" x2="20" y2="14" stroke="#a855f7" stroke-width="2"/>
+                                    <line x1="20" y1="14" x2="0" y2="14" stroke="#a855f7" stroke-width="2"/>
+                                    <polygon points="0,14 6,10 6,18" fill="#a855f7"/>
                                 </svg>
                             </div>
                         {/if}
-
-                        <!-- Flecha morada SALIDA: si es el último nodo y hay repeticiones globales -->
                         {#if index === intervals.length - 1 && repetitions > 1}
-                            <div style="position: absolute; right: -2.5rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                                <svg width="32" height="32" viewBox="0 0 32 32">
-                                    <line x1="0" y1="16" x2="22" y2="16" stroke="#a78bfa" stroke-width="2" />
-                                    <line x1="22" y1="16" x2="22" y2="4" stroke="#a78bfa" stroke-width="2" />
-                                    <polygon points="22,4 18,10 26,10" fill="#a78bfa" />
-                                    <text x="8" y="12" class="text-[10px] font-bold" fill="#a78bfa">{repetitions}</text>
+                            <div class="arrow-global-exit">
+                                <svg width="28" height="28" viewBox="0 0 28 28">
+                                    <line x1="0" y1="14" x2="20" y2="14" stroke="#a855f7" stroke-width="2"/>
+                                    <line x1="20" y1="14" x2="20" y2="3" stroke="#a855f7" stroke-width="2"/>
+                                    <polygon points="20,3 16,9 24,9" fill="#a855f7"/>
+                                    <text x="4" y="11" font-size="9" font-weight="700" fill="#a855f7">{repetitions}</text>
                                 </svg>
                             </div>
                         {/if}
                     </div>
                 {/if}
             {/each}
-            
+
             {#if intervals.length === 0}
-                <div class="bg-gray-800 rounded-lg p-4 text-center">
-                    <p class="text-gray-400" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">{$t('main.no_intervals')}</p>
-                    <p class="text-sm text-gray-500 mt-1" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);">{$t('main.use_settings')}</p>
+                <div class="ms-empty-state">
+                    <p class="ms-empty-text">{$t('main.no_intervals')}</p>
+                    <p class="ms-empty-hint">{$t('main.use_settings')}</p>
                 </div>
             {/if}
         </div>
-        
-        <button 
+
+        <!-- Duration info -->
+        {#if intervals.length > 0}
+            <div class="ms-duration-info">
+                <div class="ms-dur-item">
+                    <span class="ms-dur-label">{$t('main.total_duration')}</span>
+                    <span class="ms-dur-value">{formatTime(totalDuration())}</span>
+                </div>
+                <div class="ms-dur-sep"></div>
+                <div class="ms-dur-item">
+                    <span class="ms-dur-label">{$t('main.estimated_time')}</span>
+                    <span class="ms-dur-value">{formatTime(totalDuration() * repetitions)}</span>
+                </div>
+            </div>
+        {/if}
+
+        <!-- Start button -->
+        <button
+            class="hb-btn hb-btn-primary"
+            style="margin-top:1rem;"
             on:click={startWorkout}
             disabled={intervals.length === 0}
-            class="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium text-lg transition-colors"
-            style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);"
         >
             {intervals.length === 0 ? $t('main.configure_intervals') : $t('main.start_routine')}
         </button>
-        
-        {#if intervals.length > 0}
-            <div class="mt-6 text-center text-gray-400">
-                <p class="text-sm" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">
-                    {$t('main.total_duration')} {formatTime(intervals.reduce((acc, interval) => {
-                        if (interval.type === 'repeat') return acc + 2;
-                        if (interval.type === 'weights') return acc + ((interval.restTime || 0) * ((interval.sets || 1) - 1));
-                        return acc + (interval.duration || 0) + (interval.prepDuration || 0) + (interval.restDuration || 0);
-                    }, 0))}
-                </p>
-                <p class="text-xs mt-1" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);">
-                    {$t('main.estimated_time')} {formatTime(intervals.reduce((acc, interval) => {
-                        if (interval.type === 'repeat') return acc + 2;
-                        if (interval.type === 'weights') return acc + ((interval.restTime || 0) * ((interval.sets || 1) - 1));
-                        return acc + (interval.duration || 0) + (interval.prepDuration || 0) + (interval.restDuration || 0);
-                    }, 0) * repetitions)}
-                </p>
-            </div>
-        {/if}
     </div>
 </div>
+
+<style>
+.ms-root {
+    min-height: 100vh;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Top bar */
+.ms-top-bar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,17,32,0.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-card);
+}
+.ms-top-inner {
+    max-width: 520px; margin: 0 auto;
+    padding: 0.75rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 0.75rem;
+}
+.ms-logo-area { display: flex; align-items: center; gap: 0.6rem; }
+.ms-logo { width: 30px; height: 30px; object-fit: contain; }
+.ms-app-title { font-size: 1rem; font-weight: 800; color: var(--text-primary); }
+.ms-top-actions { display: flex; gap: 0.5rem; }
+.ms-action-btn {
+    display: flex; align-items: center; gap: 0.35rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem; font-weight: 600;
+    border: none; cursor: pointer; transition: all 0.2s;
+}
+.ms-btn-blue  { background: var(--accent-blue); color: #fff; }
+.ms-btn-blue:hover { background: #2563eb; }
+.ms-btn-ghost { background: var(--bg-card-alt); color: var(--text-secondary); border: 1px solid var(--border-card); }
+.ms-btn-ghost:hover { color: var(--text-primary); }
+
+/* Content */
+.ms-content {
+    max-width: 520px; margin: 0 auto;
+    padding: 1.25rem 1.25rem 5rem;
+}
+
+/* Routine banner */
+.ms-routine-banner {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-left: 4px solid var(--accent-blue);
+    border-radius: var(--radius-card);
+    padding: 0.875rem 1.1rem;
+    margin-bottom: 1rem;
+}
+.ms-banner-icon { font-size: 1.2rem; }
+.ms-banner-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-blue); }
+.ms-banner-name  { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-top: 0.1rem; }
+
+/* Reps card */
+.ms-reps-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-left: 4px solid var(--accent-purple);
+    border-radius: var(--radius-card);
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+.ms-reps-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(168,85,247,0.1) 0%, transparent 40%);
+    pointer-events: none;
+    border-radius: var(--radius-card);
+}
+.ms-reps-label {
+    font-size: 0.6rem; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent-purple); margin-bottom: 0.3rem;
+}
+.ms-reps-value {
+    font-size: 1.75rem; font-weight: 800;
+    color: var(--text-primary); line-height: 1;
+}
+.ms-reps-unit { font-size: 0.875rem; font-weight: 400; color: var(--text-secondary); margin-left: 0.4rem; }
+
+/* Section label */
+.ms-section-label {
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-label); margin-bottom: 0.75rem;
+}
+
+/* Intervals list */
+.ms-intervals-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
+
+/* Regular interval card */
+.ms-interval-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-card);
+    border-left-width: 4px;
+    position: relative;
+    overflow: visible;
+}
+.ms-interval-inner { padding: 0.9rem 1rem 1rem; }
+.ms-interval-header {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin-bottom: 0.25rem;
+}
+.ms-interval-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%; flex-shrink: 0;
+}
+.ms-interval-name {
+    flex: 1; font-size: 0.95rem; font-weight: 700;
+    color: var(--text-primary);
+}
+.ms-interval-meta { font-size: 0.78rem; color: var(--text-secondary); }
+.ms-interval-badge {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; flex-shrink: 0;
+}
+.ms-interval-index {
+    font-size: 0.75rem; font-weight: 700;
+    color: var(--text-muted); flex-shrink: 0;
+}
+
+/* Repeat card */
+.ms-repeat-card {
+    background: var(--bg-card-alt);
+    border: 2px dashed var(--border-card);
+    border-radius: var(--radius-card);
+    position: relative; overflow: visible;
+}
+.ms-repeat-inner {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.875rem 1rem; position: relative;
+}
+.ms-repeat-icon { font-size: 1.2rem; flex-shrink: 0; }
+.ms-repeat-name { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); }
+.ms-repeat-sub  { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.1rem; }
+
+/* Arrows */
+.repeat-arrow-exit {
+    position: absolute; left: -2.25rem; top: 50%;
+    transform: translateY(-50%); pointer-events: none;
+}
+.arrow-entry {
+    position: absolute; left: -2.25rem; top: 50%;
+    transform: translateY(-50%); pointer-events: none;
+}
+.arrow-global-entry {
+    position: absolute; right: -2.25rem; top: 50%;
+    transform: translateY(-50%); pointer-events: none;
+}
+.arrow-global-exit {
+    position: absolute; right: -2.25rem; top: 50%;
+    transform: translateY(-50%); pointer-events: none;
+}
+
+/* Empty state */
+.ms-empty-state {
+    background: var(--bg-card);
+    border: 1px dashed var(--border-card);
+    border-radius: var(--radius-card);
+    padding: 2rem; text-align: center;
+}
+.ms-empty-text { font-size: 0.9rem; color: var(--text-secondary); }
+.ms-empty-hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem; }
+
+/* Duration info */
+.ms-duration-info {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-card);
+    padding: 0.875rem 1.1rem;
+    display: flex; align-items: center; gap: 1rem;
+    margin-top: 0.25rem;
+}
+.ms-dur-item { display: flex; flex-direction: column; gap: 0.15rem; }
+.ms-dur-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-label); }
+.ms-dur-value { font-size: 1rem; font-weight: 700; color: var(--accent-green); }
+.ms-dur-sep { width: 1px; height: 2.5rem; background: var(--border-card); }
+</style>
