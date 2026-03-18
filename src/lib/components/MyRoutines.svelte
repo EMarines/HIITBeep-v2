@@ -72,7 +72,7 @@
 				<img src="/logo.png" alt="HIITBeep" class="mr-logo" />
 				<h1 class="mr-title">{$t('routines.my_routines')}</h1>
 			</div>
-			<div style="width:38px;"></div><!-- spacer for centering -->
+			<div style="width:38px;"></div>
 		</div>
 	</header>
 
@@ -80,47 +80,46 @@
 
 		<!-- Stats card -->
 		<div class="mr-stats-card">
+			<div class="mr-stats-bg-glow"></div>
 			<div class="mr-stats-number">{$routineStore.length}<span class="mr-stats-total">/15</span></div>
 			<div class="mr-stats-label">{$t('routines.routines')}</div>
 		</div>
 
 		<!-- Section label -->
-		<div class="hb-section-label" style="margin-top:1.5rem;">{$t('routines.routines')}</div>
+		<div class="hb-section-label" style="margin-top:1.75rem; margin-bottom:0.75rem;">{$t('routines.routines')}</div>
 
 		<!-- Routines list -->
 		{#if $routineStore.length === 0}
 			<div class="mr-empty-state">
 				<div class="mr-empty-icon">📋</div>
 				<p class="mr-empty-title">{$t('routines.no_routines')}</p>
+				<p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.35rem;">{$t('main.use_settings')}</p>
 			</div>
 		{:else}
-			<div class="hb-stack">
+			<div class="mr-list">
 				{#each $routineStore as routine (routine.id)}
-					<div class="hb-routine-item">
-						<div class="hb-routine-body">
-							<div class="hb-routine-name">{routine.name}</div>
-							<div class="hb-routine-meta">
-								{getIntervalCount(routine)} {$t('routines.intervals')} &nbsp;·&nbsp;
-								{routine.repetitions} {$t('routines.repetitions')} &nbsp;·&nbsp;
-								{formatTime(calculateTotalRoutineTime(routine))}
+					<div class="mr-item">
+						<div class="mr-item-glow"></div>
+						<div class="mr-item-body">
+							<div class="mr-item-name">{routine.name}</div>
+							<div class="mr-item-meta">
+								<span>{getIntervalCount(routine)} {$t('routines.intervals')}</span>
+								<span class="mr-meta-sep">•</span>
+								<span>{routine.repetitions} {$t('routines.repetitions')}</span>
+								<span class="mr-meta-sep">•</span>
+								<span>{formatTime(calculateTotalRoutineTime(routine))}</span>
 							</div>
-							<div class="hb-routine-date">
+							<div class="mr-item-date">
 								{routine.lastUsed
 									? `${$t('routines.last_used')}: ${formatDate(routine.lastUsed)}`
 									: formatDate(routine.createdAt)}
 							</div>
 						</div>
-						<div class="hb-routine-actions">
-							<button
-								class="hb-routine-action-btn"
-								on:click={() => loadRoutine(routine)}
-							>
+						<div class="mr-item-actions">
+							<button class="mr-item-btn mr-btn-load" on:click={() => loadRoutine(routine)}>
 								{$t('routines.load')}
 							</button>
-							<button
-								class="hb-routine-action-btn hb-routine-action-btn-danger"
-								on:click={() => confirmDelete(routine)}
-							>
+							<button class="mr-item-btn mr-btn-del" on:click={() => confirmDelete(routine)} aria-label="Eliminar">
 								🗑️
 							</button>
 						</div>
@@ -133,19 +132,17 @@
 
 <!-- Delete Confirmation Modal -->
 {#if showDeleteConfirm && routineToDelete}
-	<div class="hb-modal-backdrop">
-		<div class="hb-modal">
-			<div class="mr-del-icon-wrap">
-				<span class="mr-del-icon">⚠️</span>
-			</div>
-			<h3 class="mr-del-title">{$t('routines.confirm_delete')}</h3>
-			<p class="mr-del-msg">
+	<div class="hb-modal-backdrop" style="z-index:300;">
+		<div class="hb-modal" style="text-align:center;">
+			<div class="mr-del-icon-wrap">⚠️</div>
+			<h3 style="font-size:1.25rem; font-weight:800; color:var(--text-primary); margin-bottom:0.5rem;">{$t('routines.confirm_delete')}</h3>
+			<p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.5; margin-bottom:1.5rem;">
 				{$t('routines.confirm_delete_message')}
 				<br/>
-				<span class="mr-del-name">"{routineToDelete.name}"</span>
+				<span style="font-weight:700; color:var(--text-primary);">"{routineToDelete.name}"</span>
 			</p>
-			<div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
-				<button class="hb-btn hb-btn-delete" on:click={handleDelete}>
+			<div style="display:flex; flex-direction:column; gap:0.75rem;">
+				<button class="hb-btn hb-btn-primary" style="background:var(--accent-red); width:100%;" on:click={handleDelete}>
 					{$t('routines.delete')}
 				</button>
 				<button class="hb-btn hb-btn-secondary" on:click={cancelDelete}>
@@ -191,51 +188,104 @@
 	background: var(--bg-card);
 	border: 1px solid var(--border-card);
 	border-radius: var(--radius-card);
-	padding: 1.5rem;
+	padding: 1.75rem 1.5rem;
 	text-align: center;
+	position: relative; overflow: hidden;
+}
+.mr-stats-bg-glow {
+	position: absolute; inset: 0;
+	background: radial-gradient(circle at center, rgba(34,197,94,0.08) 0%, transparent 70%);
+	pointer-events: none;
 }
 .mr-stats-number {
-	font-size: 3rem; font-weight: 900;
+	position: relative; z-index: 1;
+	font-size: 3.5rem; font-weight: 900;
 	color: var(--accent-green); line-height: 1;
+	text-shadow: 0 4px 12px rgba(34,197,94,0.2);
 }
-.mr-stats-total { font-size: 1.5rem; color: var(--text-muted); font-weight: 400; margin-left: 0.2rem; }
+.mr-stats-total { font-size: 1.75rem; color: var(--text-muted); font-weight: 400; margin-left: 0.2rem; }
 .mr-stats-label {
+	position: relative; z-index: 1;
 	font-size: 0.65rem; font-weight: 700;
-	letter-spacing: 0.12em; text-transform: uppercase;
-	color: var(--text-label); margin-top: 0.4rem;
+	letter-spacing: 0.15em; text-transform: uppercase;
+	color: var(--text-label); margin-top: 0.6rem;
 }
+
+/* List */
+.mr-list { display: flex; flex-direction: column; gap: 0.875rem; }
+
+/* Routine Item */
+.mr-item {
+	background: var(--bg-card);
+	border: 1px solid var(--border-card);
+	border-left: 4px solid var(--accent-orange);
+	border-radius: var(--radius-card);
+	padding: 1rem 1.1rem;
+	display: flex; align-items: center; justify-content: space-between;
+	gap: 1rem;
+	position: relative; overflow: hidden;
+	transition: all 0.2s;
+}
+.mr-item:hover {
+	border-color: rgba(249,115,22,0.3);
+	box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.mr-item-glow {
+	position: absolute; inset: 0;
+	background: linear-gradient(90deg, rgba(249,115,22,0.1) 0%, transparent 40%);
+	pointer-events: none;
+}
+.mr-item-body { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.mr-item-name {
+	font-size: 1rem; font-weight: 700; color: var(--text-primary);
+	margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mr-item-meta {
+	display: flex; align-items: center; gap: 0.5rem;
+	font-size: 0.78rem; color: var(--text-secondary);
+}
+.mr-meta-sep { opacity: 0.4; }
+.mr-item-date {
+	font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem;
+}
+
+.mr-item-actions { display: flex; gap: 0.6rem; align-items: center; position: relative; z-index: 1; }
+.mr-item-btn {
+	border-radius: 8px; border: none; cursor: pointer;
+	font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 700;
+	transition: all 0.2s;
+}
+.mr-btn-load {
+	padding: 0.5rem 1rem;
+	background: var(--bg-card-alt); color: var(--accent-orange);
+	border: 1px solid rgba(249,115,22,0.3);
+}
+.mr-btn-load:hover { background: var(--accent-orange); color: #fff; }
+
+.mr-btn-del {
+	width: 36px; height: 36px;
+	display: flex; align-items: center; justify-content: center;
+	padding: 0; background: rgba(239,68,68,0.1); color: var(--accent-red);
+}
+.mr-btn-del:hover { background: var(--accent-red); color: #fff; }
 
 /* Empty state */
 .mr-empty-state {
 	background: var(--bg-card);
-	border: 1px dashed var(--border-card);
+	border: 2px dashed var(--border-card);
 	border-radius: var(--radius-card);
-	padding: 2.5rem; text-align: center;
+	padding: 3rem 1.5rem; text-align: center;
 }
-.mr-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-.mr-empty-title { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
+.mr-empty-icon { font-size: 2.5rem; margin-bottom: 0.875rem; }
+.mr-empty-title { font-size: 0.95rem; color: var(--text-secondary); font-weight: 600; }
 
-/* Delete modal */
+/* Delete modal icon */
 .mr-del-icon-wrap {
 	width: 60px; height: 60px;
 	background: rgba(239,68,68,0.1);
 	border-radius: 50%; display: flex;
 	align-items: center; justify-content: center;
-	margin: 0 auto 1.25rem;
+	font-size: 1.75rem; margin: 0 auto 1.25rem;
+	color: var(--accent-red);
 }
-.mr-del-icon { font-size: 1.75rem; }
-.mr-del-title { font-size: 1.25rem; font-weight: 800; text-align: center; color: var(--text-primary); }
-.mr-del-msg   { font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin-top: 0.5rem; line-height: 1.6; }
-.mr-del-name  { display: block; font-weight: 700; color: var(--text-primary); margin-top: 0.5rem; }
-
-.hb-btn-delete {
-	width: 100%; padding: 1rem;
-	background: var(--accent-red);
-	color: #fff;
-	font-size: 1rem; font-weight: 700;
-	border-radius: var(--radius-btn);
-	border: none; cursor: pointer;
-	transition: all 0.2s;
-}
-.hb-btn-delete:hover { background: #dc2626; }
 </style>
