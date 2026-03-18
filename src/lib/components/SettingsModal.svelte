@@ -206,9 +206,15 @@
 										🔄 {$t('settings.repeat_marker')}
 									</div>
 									<div class="sm-interval-actions">
-										<button class="sm-act-btn" on:click={() => moveIntervalUp(index)} disabled={index === 0} title={$t('settings.move_up')}>↑</button>
-										<button class="sm-act-btn" on:click={() => moveIntervalDown(index)} disabled={index === localIntervals.length - 1} title={$t('settings.move_down')}>↓</button>
-										<button class="sm-act-btn sm-act-danger" on:click={() => confirmDeleteInterval(index)} title={$t('settings.delete_interval')}>🗑️</button>
+										<button class="sm-act-btn" on:click={() => moveIntervalUp(index)} disabled={index === 0} title={$t('settings.move_up')} aria-label={$t('settings.move_up')}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+										</button>
+										<button class="sm-act-btn" on:click={() => moveIntervalDown(index)} disabled={index === localIntervals.length - 1} title={$t('settings.move_down')} aria-label={$t('settings.move_down')}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+										</button>
+										<button class="sm-act-btn sm-act-danger" on:click={() => confirmDeleteInterval(index)} title={$t('settings.delete_interval')} aria-label={$t('settings.delete_interval')}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+										</button>
 									</div>
 								</div>
 								<div class="sm-interval-body">
@@ -233,10 +239,19 @@
 										🏋️ {$t('intervals.weights')}
 									</div>
 									<div class="sm-interval-actions">
-										<button class="sm-act-btn sm-act-copy" on:click={() => copyInterval(index)} title={$t('settings.copy_interval')}>📄</button>
-										<button class="sm-act-btn" on:click={() => moveIntervalUp(index)} disabled={index === 0} title={$t('settings.move_up')}>↑</button>
-										<button class="sm-act-btn" on:click={() => moveIntervalDown(index)} disabled={index === localIntervals.length - 1} title={$t('settings.move_down')}>↓</button>
-										<button class="sm-act-btn sm-act-danger" on:click={() => confirmDeleteInterval(index)} title={$t('settings.delete_interval')}>🗑️</button>
+										<button class="sm-act-btn sm-act-copy" on:click={() => copyInterval(index)} title={$t('settings.copy_interval')}>
+											<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+											<span>{$t('common.copy') || 'Copiar'}</span>
+										</button>
+										<button class="sm-act-btn" on:click={() => moveIntervalUp(index)} disabled={index === 0} title={$t('settings.move_up')} aria-label={$t('settings.move_up')}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+										</button>
+										<button class="sm-act-btn" on:click={() => moveIntervalDown(index)} disabled={index === localIntervals.length - 1} title={$t('settings.move_down')} aria-label={$t('settings.move_down')}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+										</button>
+										<button class="sm-act-btn sm-act-danger" on:click={() => confirmDeleteInterval(index)} title={$t('settings.delete_interval')} aria-label={$t('settings.delete_interval')}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+										</button>
 									</div>
 								</div>
 								<div class="sm-interval-body">
@@ -273,10 +288,19 @@
 								<div class="sm-interval-top">
 									<div class="sm-interval-dot" style="background:{getAccent(interval.color)};"></div>
 									<div class="sm-interval-actions">
-										<button class="sm-act-btn sm-act-copy" on:click={() => copyInterval(index)} title={$t('settings.copy_interval')}>📄</button>
-										<button class="sm-act-btn" on:click={() => moveIntervalUp(index)} disabled={index === 0} title={$t('settings.move_up')}>↑</button>
-										<button class="sm-act-btn" on:click={() => moveIntervalDown(index)} disabled={index === localIntervals.length - 1} title={$t('settings.move_down')}>↓</button>
-										<button class="sm-act-btn sm-act-danger" on:click={() => confirmDeleteInterval(index)} title={$t('settings.delete_interval')}>🗑️</button>
+										<button class="sm-act-btn sm-act-copy" on:click={() => copyInterval(index)} title={$t('settings.copy_interval')}>
+											<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+											<span>{$t('common.copy') || 'Copiar'}</span>
+										</button>
+										<button class="sm-act-btn" on:click={() => moveIntervalUp(index)} disabled={index === 0} title={$t('settings.move_up')} aria-label={$t('settings.move_up')}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+										</button>
+										<button class="sm-act-btn" on:click={() => moveIntervalDown(index)} disabled={index === localIntervals.length - 1} title={$t('settings.move_down')} aria-label={$t('settings.move_down')}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+										</button>
+										<button class="sm-act-btn sm-act-danger" on:click={() => confirmDeleteInterval(index)} title={$t('settings.delete_interval')} aria-label={$t('settings.delete_interval')}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+										</button>
 									</div>
 								</div>
 								<div class="sm-interval-body">
@@ -375,15 +399,23 @@
 <!-- Delete confirmation modal -->
 {#if intervalToDeleteIndex !== null}
 	<div class="hb-modal-backdrop" style="z-index:300;">
-		<div class="hb-modal" style="text-align:center;">
-			<div class="sm-del-icon-wrap">🗑️</div>
-			<h3 style="font-size:1.2rem;font-weight:800;margin-bottom:0.5rem;">{$t('settings.confirm_delete_interval')}</h3>
-			<p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.5rem;">{$t('settings.confirm_delete_interval_message')}</p>
-			<div style="display:flex;flex-direction:column;gap:0.75rem;">
-				<button class="hb-btn" style="width:100%;padding:0.9rem;background:var(--accent-red);color:#fff;border-radius:var(--radius-btn);font-weight:700;" on:click={executeDeleteInterval}>
+		<div class="mr-del-modal">
+			<div class="mr-del-icon-wrap">
+				<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M3 6h18"></path>
+					<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+					<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+					<line x1="10" y1="11" x2="10" y2="17"></line>
+					<line x1="14" y1="11" x2="14" y2="17"></line>
+				</svg>
+			</div>
+			<h3 style="font-size:1.25rem; font-weight:800; color:var(--text-primary); margin-bottom:0.5rem; letter-spacing:-0.02em;">{$t('settings.confirm_delete_interval')}</h3>
+			<p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.5; margin-bottom:1.5rem;">{$t('settings.confirm_delete_interval_message')}</p>
+			<div style="display:flex; flex-direction:column; gap:0.75rem;">
+				<button class="mr-btn-danger" on:click={executeDeleteInterval}>
 					{$t('common.delete')}
 				</button>
-				<button class="hb-btn hb-btn-secondary" on:click={cancelDeleteInterval}>
+				<button class="hb-btn hb-btn-secondary" style="width:100%; border:none;" on:click={cancelDeleteInterval}>
 					{$t('common.cancel')}
 				</button>
 			</div>
@@ -499,13 +531,13 @@
 	display: flex; gap: 0.3rem; align-items: center;
 }
 .sm-act-btn {
-	height: 28px; min-width: 28px; padding: 0 0.4rem;
-	border-radius: 6px; border: none; cursor: pointer;
+	height: 38px; min-width: 38px; padding: 0 0.65rem;
+	border-radius: 8px; border: none; cursor: pointer;
 	background: var(--bg-card-alt); color: var(--text-secondary);
-	font-size: 0.78rem; font-weight: 600;
+	font-size: 0.82rem; font-weight: 700; gap: 0.4rem;
 	transition: all 0.15s; display: flex; align-items: center; justify-content: center;
 }
-.sm-act-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+.sm-act-btn:hover { background: rgba(255,255,255,0.12); color: var(--text-primary); }
 .sm-act-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .sm-act-danger:hover { background: rgba(239,68,68,0.15); color: var(--accent-red); }
 .sm-act-copy:hover  { background: rgba(59,130,246,0.12); color: var(--accent-blue); }
@@ -533,7 +565,6 @@
 	display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
 	margin-top: 0.6rem;
 }
-.sm-mini-field {}
 .hb-input-sm { padding: 0.55rem 2rem 0.55rem 0.75rem; font-size: 0.85rem; }
 
 .sm-fields-row {
@@ -591,11 +622,43 @@
 .sm-footer-actions { display: flex; gap: 0.6rem; }
 
 /* ── Delete modal ── */
-.sm-del-icon-wrap {
-	width: 56px; height: 56px;
-	background: rgba(239,68,68,0.1);
-	border-radius: 50%;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 1.75rem; margin: 0 auto 1rem;
+.mr-del-modal {
+	background: var(--bg-card);
+	border: 1px solid var(--border-card);
+	border-radius: var(--radius-card);
+	padding: 2.5rem 2rem;
+	width: 100%; max-width: 360px;
+	text-align: center;
+	box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+	animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mr-del-icon-wrap {
+	width: 60px; height: 60px;
+	background: rgba(239,68,68,0.12);
+	border-radius: 50%; display: flex;
+	align-items: center; justify-content: center;
+	margin: 0 auto 1.25rem;
+	color: var(--accent-red);
+}
+
+.mr-btn-danger {
+	width: 100%; padding: 0.9rem;
+	background: var(--accent-red); color: #fff;
+	font-size: 0.95rem; font-weight: 700;
+	border-radius: var(--radius-btn); border: none;
+	cursor: pointer; transition: all 0.2s;
+	font-family: 'Inter', sans-serif;
+	box-shadow: 0 4px 14px rgba(239,68,68,0.3);
+}
+.mr-btn-danger:hover {
+	background: #dc2626;
+	box-shadow: 0 6px 20px rgba(239,68,68,0.4);
+	transform: translateY(-1px);
+}
+
+@keyframes popIn {
+	0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+	100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 </style>

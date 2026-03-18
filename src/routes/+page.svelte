@@ -25,6 +25,13 @@
 	let showSaveModal = false;
 	let routineNameInput = '';
 	
+	// Toast para notificaciones
+	let toastMessage = '';
+	function showToast(msg: string) {
+		toastMessage = msg;
+		setTimeout(() => { toastMessage = ''; }, 3000);
+	}
+	
 	// Key para forzar recreación de SettingsModal
 	let settingsKey = 0;
 	
@@ -85,8 +92,9 @@
 			return;
 		}
 		
-		if (routineNameFromSettings && routineNameFromSettings.trim()) {
+			if (routineNameFromSettings && routineNameFromSettings.trim()) {
 			let result;
+			const wasUpdating = !!currentRoutineId;
 			
 			if (currentRoutineId) {
 				result = await routineStore.update(currentRoutineId, routineNameFromSettings.trim(), routineIntervals, routineRepetitions);
@@ -102,14 +110,15 @@
 				
 				localStorage.removeItem('hiitbeep-config');
 				
-				const message = currentRoutineId && currentRoutineId === result.routine?.id 
+				const message = wasUpdating 
 					? `✅ Rutina "${currentRoutineName}" actualizada`
 					: `✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`;
-				alert(message);
+				showToast(message);
 				
-				currentView = 'main';
+				// El botón de "Guardar e Iniciar" debe llevar directo al Timer
+				currentView = 'timer';
 			} else {
-				alert(`❌ ${currentT('routines.save_error')}: ${result.error}`);
+				showToast(`❌ ${currentT('routines.save_error')}: ${result.error}`);
 			}
 		} else {
 			intervals = routineIntervals;
@@ -158,16 +167,17 @@
 		t.subscribe(value => currentT = value)();
 		
 		if (!routineNameInput.trim()) {
-			alert(currentT('routines.name_required'));
+			showToast(currentT('routines.name_required'));
 			return;
 		}
 		
 		if (!repetitions || repetitions < 1) {
-			alert(currentT('settings.repetitions_required') || 'Please configure repetitions');
+			showToast(currentT('settings.repetitions_required') || 'Please configure repetitions');
 			return;
 		}
 		
 		let result;
+		const wasUpdating = !!currentRoutineId;
 		
 		if (currentRoutineId) {
 			result = await routineStore.update(currentRoutineId, routineNameInput.trim(), intervals, repetitions);
@@ -183,13 +193,13 @@
 			
 			localStorage.removeItem('hiitbeep-config');
 			
-			const message = currentRoutineId && currentRoutineId === result.routine?.id 
+			const message = wasUpdating 
 				? `✅ Rutina "${currentRoutineName}" actualizada`
 				: `✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`;
-			alert(message);
+			showToast(message);
 			currentView = 'main';
 		} else {
-			alert(`❌ ${currentT('routines.save_error')}: ${result.error}`);
+			showToast(`❌ ${currentT('routines.save_error')}: ${result.error}`);
 		}
 	}
 	
@@ -233,6 +243,23 @@
 <svelte:head>
 	<title>{$t('app.title')} - {$t('app.description')}</title>
 </svelte:head>
+
+<!-- Toast notification superior -->
+{#if toastMessage}
+	<div class="fixed top-6 left-1/2 -translate-x-1/2 z-[99999] bg-gray-900 border border-white/10 shadow-2xl rounded-full px-6 py-3 flex items-center justify-center animate-bounce-in">
+		<span class="text-sm font-bold text-white tracking-wide">{toastMessage}</span>
+	</div>
+	<style>
+		@keyframes bounceIn {
+			0% { opacity: 0; transform: translate(-50%, -20px); }
+			50% { opacity: 1; transform: translate(-50%, 5px); }
+			100% { opacity: 1; transform: translate(-50%, 0); }
+		}
+		.animate-bounce-in {
+			animation: bounceIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+		}
+	</style>
+{/if}
 
 <main class="min-h-screen transition-colors duration-500 bg-gray-900 text-white">
 	{#if currentView === 'dashboard'}
@@ -282,35 +309,76 @@
 	{/if}
 	
 	{#if showSaveModal}
-		<div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-6">
-			<div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full">
-				<h3 class="text-xl font-bold mb-4 text-white">{$t('routines.save_routine')}</h3>
-				<p class="text-gray-300 mb-4">
+		<div class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[300] p-6">
+			<div class="sv-modal">
+				<div class="sv-icon-wrap">
+					<svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+						<polyline points="17 21 17 13 7 13 7 21"></polyline>
+						<polyline points="7 3 7 8 15 8"></polyline>
+					</svg>
+				</div>
+				<h3 style="font-size:1.25rem; font-weight:800; color:var(--text-primary); margin-bottom:0.5rem; letter-spacing:-0.02em;">{$t('routines.save_routine')}</h3>
+				<p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.5; margin-bottom:1.5rem;">
 					{$t('routines.save_routine_prompt')}
 				</p>
 				<input
 					type="text"
 					bind:value={routineNameInput}
 					placeholder={$t('routines.routine_name_placeholder')}
-					class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
+					class="sv-input"
 					maxlength="50"
 					on:keydown={(e) => e.key === 'Enter' && confirmSaveRoutine()}
 				/>
-				<div class="flex gap-3">
-					<button
-						on:click={cancelSaveRoutine}
-						class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors"
-					>
+				<div style="display:flex; gap:0.6rem; margin-top:1.5rem;">
+					<button class="sv-btn-cancel" on:click={cancelSaveRoutine}>
 						{$t('common.cancel')}
 					</button>
-					<button
-						on:click={confirmSaveRoutine}
-						class="flex-1 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg font-medium transition-colors"
-					>
+					<button class="sv-btn-save" on:click={confirmSaveRoutine}>
 						{$t('common.save')}
 					</button>
 				</div>
 			</div>
 		</div>
+		<style>
+		.sv-modal {
+			background: var(--bg-card);
+			border: 1px solid var(--border-card);
+			border-radius: var(--radius-card);
+			padding: 2.25rem 2rem;
+			width: 100%; max-width: 360px;
+			text-align: center;
+			box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+			animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		}
+		.sv-icon-wrap {
+			width: 60px; height: 60px;
+			background: rgba(168,85,247,0.12);
+			border-radius: 50%; display: flex;
+			align-items: center; justify-content: center;
+			margin: 0 auto 1.25rem;
+			color: var(--accent-purple);
+		}
+		.sv-input {
+			width: 100%; background: var(--bg-input); color: var(--text-input);
+			border: 1px solid var(--border-input); border-radius: var(--radius-input);
+			padding: 0.8rem 1rem; font-family: 'Inter', sans-serif;
+			font-size: 0.95rem; font-weight: 600; text-align: center;
+			outline: none; transition: all 0.2s;
+		}
+		.sv-input:focus { border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(168,85,247,0.25); }
+		.sv-btn-cancel {
+			flex: 1; padding: 0.85rem; background: var(--bg-card-alt); color: var(--text-secondary);
+			border: 1px solid var(--border-card); border-radius: var(--radius-btn);
+			font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+		}
+		.sv-btn-cancel:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+		.sv-btn-save {
+			flex: 1; padding: 0.85rem; background: var(--accent-purple); color: #fff;
+			border: none; border-radius: var(--radius-btn); box-shadow: 0 4px 14px rgba(168,85,247,0.3);
+			font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+		}
+		.sv-btn-save:hover { background: #9333ea; box-shadow: 0 6px 20px rgba(168,85,247,0.4); transform: translateY(-1px); }
+		</style>
 	{/if}
 </main>

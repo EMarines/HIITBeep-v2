@@ -135,14 +135,18 @@
 							</div>
 							<div class="hb-divider"></div>
 							<button class="dropdown-item" on:click={openProfile}>
-								<span class="dropdown-item-icon" style="background: rgba(59,130,246,0.15);">👤</span>
+								<span class="dropdown-item-icon" style="background: rgba(59,130,246,0.12); color: var(--accent-blue);">
+									<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+								</span>
 								<div>
 									<span class="dropdown-item-label">Editar Perfil</span>
 									<span class="dropdown-item-desc">Nombre, edad, peso, meta</span>
 								</div>
 							</button>
 							<button class="dropdown-item" on:click={openPreferences}>
-								<span class="dropdown-item-icon" style="background: rgba(168,85,247,0.15);">⚙️</span>
+								<span class="dropdown-item-icon" style="background: rgba(168,85,247,0.12); color: var(--accent-purple);">
+									<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+								</span>
 								<div>
 									<span class="dropdown-item-label">Preferencias</span>
 									<span class="dropdown-item-desc">Idioma, unidades de medida</span>
@@ -150,7 +154,9 @@
 							</button>
 							<div class="hb-divider"></div>
 							<button class="dropdown-item dropdown-item-danger" on:click={handleLogout}>
-								<span class="dropdown-item-icon" style="background: rgba(239,68,68,0.12);">🚪</span>
+								<span class="dropdown-item-icon" style="background: rgba(239,68,68,0.1); color: var(--accent-red);">
+									<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+								</span>
 								<span class="dropdown-item-label">Cerrar Sesión</span>
 							</button>
 						</div>
@@ -158,7 +164,9 @@
 				</div>
 			{:else}
 				<button class="login-btn" on:click={handleLogin}>
-					<span class="login-btn-icon">⚡</span>
+					<span class="login-btn-icon">
+						<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+					</span>
 					Login
 				</button>
 			{/if}

@@ -133,19 +133,25 @@
 <!-- Delete Confirmation Modal -->
 {#if showDeleteConfirm && routineToDelete}
 	<div class="hb-modal-backdrop" style="z-index:300;">
-		<div class="hb-modal" style="text-align:center;">
-			<div class="mr-del-icon-wrap">⚠️</div>
-			<h3 style="font-size:1.25rem; font-weight:800; color:var(--text-primary); margin-bottom:0.5rem;">{$t('routines.confirm_delete')}</h3>
+		<div class="mr-del-modal">
+			<div class="mr-del-icon-wrap">
+				<svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+					<line x1="12" y1="9" x2="12" y2="13"></line>
+					<line x1="12" y1="17" x2="12.01" y2="17"></line>
+				</svg>
+			</div>
+			<h3 style="font-size:1.25rem; font-weight:800; color:var(--text-primary); margin-bottom:0.5rem; letter-spacing:-0.02em;">{$t('routines.confirm_delete')}</h3>
 			<p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.5; margin-bottom:1.5rem;">
 				{$t('routines.confirm_delete_message')}
 				<br/>
 				<span style="font-weight:700; color:var(--text-primary);">"{routineToDelete.name}"</span>
 			</p>
 			<div style="display:flex; flex-direction:column; gap:0.75rem;">
-				<button class="hb-btn hb-btn-primary" style="background:var(--accent-red); width:100%;" on:click={handleDelete}>
+				<button class="mr-btn-danger" on:click={handleDelete}>
 					{$t('routines.delete')}
 				</button>
-				<button class="hb-btn hb-btn-secondary" on:click={cancelDelete}>
+				<button class="hb-btn hb-btn-secondary" style="width:100%; border:none;" on:click={cancelDelete}>
 					{$t('common.cancel')}
 				</button>
 			</div>
@@ -280,12 +286,43 @@
 .mr-empty-title { font-size: 0.95rem; color: var(--text-secondary); font-weight: 600; }
 
 /* Delete modal icon */
+.mr-del-modal {
+	background: var(--bg-card);
+	border: 1px solid var(--border-card);
+	border-radius: var(--radius-card);
+	padding: 2.5rem 2rem;
+	width: 100%; max-width: 360px;
+	text-align: center;
+	box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+	animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 .mr-del-icon-wrap {
 	width: 60px; height: 60px;
-	background: rgba(239,68,68,0.1);
+	background: rgba(239,68,68,0.12);
 	border-radius: 50%; display: flex;
 	align-items: center; justify-content: center;
-	font-size: 1.75rem; margin: 0 auto 1.25rem;
+	margin: 0 auto 1.25rem;
 	color: var(--accent-red);
+}
+
+.mr-btn-danger {
+	width: 100%; padding: 0.9rem;
+	background: var(--accent-red); color: #fff;
+	font-size: 0.95rem; font-weight: 700;
+	border-radius: var(--radius-btn); border: none;
+	cursor: pointer; transition: all 0.2s;
+	font-family: 'Inter', sans-serif;
+	box-shadow: 0 4px 14px rgba(239,68,68,0.3);
+}
+.mr-btn-danger:hover {
+	background: #dc2626;
+	box-shadow: 0 6px 20px rgba(239,68,68,0.4);
+	transform: translateY(-1px);
+}
+
+@keyframes popIn {
+	0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+	100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 </style>

@@ -1,360 +1,234 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
-    import { user } from '$lib/stores/userStore';
-    import { t } from '$lib/i18n';
+	import { createEventDispatcher } from 'svelte';
+	import { user } from '$lib/stores/userStore';
+	import { t } from '$lib/i18n';
 
-    const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher();
 
-    let email = '';
-    let password = '';
-    let displayName = '';
-    let isRegistering = false;
-    let error = '';
-    let loading = false;
+	let email = '';
+	let password = '';
+	let displayName = '';
+	let isRegistering = false;
+	let error = '';
+	let loading = false;
 
-    async function handleAuth() {
-        if (!email || !password) {
-            error = 'Por favor completa todos los campos';
-            return;
-        }
-        error = '';
-        loading = true;
-        try {
-            if (isRegistering) {
-                if (!displayName.trim()) {
-                    error = 'El nombre es requerido';
-                    loading = false;
-                    return;
-                }
-                await user.signUpWithEmail(email, password, displayName);
-            } else {
-                await user.loginWithEmail(email, password);
-            }
-            dispatch('close');
-        } catch (e: any) {
-            console.error(e);
-            if (e.code === 'auth/user-not-found') error = 'Usuario no encontrado';
-            else if (e.code === 'auth/wrong-password') error = 'Contraseña incorrecta';
-            else if (e.code === 'auth/email-already-in-use') error = 'El correo ya está en uso';
-            else error = e.message;
-        } finally {
-            loading = false;
-        }
-    }
+	async function handleAuth() {
+		if (!email || !password) {
+			error = 'Por favor completa todos los campos';
+			return;
+		}
+		error = '';
+		loading = true;
+		try {
+			if (isRegistering) {
+				if (!displayName.trim()) {
+					error = 'El nombre es requerido';
+					loading = false;
+					return;
+				}
+				await user.signUpWithEmail(email, password, displayName);
+			} else {
+				await user.loginWithEmail(email, password);
+			}
+			dispatch('close');
+		} catch (e: any) {
+			console.error(e);
+			if (e.code === 'auth/user-not-found') error = 'Usuario no encontrado';
+			else if (e.code === 'auth/wrong-password') error = 'Contraseña incorrecta';
+			else if (e.code === 'auth/email-already-in-use') error = 'El correo ya está en uso';
+			else error = e.message;
+		} finally {
+			loading = false;
+		}
+	}
 
-    async function handleGoogleLogin() {
-        error = '';
-        loading = true;
-        try {
-            await user.loginWithGoogle();
-            dispatch('close');
-        } catch (e: any) {
-            error = e.message;
-        } finally {
-            loading = false;
-        }
-    }
+	async function handleGoogleLogin() {
+		error = '';
+		loading = true;
+		try {
+			await user.loginWithGoogle();
+			dispatch('close');
+		} catch (e: any) {
+			error = e.message;
+		} finally {
+			loading = false;
+		}
+	}
 </script>
 
-<div class="modal-backdrop" on:click|self={() => dispatch('close')}>
-    <div class="modal-content">
-        <!-- Decoration bar -->
-        <div class="modal-top-bar" class:registering={isRegistering}></div>
+<div class="am-backdrop" on:click|self={() => dispatch('close')} on:keydown={(e) => e.key === 'Escape' && dispatch('close')} role="dialog" tabindex="-1">
+	<div class="am-panel">
+		<div class="am-top-bar" class:registering={isRegistering}></div>
 
-        <button on:click={() => dispatch('close')} class="close-btn">✕</button>
+		<button aria-label="Cerrar" class="am-close-btn" on:click={() => dispatch('close')}>
+			<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+			</svg>
+		</button>
 
-        <div class="modal-header">
-            <h2>{isRegistering ? 'Crear cuenta' : '¡Hola de nuevo!'}</h2>
-            <p>{isRegistering ? 'Únete a la comunidad HIITBeep' : 'Entra para sincronizar tus rutinas'}</p>
-        </div>
+		<div class="am-header">
+			<h2 class="am-title">{isRegistering ? 'Crear cuenta' : '¡Hola de nuevo!'}</h2>
+			<p class="am-subtitle">{isRegistering ? 'Únete a la comunidad HIITBeep' : 'Entra para sincronizar tus rutinas'}</p>
+		</div>
 
-        {#if error}
-            <div class="error-msg">
-                <span class="error-icon">⚠️</span> {error}
-            </div>
-        {/if}
+		{#if error}
+			<div class="am-error">
+				<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="12" r="10"></circle>
+					<line x1="12" y1="8" x2="12" y2="12"></line>
+					<line x1="12" y1="16" x2="12.01" y2="16"></line>
+				</svg>
+				<span>{error}</span>
+			</div>
+		{/if}
 
-        <div class="form-group">
-            {#if isRegistering}
-                <div class="input-wrapper">
-                    <span class="input-icon">👤</span>
-                    <input 
-                        type="text" 
-                        bind:value={displayName} 
-                        placeholder="Nombre completo" 
-                    />
-                </div>
-            {/if}
-            
-            <div class="input-wrapper">
-                <span class="input-icon">✉️</span>
-                <input 
-                    type="email" 
-                    bind:value={email} 
-                    placeholder="Correo electrónico" 
-                />
-            </div>
-            
-            <div class="input-wrapper">
-                <span class="input-icon">🔒</span>
-                <input 
-                    type="password" 
-                    bind:value={password} 
-                    placeholder="Contraseña" 
-                />
-            </div>
+		<div class="am-form">
+			{#if isRegistering}
+				<div class="am-input-wrap">
+					<input class="hb-input am-input" type="text" bind:value={displayName} placeholder="Nombre completo" />
+					<span class="am-icon">
+						<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+							<circle cx="12" cy="7" r="4"></circle>
+						</svg>
+					</span>
+				</div>
+			{/if}
+			
+			<div class="am-input-wrap">
+				<input class="hb-input am-input" type="email" bind:value={email} placeholder="Correo electrónico" />
+				<span class="am-icon">
+					<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+						<polyline points="22,6 12,13 2,6"></polyline>
+					</svg>
+				</span>
+			</div>
+			
+			<div class="am-input-wrap">
+				<input class="hb-input am-input" type="password" bind:value={password} placeholder="Contraseña" />
+				<span class="am-icon">
+					<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+						<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+					</svg>
+				</span>
+			</div>
 
-            <button 
-                on:click={handleAuth}
-                disabled={loading}
-                class="btn-primary"
-                class:loading={loading}
-            >
-                {loading ? 'Procesando...' : (isRegistering ? 'Registrarse' : 'Iniciar Sesión')}
-            </button>
+			<button on:click={handleAuth} disabled={loading} class="hb-btn hb-btn-primary" style="margin-top:0.5rem; width:100%; justify-content:center;">
+				{loading ? 'Procesando...' : (isRegistering ? 'Registrarse' : 'Iniciar Sesión')}
+			</button>
 
-            <div class="divider">
-                <span>O CONTINÚA CON</span>
-            </div>
+			<div class="am-divider">
+				<span>O CONTINÚA CON</span>
+			</div>
 
-            <button 
-                on:click={handleGoogleLogin}
-                disabled={loading}
-                class="btn-google"
-            >
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-                Google
-            </button>
-        </div>
+			<button on:click={handleGoogleLogin} disabled={loading} class="am-google-btn">
+				<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+				Google
+			</button>
+		</div>
 
-        <div class="modal-footer">
-            <p>
-                {isRegistering ? '¿Ya tienes cuenta?' : '¿Eres nuevo aquí?'}
-                <button on:click={() => isRegistering = !isRegistering}>
-                    {isRegistering ? 'Inicia sesión' : 'Crea una cuenta'}
-                </button>
-            </p>
-        </div>
-    </div>
+		<div class="am-footer">
+			<p>
+				{isRegistering ? '¿Ya tienes cuenta?' : '¿Eres nuevo aquí?'}
+				<button on:click={() => isRegistering = !isRegistering}>
+					{isRegistering ? 'Inicia sesión' : 'Crea una cuenta'}
+				</button>
+			</p>
+		</div>
+	</div>
 </div>
 
 <style>
-    .modal-backdrop {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.85);
-        backdrop-filter: blur(8px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        padding: 1.5rem;
-    }
+.am-backdrop {
+	position: fixed; inset: 0; z-index: 9999;
+	background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(14px);
+	display: flex; align-items: center; justify-content: center;
+	padding: 1.5rem;
+}
 
-    .modal-content {
-        background: #111827;
-        width: 100%;
-        max-width: 400px;
-        border-radius: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        padding: 2.5rem 2rem;
-    }
+.am-panel {
+	background: var(--bg-card);
+	border: 1px solid var(--border-card);
+	width: 100%; max-width: 400px;
+	border-radius: var(--radius-card);
+	position: relative; overflow: hidden;
+	box-shadow: var(--shadow-card);
+	padding: 2.5rem 2rem;
+	font-family: 'Inter', sans-serif;
+	animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
-    .modal-top-bar {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(to right, #3b82f6, #2563eb);
-        transition: background 0.3s ease;
-    }
+.am-top-bar {
+	position: absolute; top: 0; left: 0; right: 0; height: 4px;
+	background: linear-gradient(90deg, var(--accent-blue) 0%, #1d4ed8 100%);
+	transition: background 0.3s ease;
+}
+.am-top-bar.registering {
+	background: linear-gradient(90deg, var(--accent-purple) 0%, #7e22ce 100%);
+}
 
-    .modal-top-bar.registering {
-        background: linear-gradient(to right, #9333ea, #7e22ce);
-    }
+.am-close-btn {
+	position: absolute; top: 1.25rem; right: 1.25rem;
+	background: none; border: none; cursor: pointer;
+	color: var(--text-secondary); padding: 0.25rem;
+	border-radius: 50%; display: flex; align-items: center; justify-content: center;
+	transition: all 0.2s;
+}
+.am-close-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
 
-    .close-btn {
-        position: absolute;
-        top: 1.25rem;
-        right: 1.25rem;
-        color: #9ca3af;
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        transition: color 0.2s;
-    }
+.am-header { text-align: center; margin-bottom: 2rem; }
+.am-title {
+	font-size: 1.6rem; font-weight: 800; color: var(--text-primary);
+	margin-bottom: 0.35rem; letter-spacing: -0.02em;
+}
+.am-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
 
-    .close-btn:hover {
-        color: white;
-    }
+.am-error {
+	background: rgba(239, 68, 68, 0.12);
+	border: 1px solid rgba(239, 68, 68, 0.25);
+	color: var(--accent-red); font-size: 0.8rem; font-weight: 600;
+	padding: 0.75rem 1rem; border-radius: var(--radius-sm);
+	margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem;
+}
 
-    .modal-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
+.am-form { display: flex; flex-direction: column; gap: 0.875rem; }
 
-    .modal-header h2 {
-        color: white;
-        font-size: 1.875rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
+.am-input-wrap { position: relative; }
+.am-icon {
+	position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+	color: var(--text-secondary); pointer-events: none;
+	display: flex; align-items: center; justify-content: center;
+}
+.am-input { padding-left: 2.8rem; width: 100%; background: var(--bg-input); color: var(--text-input); }
+.am-input:focus ~ .am-icon { color: var(--accent-green); }
 
-    .modal-header p {
-        color: #9ca3af;
-        font-size: 0.875rem;
-    }
+.am-divider { display: flex; align-items: center; gap: 1rem; margin: 0.5rem 0; }
+.am-divider::before, .am-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-card); }
+.am-divider span { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; letter-spacing: 0.1em; }
 
-    .error-msg {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-        color: #ef4444;
-        font-size: 0.75rem;
-        padding: 0.75rem;
-        border-radius: 0.75rem;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+.am-google-btn {
+	background: #fff; color: #111827; border: 1px solid #e5e7eb;
+	font-weight: 700; padding: 0.875rem; border-radius: var(--radius-btn);
+	display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+	cursor: pointer; transition: all 0.2s; font-size: 0.95rem; font-family: 'Inter', sans-serif;
+}
+.am-google-btn img { width: 1.25rem; height: 1.25rem; }
+.am-google-btn:hover:not(:disabled) { background: #f9fafb; box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
+.am-google-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
+.am-footer { margin-top: 2rem; text-align: center; }
+.am-footer p { font-size: 0.85rem; color: var(--text-secondary); }
+.am-footer button {
+	background: none; border: none; padding: 0; margin-left: 0.35rem;
+	color: var(--accent-blue); font-weight: 700; cursor: pointer;
+}
+.am-footer button:hover { text-decoration: underline; }
 
-    .input-wrapper {
-        position: relative;
-    }
-
-    .input-icon {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 1.2rem;
-        pointer-events: none;
-        opacity: 0.5;
-    }
-
-    input {
-        width: 100%;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 0.75rem;
-        padding: 0.875rem 1rem 0.875rem 3rem;
-        color: white;
-        outline: none;
-        transition: all 0.2s;
-    }
-
-    input:focus {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-    }
-
-    .btn-primary {
-        background: #2563eb;
-        color: white;
-        font-weight: 600;
-        padding: 1rem;
-        border-radius: 0.75rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-        margin-top: 0.5rem;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-        background: #1d4ed8;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    .btn-primary:active:not(:disabled) {
-        transform: translateY(0);
-    }
-
-    .divider {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin: 0.5rem 0;
-    }
-
-    .divider::before, .divider::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: rgba(255, 255, 255, 0.1);
-    }
-
-    .divider span {
-        font-size: 0.65rem;
-        color: #6b7280;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-    }
-
-    .btn-google {
-        background: white;
-        color: #374151;
-        font-weight: 600;
-        padding: 0.875rem;
-        border-radius: 0.75rem;
-        border: 1px solid #e5e7eb;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        transition: all 0.2s;
-    }
-
-    .btn-google img {
-        width: 1.25rem;
-        height: 1.25rem;
-    }
-
-    .btn-google:hover:not(:disabled) {
-        background: #f9fafb;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    .modal-footer {
-        margin-top: 2rem;
-        text-align: center;
-    }
-
-    .modal-footer p {
-        font-size: 0.875rem;
-        color: #9ca3af;
-    }
-
-    .modal-footer button {
-        background: none;
-        border: none;
-        color: #3b82f6;
-        font-weight: 600;
-        padding: 0;
-        margin-left: 0.25rem;
-        cursor: pointer;
-    }
-
-    .modal-footer button:hover {
-        text-decoration: underline;
-    }
-
-    button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+@keyframes popIn {
+	0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+	100% { opacity: 1; transform: scale(1) translateY(0); }
+}
 </style>

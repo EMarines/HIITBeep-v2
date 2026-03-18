@@ -6,13 +6,9 @@
 
     const dispatch = createEventDispatcher();
 
-    // Accept initial tab from parent
     export let initialTab: 'profile' | 'settings' = 'profile';
-
-    // Tabs: 'profile' | 'settings'
     let activeTab: 'profile' | 'settings' = initialTab;
     
-    // Default form data bound to stores
     let username = '';
     let age: number | '' = '';
     let gender = '';
@@ -26,7 +22,6 @@
     let savedMsg = '';
 
     onMount(() => {
-        // Load data to local variables
         username = $userProfile.username || $user?.displayName || '';
         age = $userProfile.age || '';
         gender = $userProfile.gender || '';
@@ -61,115 +56,130 @@
     }
 </script>
 
-<!-- svelte-ignore a11y_interactive_supports_focus -->
-<div class="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[9999] p-4 sm:p-6" on:click|self={() => dispatch('close')} on:keydown|self={(e) => e.key === 'Escape' && dispatch('close')} role="dialog" aria-modal="true" tabindex="-1">
-    <div class="bg-gray-900 border border-white/10 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative flex flex-col max-h-full">
+<div class="pm-backdrop" on:click|self={() => dispatch('close')} on:keydown={(e) => e.key === 'Escape' && dispatch('close')} role="dialog" tabindex="-1">
+    <div class="pm-panel">
         
         <!-- Header -->
-        <div class="relative flex items-center justify-between p-5 border-b border-white/10 bg-gray-800/50">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+        <div class="pm-header">
+            <h2 class="pm-title">
                 {#if activeTab === 'profile'}
-                    <span>👤</span> Perfil de Usuario
+                    <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Perfil de Usuario
                 {:else}
-                    <span>⚙️</span> Configuración
+                    <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    Configuración
                 {/if}
             </h2>
-            <div class="flex items-center gap-2">
-                <!-- Toggle Tab Button -->
+            <div class="pm-actions">
                 <button 
                     on:click={() => activeTab = activeTab === 'profile' ? 'settings' : 'profile'}
-                    class="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/5"
-                    title={activeTab === 'profile' ? 'Configuración' : 'Perfil'}
+                    class="pm-icon-btn"
+                    title={activeTab === 'profile' ? 'Ajustes' : 'Perfil'}
                 >
                     {#if activeTab === 'profile'}
-                        ⚙️
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15... (simplified icon code below, replacing with generic settings) "/><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     {:else}
-                        👤
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     {/if}
                 </button>
-                <button on:click={() => dispatch('close')} class="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-all text-xl">✕</button>
+                <button on:click={() => dispatch('close')} class="pm-icon-btn pm-close-btn" aria-label="Cerrar">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
             </div>
         </div>
 
         <!-- Body -->
-        <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
+        <div class="pm-body">
             {#if activeTab === 'profile'}
-                <div class="space-y-4 animate-fadeIn">
-                    <div class="flex items-center gap-4 mb-2">
+                <div class="pm-anim-fade">
+                    <div class="pm-user-card">
                         {#if $user?.photoURL}
-                            <img src={$user.photoURL} alt="Avatar" class="w-16 h-16 rounded-full border-2 border-blue-500 shadow-lg shadow-blue-500/20" />
+                            <img src={$user.photoURL} alt="Avatar" class="pm-avatar-img" />
                         {:else}
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-purple-500/20 border-2 border-white/10">
+                            <div class="pm-avatar-initials">
                                 {(username || $user?.displayName || $user?.email || 'U').substring(0, 2).toUpperCase()}
                             </div>
                         {/if}
-                        <div>
-                            <p class="text-sm text-gray-400">Cuenta conectada</p>
-                            <p class="font-medium text-white truncate max-w-[200px]">{$user?.email}</p>
+                        <div class="pm-user-info">
+                            <p class="pm-user-label">Cuenta conectada</p>
+                            <p class="pm-user-email">{$user?.email}</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="profile-username">Nombre de Usuario</label>
-                            <input id="profile-username" type="text" bind:value={username} placeholder="Tu nombre o apodo" />
+                    <div class="pm-grid">
+                        <div class="hb-input-group">
+                            <label class="hb-label" for="profile-username">Nombre de Usuario</label>
+                            <input class="hb-input" id="profile-username" type="text" bind:value={username} placeholder="Tu nombre" />
                         </div>
-                        <div class="form-group">
-                            <label for="profile-age">Edad (años)</label>
-                            <input id="profile-age" type="number" bind:value={age} placeholder="Ej. 25" min="1" max="120" />
+                        <div class="hb-input-group">
+                            <label class="hb-label" for="profile-age">Edad (años)</label>
+                            <input class="hb-input" id="profile-age" type="number" bind:value={age} placeholder="Ej. 25" min="1" max="120" />
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="profile-gender">Sexo</label>
-                            <select id="profile-gender" bind:value={gender}>
+                    <div class="pm-grid">
+                        <div class="hb-input-group">
+                            <label class="hb-label" for="profile-gender">Sexo</label>
+                            <select class="hb-select" id="profile-gender" bind:value={gender}>
                                 <option value="" disabled selected>Selecciona</option>
                                 <option value="male">Hombre</option>
                                 <option value="female">Mujer</option>
-                                <option value="other">Otro / Prefiero no decir</option>
+                                <option value="other">Otro</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="profile-height">Estatura ({lengthSystem === 'cm' ? 'cm' : 'ft'})</label>
-                            <input id="profile-height" type="number" bind:value={height} placeholder={lengthSystem === 'cm' ? 'Ej. 175' : 'Ej. 5.9'} step="0.1" />
+                        <div class="hb-input-group">
+                            <label class="hb-label" for="profile-height">Estatura ({lengthSystem === 'cm' ? 'cm' : 'ft'})</label>
+                            <input class="hb-input" id="profile-height" type="number" bind:value={height} placeholder={lengthSystem === 'cm' ? '175' : '5.9'} step="0.1" />
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="profile-weight">Peso ({weightSystem === 'kg' ? 'kg' : 'lb'})</label>
-                        <input id="profile-weight" type="number" bind:value={weight} placeholder={weightSystem === 'kg' ? 'Ej. 70' : 'Ej. 154'} step="0.1" />
+                    <div class="hb-input-group">
+                        <label class="hb-label" for="profile-weight">Peso ({weightSystem === 'kg' ? 'kg' : 'lb'})</label>
+                        <input class="hb-input" id="profile-weight" type="number" bind:value={weight} placeholder={weightSystem === 'kg' ? '70' : '154'} step="0.1" />
                     </div>
 
-                    <div class="form-group">
-                        <label for="profile-goal">Meta de Ejercicio</label>
-                        <textarea id="profile-goal" bind:value={goal} placeholder="Ej. Perder peso, ganar fuerza, resistencia..." rows="3"></textarea>
+                    <div class="hb-input-group">
+                        <label class="hb-label" for="profile-goal">Meta de Ejercicio</label>
+                        <textarea class="hb-input" id="profile-goal" bind:value={goal} placeholder="Ej. Perder peso, resistencia..." rows="3" style="resize:vertical;"></textarea>
                     </div>
 
                 </div>
             {:else}
-                <div class="space-y-6 animate-fadeIn">
-                    <div class="bg-gray-800/50 p-4 rounded-xl border border-white/5">
-                        <h3 class="font-semibold text-white mb-3 text-sm uppercase tracking-wider text-blue-400">🌐 Idioma</h3>
+                <div class="pm-anim-fade" style="display:flex; flex-direction:column; gap:1.25rem;">
+                    
+                    <div class="pm-setting-card">
+                        <h3 class="pm-setting-title">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            Idioma
+                        </h3>
                         <LanguageSelector />
                     </div>
 
-                    <div class="bg-gray-800/50 p-4 rounded-xl border border-white/5 space-y-4">
-                        <h3 class="font-semibold text-white mb-1 text-sm uppercase tracking-wider text-blue-400">📏 Sistema de Medida</h3>
+                    <div class="pm-setting-card">
+                        <h3 class="pm-setting-title">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>
+                            Sistema de Medida
+                        </h3>
                         
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-300">Longitud (Estatura)</span>
-                            <div class="flex bg-black/40 p-1 rounded-lg border border-white/10">
-                                <button type="button" class="px-3 py-1 text-sm rounded-md transition-all {lengthSystem === 'cm' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}" on:click={() => lengthSystem = 'cm'}>Metros (cm)</button>
-                                <button type="button" class="px-3 py-1 text-sm rounded-md transition-all {lengthSystem === 'ft' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}" on:click={() => lengthSystem = 'ft'}>Pies (ft)</button>
+                        <div class="pm-setting-row">
+                            <span class="pm-setting-label">Longitud (Estatura)</span>
+                            <div class="pm-toggle-group">
+                                <button class="pm-toggle-btn" class:active={lengthSystem === 'cm'} on:click={() => lengthSystem = 'cm'}>Metros</button>
+                                <button class="pm-toggle-btn" class:active={lengthSystem === 'ft'} on:click={() => lengthSystem = 'ft'}>Pies</button>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between pt-2 border-t border-white/5">
-                            <span class="text-sm text-gray-300">Peso</span>
-                            <div class="flex bg-black/40 p-1 rounded-lg border border-white/10">
-                                <button type="button" class="px-3 py-1 text-sm rounded-md transition-all {weightSystem === 'kg' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}" on:click={() => weightSystem = 'kg'}>Kilos (kg)</button>
-                                <button type="button" class="px-3 py-1 text-sm rounded-md transition-all {weightSystem === 'lb' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}" on:click={() => weightSystem = 'lb'}>Libras (lb)</button>
+                        <div class="pm-setting-row" style="border-top:1px solid var(--border-card); margin-top:0.6rem; padding-top:0.6rem;">
+                            <span class="pm-setting-label">Peso</span>
+                            <div class="pm-toggle-group">
+                                <button class="pm-toggle-btn" class:active={weightSystem === 'kg'} on:click={() => weightSystem = 'kg'}>Kilos</button>
+                                <button class="pm-toggle-btn" class:active={weightSystem === 'lb'} on:click={() => weightSystem = 'lb'}>Libras</button>
                             </div>
                         </div>
                     </div>
@@ -178,15 +188,11 @@
         </div>
 
         <!-- Footer / Save Button -->
-        <div class="p-5 border-t border-white/10 bg-gray-800/80 backdrop-blur-md flex flex-col gap-2">
+        <div class="pm-footer">
             {#if savedMsg}
-                <div class="text-green-400 text-xs text-center font-medium animate-pulse">{savedMsg}</div>
+                <div class="pm-msg">{savedMsg}</div>
             {/if}
-            <button 
-                on:click={handleSave}
-                disabled={loading}
-                class="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl shadow-lg hover:shadow-blue-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
+            <button class="hb-btn hb-btn-primary" on:click={handleSave} disabled={loading} style="width:100%; justify-content:center;">
                 {loading ? 'Guardando...' : 'Guardar Cambios'}
             </button>
         </div>
@@ -194,70 +200,129 @@
 </div>
 
 <style>
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
+.pm-backdrop {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(14px);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 1.5rem; overflow-y: auto;
+}
 
-    .form-group label {
-        font-size: 0.75rem;
-        color: #9ca3af;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 600;
-        margin-left: 0.25rem;
-    }
+.pm-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    width: 100%; max-width: 500px;
+    border-radius: var(--radius-card);
+    display: flex; flex-direction: column;
+    box-shadow: var(--shadow-card);
+    font-family: 'Inter', sans-serif;
+    animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin: auto;
+}
 
-    .form-group input, .form-group select, .form-group textarea {
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0.75rem 1rem;
-        border-radius: 0.75rem;
-        color: white;
-        transition: all 0.2s;
-        font-size: 0.875rem;
-    }
-    
-    .form-group input::placeholder, .form-group textarea::placeholder {
-        color: rgba(255, 255, 255, 0.3);
-    }
+/* Header */
+.pm-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-card);
+    background: rgba(255,255,255,0.02);
+}
+.pm-title {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 1.15rem; font-weight: 800; color: var(--text-primary);
+    margin: 0;
+}
+.pm-title svg { color: var(--accent-blue); }
 
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-        outline: none;
-        border-color: #3b82f6;
-        background: rgba(255, 255, 255, 0.05);
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-    }
-    
-    .form-group select option {
-        background: #1f2937;
-        color: white;
-    }
+.pm-actions { display: flex; align-items: center; gap: 0.5rem; }
+.pm-icon-btn {
+    width: 36px; height: 36px;
+    background: var(--bg-card-alt); border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm); color: var(--text-secondary);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+}
+.pm-icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.pm-close-btn:hover { color: var(--accent-red); }
 
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.02);
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.2);
-    }
+/* Body */
+.pm-body {
+    padding: 1.5rem;
+    display: flex; flex-direction: column; gap: 1.25rem;
+}
+.pm-anim-fade { animation: fadeIn 0.3s ease; display:flex; flex-direction:column; gap:1.25rem; }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .animate-fadeIn {
-        animation: fadeIn 0.3s ease-out;
-    }
+/* User card */
+.pm-user-card {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+.pm-avatar-img {
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 2px solid var(--accent-blue); box-shadow: 0 4px 14px rgba(59,130,246,0.3);
+    object-fit: cover;
+}
+.pm-avatar-initials {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 14px rgba(168,85,247,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 800; color: #fff;
+}
+.pm-user-info { display: flex; flex-direction: column; }
+.pm-user-label { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.2rem; }
+.pm-user-email { font-size: 1.05rem; font-weight: 600; color: var(--text-primary); word-break: break-all; }
+
+.pm-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+}
+
+/* Settings tab */
+.pm-setting-card {
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border-card);
+    border-radius: var(--radius-card); padding: 1.25rem;
+}
+.pm-setting-title {
+    font-size: 0.75rem; font-weight: 700; color: var(--text-label); letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 0.45rem;
+}
+.pm-setting-title svg { color: var(--accent-blue); }
+
+.pm-setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+}
+.pm-setting-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; }
+.pm-toggle-group {
+    display: flex; background: var(--bg-card-alt); border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm); padding: 0.2rem;
+}
+.pm-toggle-btn {
+    background: none; border: none; padding: 0.4rem 0.8rem;
+    font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+    border-radius: 6px; cursor: pointer; transition: all 0.2s;
+}
+.pm-toggle-btn:hover { color: var(--text-primary); }
+.pm-toggle-btn.active {
+    background: var(--accent-blue); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+
+/* Footer */
+.pm-footer {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border-card);
+    background: rgba(255,255,255,0.02);
+    display: flex; flex-direction: column; gap: 0.75rem;
+}
+.pm-msg {
+    font-size: 0.8rem; font-weight: 600; color: var(--accent-green);
+    text-align: center; animation: pulse 2s infinite;
+}
+
+@keyframes popIn {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
 </style>
