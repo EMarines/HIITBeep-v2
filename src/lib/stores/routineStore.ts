@@ -6,6 +6,7 @@ import {
 	saveRoutine as saveLocalRoutine,
 	updateRoutine as updateLocalRoutine,
 	saveAllRoutines,
+	clearAllData,
 	getStats,
 	type SavedRoutine,
 	type Interval
@@ -32,8 +33,9 @@ function createRoutineStore() {
 				set(local);
 			}
 		} else {
-			// Guest mode
-			set(loadLocalRoutines());
+			// Guest mode - clear local storage of data belonging to logged-out user
+			clearAllData();
+			set([]);
 		}
 	});
 

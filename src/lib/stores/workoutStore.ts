@@ -28,7 +28,7 @@ function createWorkoutStore() {
 				set(local);
 			}
 		} else {
-			set(loadLocalLogs());
+			set([]);
 		}
 	});
 

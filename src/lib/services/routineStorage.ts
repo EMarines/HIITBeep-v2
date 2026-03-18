@@ -280,6 +280,18 @@ export function importData(jsonString: string): { success: boolean; error?: stri
 }
 
 /**
+ * Limpiar todos los datos locales (al cerrar sesión)
+ */
+export function clearAllData(): void {
+	try {
+		localStorage.removeItem(STORAGE_KEY_ROUTINES);
+		localStorage.removeItem(STORAGE_KEY_LOGS);
+	} catch (error) {
+		console.error('Error limpiando datos locales:', error);
+	}
+}
+
+/**
  * Obtener estadísticas generales
  */
 export function getStats(): { totalRoutines: number; totalWorkouts: number; totalMinutes: number } {
