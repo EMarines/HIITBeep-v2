@@ -65,6 +65,32 @@
             return acc + (interval.duration || 0) + (interval.prepDuration || 0) + (interval.restDuration || 0);
         }, 0);
     }
+
+    let showManualLogModal = false;
+    let selectedDate = new Date().toISOString().split('T')[0];
+
+    function handleManualLog() {
+        // Convertir la fecha seleccionada a timestamp (inicio del día seleccionado)
+        const dateParts = selectedDate.split('-');
+        const timestamp = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2])).getTime();
+        
+        const duration = totalDuration() * repetitions;
+        
+        dispatch('log-manual', {
+            duration,
+            repetitionsCompleted: repetitions,
+            customDate: timestamp,
+            routineSnapshot: {
+                id: 'snapshot-' + Date.now(),
+                name: routineName,
+                intervals: JSON.parse(JSON.stringify(intervals)),
+                repetitions: repetitions,
+                createdAt: Date.now()
+            }
+        });
+        
+        showManualLogModal = false;
+    }
 </script>
 
 <div class="ms-root">
@@ -268,17 +294,62 @@
             </div>
         {/if}
 
-        <!-- Start button -->
-        <button
-            class="hb-btn hb-btn-primary"
-            style="margin-top:1rem;"
-            on:click={startWorkout}
-            disabled={intervals.length === 0}
-        >
-            {intervals.length === 0 ? $t('main.configure_intervals') : $t('main.start_routine')}
-        </button>
+        <!-- Start buttons -->
+        <div class="ms-start-actions">
+            <button
+                class="hb-btn hb-btn-primary"
+                on:click={startWorkout}
+                disabled={intervals.length === 0}
+            >
+                {intervals.length === 0 ? $t('main.configure_intervals') : $t('main.start_routine')}
+            </button>
+
+            {#if intervals.length > 0}
+                <button
+                    class="ms-done-btn"
+                    on:click={() => showManualLogModal = true}
+                >
+                    <span class="ms-done-icon">✅</span>
+                    <span>{$t('main.mark_as_done')}</span>
+                </button>
+            {/if}
+        </div>
     </div>
 </div>
+
+<!-- Manual Log Modal -->
+{#if showManualLogModal}
+    <div class="hb-modal-backdrop" style="z-index:300;">
+        <div class="ms-log-modal">
+            <div class="ms-log-icon-wrap">
+                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <h3 class="ms-log-title">{$t('main.manual_log_title')}</h3>
+            <p class="ms-log-desc">{$t('main.select_date')}</p>
+            
+            <div class="ms-date-picker-wrap">
+                <input 
+                    type="date" 
+                    id="manual-log-date"
+                    bind:value={selectedDate}
+                    class="ms-date-input"
+                />
+            </div>
+
+            <div class="ms-log-actions">
+                <button class="ms-log-btn-confirm" on:click={handleManualLog}>
+                    {$t('main.confirm_log')}
+                </button>
+                <button class="hb-btn hb-btn-secondary" style="width:100%; border:none;" on:click={() => showManualLogModal = false}>
+                    {$t('common.cancel')}
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
 
 <style>
 .ms-root {
@@ -481,4 +552,77 @@
 .ms-dur-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-label); }
 .ms-dur-value { font-size: 1rem; font-weight: 700; color: var(--accent-green); }
 .ms-dur-sep { width: 1px; height: 2.5rem; background: var(--border-card); }
+
+/* Start actions */
+.ms-start-actions {
+    display: flex; flex-direction: column; gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.ms-done-btn {
+    width: 100%; padding: 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-btn);
+    color: var(--text-secondary);
+    font-size: 0.9rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    cursor: pointer; transition: all 0.2s;
+}
+.ms-done-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+.ms-done-icon { font-size: 1rem; }
+
+/* Log modal */
+.ms-log-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-card);
+    padding: 2.25rem 2rem;
+    width: 100%; max-width: 360px;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.ms-log-icon-wrap {
+    width: 60px; height: 60px;
+    background: rgba(34,197,94,0.12);
+    border-radius: 50%; display: flex;
+    align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    color: var(--accent-green);
+}
+.ms-log-title { font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+.ms-log-desc { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem; }
+
+.ms-date-picker-wrap { margin-bottom: 1.5rem; }
+.ms-date-input {
+    width: 100%; background: var(--bg-input); color: var(--text-input);
+    border: 1px solid var(--border-input); border-radius: var(--radius-input);
+    padding: 0.8rem 1rem; font-family: 'Inter', sans-serif;
+    font-size: 1rem; font-weight: 600; text-align: center;
+    outline: none; transition: border-color 0.2s;
+    color-scheme: dark;
+}
+.ms-date-input:focus { border-color: var(--accent-green); }
+
+.ms-log-actions { display: flex; flex-direction: column; gap: 0.6rem; }
+.ms-log-btn-confirm {
+    width: 100%; padding: 0.9rem;
+    background: var(--accent-green); color: #fff;
+    font-size: 0.95rem; font-weight: 700;
+    border-radius: var(--radius-btn); border: none;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 4px 14px rgba(34,197,94,0.3);
+}
+.ms-log-btn-confirm:hover {
+    background: #16a34a;
+    box-shadow: 0 6px 20px rgba(34,197,94,0.4);
+    transform: translateY(-1px);
+}
+
+@keyframes popIn {
+    0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
 </style>

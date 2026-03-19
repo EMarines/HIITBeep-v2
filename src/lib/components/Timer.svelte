@@ -601,7 +601,7 @@
 		{#if currentInterval && (isRestingWeights || currentStage === 'rest')}
 			<div class="flex flex-col items-center mb-8">
 				<p class="text-white/60 text-xs font-semibold mb-2 uppercase tracking-widest bg-black/30 px-3 py-1 rounded-full" style="text-shadow: 0 0 6px rgba(0,0,0,0.8);">
-					✓ {$t('timer.completed')}: {currentInterval.name} {currentInterval.type === 'weights' ? `(S${currentSet})` : ''}
+					✓ {$t('timer.completed')}: {currentInterval?.name} {currentInterval?.type === 'weights' ? `(S${currentSet})` : ''}
 				</p>
 				<h1 class="text-5xl font-black text-blue-400 tracking-tight" style="text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 2px 2px 8px rgba(0, 0, 0, 0.9);">
 					{$t('intervals.rest')}
@@ -639,9 +639,10 @@
 						</div>
 						<div class="text-8xl font-bold text-yellow-400 animate-pulse" style="text-shadow: 0 0 20px rgba(0, 0, 0, 1), 3px 3px 15px rgba(0, 0, 0, 0.9);">
 							{(() => {
+								if (!currentInterval) return 0;
 								const executed = repeatMarkersExecuted.get(currentIntervalIndex) || 0;
 								// Restantes = total - (ejecutadas + 1 porque ya está en ejecución)
-								return currentInterval.duration - executed - 1;
+								return (currentInterval.duration || 0) - executed - 1;
 							})()}
 						</div>
 						<div class="text-xl font-light mt-4 text-gray-300" style="text-shadow: 0 0 8px rgba(0, 0, 0, 1);">

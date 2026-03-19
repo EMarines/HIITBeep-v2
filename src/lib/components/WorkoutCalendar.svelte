@@ -179,12 +179,12 @@
 }
 .cal-today-btn {
 	display: inline-block; margin-top: 0.2rem;
-	font-size: 0.6rem; font-weight: 700;
+	font-size: 0.75rem; font-weight: 800;
 	letter-spacing: 0.1em; text-transform: uppercase;
-	color: var(--accent-green); background: none; border: none; cursor: pointer;
+	color: var(--accent-blue); background: none; border: none; cursor: pointer;
 	transition: color 0.2s;
 }
-.cal-today-btn:hover { color: #16a34a; }
+.cal-today-btn:hover { color: #60a5fa; }
 
 /* Grid */
 .cal-grid {

@@ -224,8 +224,8 @@
 		currentView = 'main';
 	}
 	
-	async function handleWorkoutComplete(event: CustomEvent<{ duration: number; repetitionsCompleted: number; routineSnapshot?: SavedRoutine }>) {
-		const { duration, repetitionsCompleted, routineSnapshot } = event.detail;
+	async function handleWorkoutComplete(event: CustomEvent<{ duration: number; repetitionsCompleted: number; routineSnapshot?: SavedRoutine; customDate?: number }>) {
+		const { duration, repetitionsCompleted, routineSnapshot, customDate } = event.detail;
 		const workoutRoutineId = currentRoutineId || 'default-routine';
 		const workoutRoutineName = currentRoutineName || 'Unnamed Routine';
 		
@@ -234,7 +234,7 @@
 			routineSnapshot.name = workoutRoutineName;
 		}
 		
-		await workoutStore.log(workoutRoutineId, workoutRoutineName, duration, repetitionsCompleted, routineSnapshot);
+		await workoutStore.log(workoutRoutineId, workoutRoutineName, duration, repetitionsCompleted, routineSnapshot, customDate);
 	}
 	
 	// No cargar automáticamente configuración al iniciar
@@ -281,6 +281,7 @@
 			on:open-settings={openSettings}
 			on:start-workout={startWorkout}
 			on:go-dashboard={goToDashboard}
+			on:log-manual={handleWorkoutComplete}
 		/>
 	{:else if currentView === 'timer'}
 		<Timer 

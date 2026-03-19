@@ -36,11 +36,11 @@ function createWorkoutStore() {
 	return {
 		subscribe,
 		
-		log: async (routineId: string, routineName: string, duration: number, repetitionsCompleted: number, routineSnapshot?: SavedRoutine) => {
+		log: async (routineId: string, routineName: string, duration: number, repetitionsCompleted: number, routineSnapshot?: SavedRoutine, customDate?: number) => {
 			const userData = get(user);
 			
 			// Always log locally first
-			logLocalWorkout(routineId, routineName, duration, repetitionsCompleted, routineSnapshot);
+			logLocalWorkout(routineId, routineName, duration, repetitionsCompleted, routineSnapshot, customDate);
 			
 			// Get the local logs (which now includes the new one)
 			const currentLocal = loadLocalLogs();

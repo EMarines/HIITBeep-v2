@@ -160,7 +160,7 @@ export function updateRoutineLastUsed(id: string): void {
 /**
  * Registrar un entrenamiento completado
  */
-export function logWorkout(routineId: string, routineName: string, duration: number, repetitionsCompleted: number, routineSnapshot?: SavedRoutine): void {
+export function logWorkout(routineId: string, routineName: string, duration: number, repetitionsCompleted: number, routineSnapshot?: SavedRoutine, customDate?: number): void {
 	try {
 		const logs = loadWorkoutLogs();
 		
@@ -168,7 +168,7 @@ export function logWorkout(routineId: string, routineName: string, duration: num
 			id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
 			routineId,
 			routineName,
-			completedAt: Date.now(),
+			completedAt: customDate || Date.now(),
 			duration,
 			repetitionsCompleted,
 			routineSnapshot: routineSnapshot ? JSON.parse(JSON.stringify(routineSnapshot)) : undefined

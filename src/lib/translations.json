@@ -50,7 +50,11 @@
       "repeat_times": "Repetir {times} veces",
       "repeat_full_routine": "Repetir toda la rutina",
       "edit_routine": "Editar Rutina",
-      "main_menu": "Menú Principal"
+      "main_menu": "Menú Principal",
+      "mark_as_done": "Marcar como realizado",
+      "manual_log_title": "Registro manual",
+      "select_date": "Seleccionar fecha",
+      "confirm_log": "Confirmar registro"
     },
     "settings": {
       "title": "Configuración",
@@ -241,7 +245,11 @@
       "repeat_times": "Repeat {times} times",
       "repeat_full_routine": "Repeat full routine",
       "edit_routine": "Edit Routine",
-      "main_menu": "Main Menu"
+      "main_menu": "Main Menu",
+      "mark_as_done": "Mark as done",
+      "manual_log_title": "Manual log",
+      "select_date": "Select date",
+      "confirm_log": "Confirm log"
     },
     "settings": {
       "title": "Settings",
