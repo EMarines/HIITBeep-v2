@@ -32,7 +32,8 @@
       "edit": "Editar",
       "settings": "Configuración",
       "of": "de",
-      "done": "Listo"
+      "done": "Listo",
+      "up_next": "Siguiente:"
     },
     "main": {
       "repetitions": "Repeticiones",
@@ -222,7 +223,8 @@
       "edit": "Edit",
       "settings": "Settings",
       "of": "of",
-      "done": "Done"
+      "done": "Done",
+      "up_next": "Up next:"
     },
     "main": {
       "repetitions": "Repetitions",

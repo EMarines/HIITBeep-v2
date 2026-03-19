@@ -71,6 +71,11 @@
     <!-- Top bar with logo & nav -->
     <header class="ms-top-bar">
         <div class="ms-top-inner">
+            <button class="hb-back-btn" on:click={goToDashboard} aria-label="Volver">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
             <div class="ms-logo-area">
                 <img src="/logo.png" alt="HIITBeep" class="ms-logo" />
                 <h1 class="ms-app-title">{$t('app.title')}</h1>
@@ -79,10 +84,6 @@
                 <button class="ms-action-btn ms-btn-blue" on:click={openSettings}>
                     <span>✏️</span>
                     <span>{$t('main.edit_routine')}</span>
-                </button>
-                <button class="ms-action-btn ms-btn-ghost" on:click={goToDashboard}>
-                    <span>🏠</span>
-                    <span>{$t('main.main_menu')}</span>
                 </button>
             </div>
         </div>
@@ -312,10 +313,25 @@
     font-size: 0.78rem; font-weight: 600;
     border: none; cursor: pointer; transition: all 0.2s;
 }
-.ms-btn-blue  { background: var(--accent-blue); color: #fff; }
 .ms-btn-blue:hover { background: #2563eb; }
-.ms-btn-ghost { background: var(--bg-card-alt); color: var(--text-secondary); border: 1px solid var(--border-card); }
-.ms-btn-ghost:hover { color: var(--text-primary); }
+
+.hb-back-btn {
+    width: 38px; height: 38px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; color: var(--text-primary);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.05);
+}
+.hb-back-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+    transform: translateX(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+.hb-back-btn:active { transform: scale(0.9) translateX(-2px); }
 
 /* Content */
 .ms-content {
