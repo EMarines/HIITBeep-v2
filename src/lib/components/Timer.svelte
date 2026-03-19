@@ -14,6 +14,7 @@
 		restTime?: number;
 		prepDuration?: number;
 		restDuration?: number;
+		notes?: string;
 	}>;
 	export let repetitions: number = 1;
 	
@@ -626,6 +627,18 @@
 					{currentInterval ? currentInterval.name : $t('timer.completed')}
 				{/if}
 			</h1>
+		{/if}
+
+		<!-- Notes display -->
+		{#if currentInterval?.notes && !isCompleted}
+			<div 
+				class="bg-black/30 backdrop-blur-lg px-5 py-3 rounded-2xl border border-white/10 mb-8 max-w-[92%] shadow-xl animate-in fade-in zoom-in duration-500"
+				style="box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);"
+			>
+				<p class="text-white/90 text-sm font-medium leading-relaxed italic" style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+					{currentInterval.notes}
+				</p>
+			</div>
 		{/if}
 		
 		<!-- Círculo animado con tiempo o botón de tap para pesas -->

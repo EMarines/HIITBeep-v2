@@ -75,7 +75,7 @@
       "repeat_times": "Repetir {times} veces",
       "times": "veces",
       "save_configuration": "Solo Iniciar",
-      "save_as_routine": "Guardar e Iniciar",
+      "save_as_routine": "Guardar",
       "new_interval": "Nuevo Intervalo",
       "new_weights_interval": "Nuevo Intervalo de Pesas",
       "interval_type": "Tipo de Intervalo",
@@ -95,7 +95,10 @@
       "move_up": "Mover hacia arriba",
       "move_down": "Mover hacia abajo",
       "delete_interval": "Eliminar intervalo",
-      "intervals_list": "Lista de intervalos"
+      "intervals_list": "Lista de intervalos",
+      "notes": "Notas del ejercicio",
+      "notes_placeholder": "Ej: Mancuernas de 45 lbs, enfoque en técnica...",
+      "notes_help": "Agrega detalles o recordatorios para este ejercicio."
     },
     "timer": {
       "completed": "Completado",
@@ -270,7 +273,7 @@
       "repeat_times": "Repeat {times} times",
       "times": "times",
       "save_configuration": "Just Start",
-      "save_as_routine": "Save & Start",
+      "save_as_routine": "Save",
       "new_interval": "New Interval",
       "new_weights_interval": "New Weights Interval",
       "interval_type": "Interval Type",
@@ -290,7 +293,10 @@
       "move_up": "Move up",
       "move_down": "Move down",
       "delete_interval": "Delete interval",
-      "intervals_list": "Intervals list"
+      "intervals_list": "Intervals list",
+      "notes": "Exercise notes",
+      "notes_placeholder": "Ex: 45 lbs dumbbells, focus on form...",
+      "notes_help": "Add details or reminders for this exercise."
     },
     "timer": {
       "completed": "Completed",

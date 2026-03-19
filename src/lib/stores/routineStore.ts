@@ -97,6 +97,26 @@ function createRoutineStore() {
 		load: (id: string): SavedRoutine | undefined => {
 			const routines = get({ subscribe });
 			return routines.find(r => r.id === id);
+		},
+
+		updateLastUsed: async (id: string) => {
+			const userData = get(user);
+			update(routines => {
+				const index = routines.findIndex(r => r.id === id);
+				if (index !== -1) {
+					const updated = [...routines];
+					updated[index] = { ...updated[index], lastUsed: Date.now() };
+					
+					// Sync local storage in current view context for future reloads
+					import('$lib/services/routineStorage').then(storage => {
+						storage.updateRoutineLastUsed(id);
+					});
+
+					// Re-sort routines by last used if desired
+					return updated.sort((a, b) => (b.lastUsed || b.createdAt) - (a.lastUsed || a.createdAt));
+				}
+				return routines;
+			});
 		}
 	};
 }

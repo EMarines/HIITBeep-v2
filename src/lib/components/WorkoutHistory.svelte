@@ -20,41 +20,69 @@
 
 
 
+	function pad(n: number): string { return n < 10 ? '0' + n : '' + n; }
+
+	function dayKey(d: Date): string {
+		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+	}
+
+	function parseDayKey(key: string): Date {
+		const [y, m, d] = key.split('-').map(Number);
+		return new Date(y, m - 1, d);
+	}
+
 	function calculateStats(logs: WorkoutLog[]) {
 		totalWorkouts = logs.length;
 		totalMinutes = Math.round(logs.reduce((acc, log) => acc + (log.duration / 60), 0));
 
 		if (logs.length === 0) { currentStreak = 0; longestStreak = 0; return; }
 
-		const sorted = [...logs].sort((a, b) => a.completedAt - b.completedAt);
+		// Build unique days set using zero-padded YYYY-MM-DD keys for correct lexicographic sort
 		const uniqueDays = new Set<string>();
-		sorted.forEach(log => {
+		logs.forEach(log => {
 			const d = new Date(log.completedAt);
-			uniqueDays.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+			uniqueDays.add(dayKey(d));
 		});
-		const daysArray = Array.from(uniqueDays).sort();
+		const daysArray = Array.from(uniqueDays).sort(); // Lexicographic sort works with zero-padded dates
 
+		// Calculate current streak
 		const today = new Date();
-		const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-		const yesterday = new Date(today);
-		yesterday.setDate(yesterday.getDate() - 1);
-		const yesterdayKey = `${yesterday.getFullYear()}-${yesterday.getMonth()}-${yesterday.getDate()}`;
+		const todayStr = dayKey(today);
+		const yesterdayDate = new Date(today);
+		yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+		const yesterdayStr = dayKey(yesterdayDate);
 
 		currentStreak = 0;
-		if (daysArray.includes(todayKey) || daysArray.includes(yesterdayKey)) {
-			let checkDate = daysArray.includes(todayKey) ? today : yesterday;
+		if (daysArray.includes(todayStr) || daysArray.includes(yesterdayStr)) {
+			// Start from latest day and walk backwards
+			let checkDate = new Date(daysArray.includes(todayStr) ? today : yesterdayDate);
 			for (let i = daysArray.length - 1; i >= 0; i--) {
-				const dayKey = `${checkDate.getFullYear()}-${checkDate.getMonth()}-${checkDate.getDate()}`;
-				if (daysArray[i] === dayKey) { currentStreak++; checkDate.setDate(checkDate.getDate() - 1); }
-				else break;
+				const expected = dayKey(checkDate);
+				if (daysArray[i] === expected) {
+					currentStreak++;
+					checkDate.setDate(checkDate.getDate() - 1);
+				} else if (daysArray[i] < expected) {
+					// We've passed the expected date without finding it, streak is broken
+					break;
+				}
+				// If daysArray[i] > expected, skip (there are future entries we haven't reached yet)
 			}
 		}
 
-		let streak = 1; longestStreak = Math.max(1, daysArray.length > 0 ? 1 : 0);
+		// Calculate longest streak
+		let streak = 1;
+		longestStreak = daysArray.length > 0 ? 1 : 0;
 		for (let i = 1; i < daysArray.length; i++) {
-			const diff = Math.floor((new Date(daysArray[i]).getTime() - new Date(daysArray[i-1]).getTime()) / (1000*60*60*24));
-			if (diff === 1) { streak++; longestStreak = Math.max(longestStreak, streak); }
-			else { streak = 1; }
+			const prevDate = parseDayKey(daysArray[i - 1]);
+			const currDate = parseDayKey(daysArray[i]);
+			const diffMs = currDate.getTime() - prevDate.getTime();
+			const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+			if (diffDays === 1) {
+				streak++;
+				longestStreak = Math.max(longestStreak, streak);
+			} else {
+				streak = 1;
+			}
 		}
 	}
 

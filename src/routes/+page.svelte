@@ -115,8 +115,8 @@
 					: `✅ ${currentT('routines.routine_saved', { name: currentRoutineName })}`;
 				showToast(message);
 				
-				// El botón de "Guardar e Iniciar" debe llevar directo al Timer
-				currentView = 'timer';
+				// El botón de "Guardar" debe llevar a la pantalla principal
+				currentView = 'main';
 			} else {
 				showToast(`❌ ${currentT('routines.save_error')}: ${result.error}`);
 			}
@@ -235,6 +235,16 @@
 		}
 		
 		await workoutStore.log(workoutRoutineId, workoutRoutineName, duration, repetitionsCompleted, routineSnapshot, customDate);
+
+		// Actualizar reactivamente la fecha de último uso en el store de rutinas
+		if (currentRoutineId) {
+			routineStore.updateLastUsed(currentRoutineId);
+		}
+
+		// Mostrar feedback visual
+		let currentT: any;
+		t.subscribe(value => currentT = value)();
+		showToast(`✅ ${currentT('history.workout_logged') || 'Entrenamiento registrado'}`);
 	}
 	
 	// No cargar automáticamente configuración al iniciar

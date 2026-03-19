@@ -15,6 +15,7 @@
 		restTime?: number;
 		prepDuration?: number;
 		restDuration?: number;
+		notes?: string;
 	}> = [];
 	export let routineName: string = '';
 
@@ -127,6 +128,10 @@
 		}
 	}
 	function generateIntervalId(index: number, field: string) { return `settings-interval-${index}-${field}`; }
+
+	let notesModalIndex: number | null = null;
+	function openNotesModal(index: number) { notesModalIndex = index; }
+	function closeNotesModal() { notesModalIndex = null; }
 </script>
 
 <!-- Modal backdrop -->
@@ -248,6 +253,15 @@
 										🏋️ {$t('intervals.weights')}
 									</div>
 									<div class="sm-interval-actions">
+										<button class="sm-act-btn sm-act-notes" on:click={() => openNotesModal(index)} title={$t('settings.notes')} class:sm-has-notes={localIntervals[index].notes}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+												<polyline points="14 2 14 8 20 8"></polyline>
+												<line x1="16" y1="13" x2="8" y2="13"></line>
+												<line x1="16" y1="17" x2="8" y2="17"></line>
+												<polyline points="10 9 9 9 8 9"></polyline>
+											</svg>
+										</button>
 										<button class="sm-act-btn sm-act-copy" on:click={() => copyInterval(index)} title={$t('settings.copy_interval')}>
 											<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
 											<span>{$t('common.copy') || 'Copiar'}</span>
@@ -297,6 +311,15 @@
 								<div class="sm-interval-top">
 									<div class="sm-interval-dot" style="background:{getAccent(interval.color)};"></div>
 									<div class="sm-interval-actions">
+										<button class="sm-act-btn sm-act-notes" on:click={() => openNotesModal(index)} title={$t('settings.notes')} class:sm-has-notes={localIntervals[index].notes}>
+											<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+												<polyline points="14 2 14 8 20 8"></polyline>
+												<line x1="16" y1="13" x2="8" y2="13"></line>
+												<line x1="16" y1="17" x2="8" y2="17"></line>
+												<polyline points="10 9 9 9 8 9"></polyline>
+											</svg>
+										</button>
 										<button class="sm-act-btn sm-act-copy" on:click={() => copyInterval(index)} title={$t('settings.copy_interval')}>
 											<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
 											<span>{$t('common.copy') || 'Copiar'}</span>
@@ -426,6 +449,42 @@
 				</button>
 				<button class="hb-btn hb-btn-secondary" style="width:100%; border:none;" on:click={cancelDeleteInterval}>
 					{$t('common.cancel')}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Notes modal -->
+{#if notesModalIndex !== null}
+	<div class="hb-modal-backdrop" style="z-index:300;">
+		<div class="sm-notes-modal">
+			<div class="sm-notes-icon-wrap" style="color: {getAccent(localIntervals[notesModalIndex].color)}; background: {getAccent(localIntervals[notesModalIndex].color)}15;">
+				<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+					<polyline points="14 2 14 8 20 8"></polyline>
+					<line x1="16" y1="13" x2="8" y2="13"></line>
+					<line x1="16" y1="17" x2="8" y2="17"></line>
+					<polyline points="10 9 9 9 8 9"></polyline>
+				</svg>
+			</div>
+			
+			<h3 style="font-size:1.25rem; font-weight:800; color:var(--text-primary); margin-bottom:0.15rem; letter-spacing:-0.02em;">{$t('settings.notes')}</h3>
+			<p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1.5rem;">{localIntervals[notesModalIndex].name || $t('settings.new_interval')}</p>
+			
+			<div class="sm-notes-field">
+				<textarea
+					bind:value={localIntervals[notesModalIndex].notes}
+					placeholder={$t('settings.notes_placeholder')}
+					class="sm-notes-textarea"
+					rows="5"
+				></textarea>
+				<p class="sm-help" style="margin-top:0.5rem; text-align:left;">{$t('settings.notes_help')}</p>
+			</div>
+			
+			<div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
+				<button class="hb-btn hb-btn-primary" style="background: {getAccent(localIntervals[notesModalIndex].color)}" on:click={closeNotesModal}>
+					{$t('common.done')}
 				</button>
 			</div>
 		</div>
@@ -683,6 +742,35 @@
 	box-shadow: 0 6px 20px rgba(239,68,68,0.4);
 	transform: translateY(-1px);
 }
+
+.sm-act-notes.sm-has-notes { color: var(--accent-green); background: rgba(34,197,94,0.1); }
+
+.sm-notes-modal {
+	background: var(--bg-card);
+	border: 1px solid var(--border-card);
+	border-radius: 24px;
+	padding: 2rem;
+	width: 90%; max-width: 400px;
+	text-align: center;
+	box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+	animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.sm-notes-icon-wrap {
+	width: 56px; height: 56px;
+	border-radius: 16px; display: flex;
+	align-items: center; justify-content: center;
+	margin: 0 auto 1.25rem;
+}
+.sm-notes-field { width: 100%; }
+.sm-notes-textarea {
+	width: 100%; background: var(--bg-input);
+	border: 1.5px solid var(--border-input);
+	border-radius: 16px; padding: 1rem;
+	color: var(--text-input); font-family: 'Inter', sans-serif;
+	font-size: 0.95rem; line-height: 1.5; outline: none;
+	resize: none; transition: border-color 0.2s;
+}
+.sm-notes-textarea:focus { border-color: var(--accent-green); }
 
 @keyframes popIn {
 	0% { opacity: 0; transform: scale(0.95) translateY(10px); }

@@ -8,6 +8,7 @@ export interface Interval {
 	restTime?: number;
 	prepDuration?: number;
 	restDuration?: number;
+	notes?: string;
 }
 
 export interface SavedRoutine {
