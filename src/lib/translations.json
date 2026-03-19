@@ -31,7 +31,8 @@
       "copy": "Copiar",
       "edit": "Editar",
       "settings": "Configuración",
-      "of": "de"
+      "of": "de",
+      "done": "Listo"
     },
     "main": {
       "repetitions": "Repeticiones",
@@ -88,7 +89,8 @@
       "copy_interval": "Copiar intervalo al final",
       "move_up": "Mover hacia arriba",
       "move_down": "Mover hacia abajo",
-      "delete_interval": "Eliminar intervalo"
+      "delete_interval": "Eliminar intervalo",
+      "intervals_list": "Lista de intervalos"
     },
     "timer": {
       "completed": "Completado",
@@ -219,7 +221,8 @@
       "copy": "Copy",
       "edit": "Edit",
       "settings": "Settings",
-      "of": "of"
+      "of": "of",
+      "done": "Done"
     },
     "main": {
       "repetitions": "Repetitions",
@@ -276,7 +279,8 @@
       "copy_interval": "Copy interval to end",
       "move_up": "Move up",
       "move_down": "Move down",
-      "delete_interval": "Delete interval"
+      "delete_interval": "Delete interval",
+      "intervals_list": "Intervals list"
     },
     "timer": {
       "completed": "Completed",

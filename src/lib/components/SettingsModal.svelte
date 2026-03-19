@@ -137,8 +137,8 @@
 		<div class="sm-header">
 			<div class="sm-header-left">
 				<button class="sm-back-btn" on:click={cancelConfiguration} aria-label="Volver">
-					<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M15 18l-6-6 6-6"/>
+					<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M15 19l-7-7 7-7"/>
 					</svg>
 				</button>
 				<img src="/logo.png" alt="HIITBeep" class="sm-logo" />
@@ -464,30 +464,34 @@
 .sm-title { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); }
 .sm-header-right { display: flex; align-items: center; gap: 0.4rem; }
 .sm-icon-btn {
-	width: 38px; height: 38px;
-	background: var(--bg-card-alt); border: 1.5px solid var(--border-card);
-	border-radius: 12px;
+	width: 40px; height: 40px;
+	background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+	border: 1px solid rgba(255,255,255,0.1);
+	border-radius: 14px;
 	display: flex; align-items: center; justify-content: center;
 	font-size: 0.95rem; cursor: pointer; color: var(--text-secondary);
-	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.05);
 }
-.sm-icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); border-color: var(--text-muted); }
+.sm-icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
 
 .sm-back-btn {
-	width: 38px; height: 38px;
-	background: var(--bg-card-alt); border: 1.5px solid var(--border-card);
-	border-radius: 12px; color: var(--text-primary);
+	width: 40px; height: 40px;
+	background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+	border: 1px solid rgba(255,255,255,0.1);
+	border-radius: 14px; color: var(--text-primary);
 	display: flex; align-items: center; justify-content: center;
-	cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	flex-shrink: 0;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.05);
 }
 .sm-back-btn:hover {
-	background: rgba(255,255,255,0.08);
-	border-color: var(--text-muted);
-	transform: translateX(-3px);
-	box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+	background: rgba(255,255,255,0.1);
+	border-color: rgba(255,255,255,0.2);
+	transform: translateX(-4px);
+	box-shadow: 0 6px 16px rgba(0,0,0,0.3);
 }
-.sm-back-btn:active { transform: scale(0.92) translateX(-3px); }
+.sm-back-btn:active { transform: scale(0.9) translateX(-4px); }
 
 /* ── Body (scrollable) ── */
 .sm-body {

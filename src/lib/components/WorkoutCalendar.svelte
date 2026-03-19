@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
 	import { workoutStore } from '$lib/stores/workoutStore';
+	import { createEventDispatcher } from 'svelte';
 	import type { WorkoutLog } from '$lib/services/routineStorage';
+
+	const dispatch = createEventDispatcher();
 
 	const monthNamesES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 	const monthNamesEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -66,6 +69,12 @@
 			&& date.getDate()     === today.getDate();
 	}
 
+	function handleDayClick(workouts: WorkoutLog[]) {
+		if (workouts.length > 0) {
+			dispatch('day-click', workouts);
+		}
+	}
+
 	function getMonthName(month: number): string {
 		let lang = 'es';
 		if (typeof navigator !== 'undefined') {
@@ -110,16 +119,19 @@
 			{#if day === 0}
 				<div class="cal-day-empty"></div>
 			{:else}
-				<div
+				<button
 					class="cal-day"
 					class:cal-day-worked={workouts.length > 0}
 					class:cal-day-today={isToday(date)}
+					class:clickable={workouts.length > 0}
+					on:click={() => handleDayClick(workouts)}
+					disabled={workouts.length === 0}
 				>
 					<span class="cal-day-num">{day}</span>
 					{#if workouts.length > 0}
 						<span class="cal-dot"></span>
 					{/if}
-				</div>
+				</button>
 			{/if}
 		{/each}
 	</div>
@@ -201,8 +213,12 @@
 	position: relative;
 	transition: all 0.15s;
 	cursor: default;
+	padding: 0; margin: 0; color: inherit; font: inherit; outline: none; box-shadow: none;
 }
-.cal-day:hover { border-color: var(--border-card); }
+.cal-day.clickable { cursor: pointer; }
+.cal-day.clickable:hover { border-color: rgba(34,197,94,0.5); transform: scale(1.05); }
+.cal-day.clickable:active { transform: scale(0.95); }
+.cal-day:not(.clickable):hover { border-color: transparent; }
 
 /* Day with workouts */
 .cal-day-worked {

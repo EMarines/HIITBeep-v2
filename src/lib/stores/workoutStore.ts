@@ -4,7 +4,8 @@ import {
 	loadWorkoutLogs as loadLocalLogs,
 	logWorkout as logLocalWorkout,
 	saveAllWorkoutLogs,
-	type WorkoutLog
+	type WorkoutLog,
+	type SavedRoutine
 } from '$lib/services/routineStorage';
 import { 
 	syncLogsToFirestore,
@@ -35,11 +36,11 @@ function createWorkoutStore() {
 	return {
 		subscribe,
 		
-		log: async (routineId: string, routineName: string, duration: number, repetitionsCompleted: number) => {
+		log: async (routineId: string, routineName: string, duration: number, repetitionsCompleted: number, routineSnapshot?: SavedRoutine) => {
 			const userData = get(user);
 			
 			// Always log locally first
-			logLocalWorkout(routineId, routineName, duration, repetitionsCompleted);
+			logLocalWorkout(routineId, routineName, duration, repetitionsCompleted, routineSnapshot);
 			
 			// Get the local logs (which now includes the new one)
 			const currentLocal = loadLocalLogs();

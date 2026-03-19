@@ -224,12 +224,17 @@
 		currentView = 'main';
 	}
 	
-	async function handleWorkoutComplete(event: CustomEvent<{ duration: number; repetitionsCompleted: number }>) {
-		const { duration, repetitionsCompleted } = event.detail;
+	async function handleWorkoutComplete(event: CustomEvent<{ duration: number; repetitionsCompleted: number; routineSnapshot?: SavedRoutine }>) {
+		const { duration, repetitionsCompleted, routineSnapshot } = event.detail;
 		const workoutRoutineId = currentRoutineId || 'default-routine';
 		const workoutRoutineName = currentRoutineName || 'Unnamed Routine';
 		
-		await workoutStore.log(workoutRoutineId, workoutRoutineName, duration, repetitionsCompleted);
+		// Asegurarse de que el snapshot tenga el nombre actual si no tiene uno
+		if (routineSnapshot && !routineSnapshot.name) {
+			routineSnapshot.name = workoutRoutineName;
+		}
+		
+		await workoutStore.log(workoutRoutineId, workoutRoutineName, duration, repetitionsCompleted, routineSnapshot);
 	}
 	
 	// No cargar automáticamente configuración al iniciar

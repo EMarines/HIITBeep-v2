@@ -247,10 +247,17 @@
 									// Calcular duración total del workout en segundos
 									totalWorkoutDuration = Math.floor((Date.now() - workoutStartTime) / 1000);
 									
-									// Emitir evento de workout completado
+									// Emitir evento de workout workout completado
 									dispatch('workout-complete', {
 										duration: totalWorkoutDuration,
-										repetitionsCompleted: repetitions
+										repetitionsCompleted: repetitions,
+										routineSnapshot: {
+											id: 'snapshot-' + Date.now(),
+											name: '', // Se asignará en el manejador si es necesario
+											intervals: JSON.parse(JSON.stringify(intervals)),
+											repetitions: repetitions,
+											createdAt: Date.now()
+										}
 									});
 									
 									setTimeout(() => playBeep(400, 800), 100);
@@ -437,7 +444,14 @@
 				// Emitir evento de workout completado
 				dispatch('workout-complete', {
 					duration: totalWorkoutDuration,
-					repetitionsCompleted: repetitions
+					repetitionsCompleted: repetitions,
+					routineSnapshot: {
+						id: 'snapshot-' + Date.now(),
+						name: '', // Se asignará en el manejador si es necesario
+						intervals: JSON.parse(JSON.stringify(intervals)),
+						repetitions: repetitions,
+						createdAt: Date.now()
+					}
 				});
 				
 				setTimeout(() => playBeep(400, 800), 100);
@@ -711,8 +725,8 @@
 				{#if isRunning}
 					<span>⏹️ {$t('timer.stop')}</span>
 				{:else}
-					<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M15 18l-6-6 6-6"/>
+					<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M15 19l-7-7 7-7"/>
 					</svg>
 					<span>{$t('common.back')}</span>
 				{/if}

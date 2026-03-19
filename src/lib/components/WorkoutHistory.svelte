@@ -2,34 +2,23 @@
 	import { createEventDispatcher } from 'svelte';
 	import { t } from '$lib/i18n';
 	import { workoutStore } from '$lib/stores/workoutStore';
-	import { type WorkoutLog } from '$lib/services/routineStorage';
+	import { type WorkoutLog, type SavedRoutine } from '$lib/services/routineStorage';
 	import WorkoutCalendar from './WorkoutCalendar.svelte';
+	import WorkoutDetailModal from './WorkoutDetailModal.svelte';
 
 	const dispatch = createEventDispatcher();
 
-	let groupedByDate: Map<string, WorkoutLog[]> = new Map();
 	let totalWorkouts = 0;
 	let totalMinutes = 0;
 	let currentStreak = 0;
 	let longestStreak = 0;
+	let selectedLog: WorkoutLog | null = null;
 
 	$: if ($workoutStore) {
-		groupWorkoutsByDate($workoutStore);
 		calculateStats($workoutStore);
 	}
 
-	function groupWorkoutsByDate(logs: WorkoutLog[]) {
-		groupedByDate = new Map();
-		const sorted = [...logs].sort((a, b) => b.completedAt - a.completedAt);
-		sorted.forEach(log => {
-			const date = new Date(log.completedAt);
-			const dateKey = date.toLocaleDateString(undefined, {
-				year: 'numeric', month: 'long', day: 'numeric'
-			});
-			if (!groupedByDate.has(dateKey)) groupedByDate.set(dateKey, []);
-			groupedByDate.get(dateKey)!.push(log);
-		});
-	}
+
 
 	function calculateStats(logs: WorkoutLog[]) {
 		totalWorkouts = logs.length;
@@ -75,6 +64,26 @@
 		return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')} min` : `${secs}s`;
 	}
 
+	function showDetail(log: WorkoutLog) {
+		if (log.routineSnapshot) {
+			selectedLog = log;
+		}
+	}
+
+	function closeDetail() {
+		selectedLog = null;
+	}
+
+	function handleCalendarDayClick(event: CustomEvent<WorkoutLog[]>) {
+		const workouts = event.detail;
+		if (workouts && workouts.length > 0) {
+			// Ordenar por más reciente (completedAt descedente) y tomar el primero,
+			// ya que el usuario podría tener múltiples en un día.
+			const sortedWorkouts = [...workouts].sort((a, b) => b.completedAt - a.completedAt);
+			showDetail(sortedWorkouts[0]);
+		}
+	}
+
 	function back() { dispatch('back'); }
 
 	const statCards = [
@@ -90,8 +99,8 @@
 	<header class="wh-header">
 		<div class="wh-header-inner">
 			<button class="hb-back-btn" on:click={back} aria-label="Volver">
-				<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M15 18l-6-6 6-6"/>
+				<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M15 19l-7-7 7-7"/>
 				</svg>
 			</button>
 			<div class="wh-title-area">
@@ -133,48 +142,18 @@
 		</div>
 
 		<!-- Calendar -->
-		<WorkoutCalendar />
-
-		<!-- Workout Log List -->
-		<div class="wh-section-header">
-			<div class="hb-section-label">{$t('history.workout_list')}</div>
-		</div>
-
-		{#if groupedByDate.size === 0}
-			<div class="wh-empty">
-				<div class="wh-empty-icon">📋</div>
-				<p class="wh-empty-title">{$t('history.no_workouts')}</p>
-				<p class="wh-empty-sub">{$t('history.complete_first_workout')}</p>
-			</div>
-		{:else}
-			<div class="wh-log-groups">
-				{#each Array.from(groupedByDate.entries()) as [dateKey, logs]}
-					<div class="wh-date-group">
-						<div class="wh-date-label">{dateKey}</div>
-						<div class="wh-log-list">
-							{#each logs as log}
-								<div class="wh-log-card">
-									<div class="wh-log-left">
-										<div class="wh-check-badge">✓</div>
-									</div>
-									<div class="wh-log-body">
-										<div class="wh-log-name">{log.routineName}</div>
-										<div class="wh-log-meta">
-											<span>⏱️ {formatTime(log.duration)}</span>
-											<span>🔄 {log.repetitionsCompleted} {$t('main.repetitions_plural')}</span>
-											<span>🕐 {new Date(log.completedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</span>
-										</div>
-									</div>
-								</div>
-							{/each}
-						</div>
-					</div>
-				{/each}
-			</div>
-		{/if}
+		<WorkoutCalendar on:day-click={handleCalendarDayClick} />
 
 	</div>
 </div>
+
+{#if selectedLog && selectedLog.routineSnapshot}
+	<WorkoutDetailModal 
+		routine={selectedLog.routineSnapshot} 
+		completedAt={selectedLog.completedAt}
+		on:close={closeDetail}
+	/>
+{/if}
 
 <style>
 .wh-root {
@@ -201,20 +180,22 @@
 .wh-title { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); }
 
 .hb-back-btn {
-	width: 38px; height: 38px;
-	background: var(--bg-card-alt); border: 1.5px solid var(--border-card);
-	border-radius: 12px; color: var(--text-primary);
+	width: 40px; height: 40px;
+	background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+	border: 1px solid rgba(255,255,255,0.1);
+	border-radius: 14px; color: var(--text-primary);
 	display: flex; align-items: center; justify-content: center;
-	cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	flex-shrink: 0;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.05);
 }
 .hb-back-btn:hover {
-	background: rgba(255,255,255,0.08);
-	border-color: var(--text-muted);
-	transform: translateX(-3px);
-	box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+	background: rgba(255,255,255,0.1);
+	border-color: rgba(255,255,255,0.2);
+	transform: translateX(-4px);
+	box-shadow: 0 6px 16px rgba(0,0,0,0.3);
 }
-.hb-back-btn:active { transform: scale(0.92) translateX(-3px); }
+.hb-back-btn:active { transform: scale(0.9) translateX(-4px); }
 
 /* Content */
 .wh-content {
@@ -257,72 +238,4 @@
 	position: relative; z-index: 1;
 	opacity: 0.7;
 }
-
-/* Section header */
-.wh-section-header { margin-bottom: 0.875rem; }
-
-/* Empty state */
-.wh-empty {
-	background: var(--bg-card);
-	border: 1px dashed var(--border-card);
-	border-radius: var(--radius-card);
-	padding: 3rem 1.5rem; text-align: center;
-}
-.wh-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-.wh-empty-title { font-size: 1rem; color: var(--text-secondary); font-weight: 600; }
-.wh-empty-sub   { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem; }
-
-/* Log groups */
-.wh-log-groups { display: flex; flex-direction: column; gap: 1.5rem; }
-.wh-date-group {}
-.wh-date-label {
-	font-size: 0.7rem; font-weight: 700;
-	letter-spacing: 0.1em; text-transform: uppercase;
-	color: var(--text-label);
-	padding: 0.4rem 0; margin-bottom: 0.5rem;
-	border-bottom: 1px solid var(--border-card);
-}
-.wh-log-list { display: flex; flex-direction: column; gap: 0.625rem; }
-
-/* Log card */
-.wh-log-card {
-	display: flex; align-items: flex-start; gap: 0.875rem;
-	background: var(--bg-card);
-	border: 1px solid var(--border-card);
-	border-left: 4px solid var(--accent-green);
-	border-radius: var(--radius-card);
-	padding: 0.875rem 1rem;
-	position: relative; overflow: hidden;
-	transition: box-shadow 0.2s;
-}
-.wh-log-card::before {
-	content: '';
-	position: absolute; inset: 0;
-	background: linear-gradient(90deg, var(--accent-green-glow) 0%, transparent 35%);
-	pointer-events: none;
-}
-.wh-log-card:hover { box-shadow: var(--shadow-card); }
-
-.wh-log-left { flex-shrink: 0; }
-.wh-check-badge {
-	width: 32px; height: 32px;
-	border-radius: 50%;
-	background: rgba(34,197,94,0.15);
-	border: 1.5px solid rgba(34,197,94,0.3);
-	display: flex; align-items: center; justify-content: center;
-	font-size: 0.875rem; font-weight: 700;
-	color: var(--accent-green);
-}
-
-.wh-log-body { flex: 1; min-width: 0; }
-.wh-log-name {
-	font-size: 0.95rem; font-weight: 700;
-	color: var(--text-primary); margin-bottom: 0.35rem;
-	white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.wh-log-meta {
-	display: flex; flex-wrap: wrap; gap: 0.75rem;
-	font-size: 0.75rem; color: var(--text-secondary);
-}
-.wh-log-meta span { display: flex; align-items: center; gap: 0.2rem; }
 </style>

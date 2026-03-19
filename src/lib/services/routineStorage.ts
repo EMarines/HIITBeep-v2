@@ -26,6 +26,7 @@ export interface WorkoutLog {
 	completedAt: number;
 	duration: number;
 	repetitionsCompleted: number;
+	routineSnapshot?: SavedRoutine;
 }
 
 const STORAGE_KEY_ROUTINES = 'hiitbeep_routines';
@@ -159,7 +160,7 @@ export function updateRoutineLastUsed(id: string): void {
 /**
  * Registrar un entrenamiento completado
  */
-export function logWorkout(routineId: string, routineName: string, duration: number, repetitionsCompleted: number): void {
+export function logWorkout(routineId: string, routineName: string, duration: number, repetitionsCompleted: number, routineSnapshot?: SavedRoutine): void {
 	try {
 		const logs = loadWorkoutLogs();
 		
@@ -169,7 +170,8 @@ export function logWorkout(routineId: string, routineName: string, duration: num
 			routineName,
 			completedAt: Date.now(),
 			duration,
-			repetitionsCompleted
+			repetitionsCompleted,
+			routineSnapshot: routineSnapshot ? JSON.parse(JSON.stringify(routineSnapshot)) : undefined
 		};
 		
 		logs.unshift(newLog); // Agregar al inicio
