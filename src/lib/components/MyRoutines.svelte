@@ -90,14 +90,14 @@
 		</div>
 
 		<!-- Section label -->
-		<div class="hb-section-label" style="margin-top:1.75rem; margin-bottom:0.75rem;">{$t('routines.routines')}</div>
+		<div class="hb-section-label mt-7 mb-3">{$t('routines.routines')}</div>
 
 		<!-- Routines list -->
 		{#if $routineStore.length === 0}
 			<div class="mr-empty-state">
 				<div class="mr-empty-icon">📋</div>
 				<p class="mr-empty-title">{$t('routines.no_routines')}</p>
-				<p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.35rem;">{$t('main.use_settings')}</p>
+				<p class="text-xs text-gray-500 mt-1">{$t('main.use_settings')}</p>
 			</div>
 		{:else}
 			<div class="mr-list">
@@ -136,7 +136,7 @@
 
 <!-- Delete Confirmation Modal -->
 {#if showDeleteConfirm && routineToDelete}
-	<div class="hb-modal-backdrop" style="z-index:300;">
+	<div class="hb-modal-backdrop z-50">
 		<div class="mr-del-modal">
 			<div class="mr-del-icon-wrap">
 				<svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -145,17 +145,17 @@
 					<line x1="12" y1="17" x2="12.01" y2="17"></line>
 				</svg>
 			</div>
-			<h3 style="font-size:1.25rem; font-weight:800; color:var(--text-primary); margin-bottom:0.5rem; letter-spacing:-0.02em;">{$t('routines.confirm_delete')}</h3>
-			<p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.5; margin-bottom:1.5rem;">
+			<h3 class="text-xl font-black mb-2 tracking-tight text-white">{$t('routines.confirm_delete')}</h3>
+			<p class="text-sm text-gray-400 mb-6">
 				{$t('routines.confirm_delete_message')}
 				<br/>
-				<span style="font-weight:700; color:var(--text-primary);">"{routineToDelete.name}"</span>
+				<span class="font-bold text-white">"{routineToDelete.name}"</span>
 			</p>
-			<div style="display:flex; flex-direction:column; gap:0.75rem;">
+			<div class="flex flex-col gap-3">
 				<button class="mr-btn-danger" on:click={handleDelete}>
 					{$t('routines.delete')}
 				</button>
-				<button class="hb-btn hb-btn-secondary" style="width:100%; border:none;" on:click={cancelDelete}>
+				<button class="hb-btn hb-btn-secondary w-full border-transparent" on:click={cancelDelete}>
 					{$t('common.cancel')}
 				</button>
 			</div>

@@ -320,15 +320,17 @@
 <!-- Manual Log Modal -->
 {#if showManualLogModal}
     <div class="hb-modal-backdrop" style="z-index:300;">
-        <div class="ms-log-modal">
+        <div class="hb-modal">
             <div class="ms-log-icon-wrap">
                 <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
             </div>
-            <h3 class="ms-log-title">{$t('main.manual_log_title')}</h3>
-            <p class="ms-log-desc">{$t('main.select_date')}</p>
+            <div class="hb-modal-header">
+                <h3 class="hb-modal-title">{$t('main.manual_log_title')}</h3>
+                <p class="hb-modal-subtitle">{$t('main.select_date')}</p>
+            </div>
             
             <div class="ms-date-picker-wrap">
                 <input 
@@ -573,16 +575,6 @@
 .ms-done-icon { font-size: 1rem; }
 
 /* Log modal */
-.ms-log-modal {
-    background: var(--bg-card);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-card);
-    padding: 2.25rem 2rem;
-    width: 100%; max-width: 360px;
-    text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
 .ms-log-icon-wrap {
     width: 60px; height: 60px;
     background: rgba(34,197,94,0.12);
@@ -619,10 +611,5 @@
     background: #16a34a;
     box-shadow: 0 6px 20px rgba(34,197,94,0.4);
     transform: translateY(-1px);
-}
-
-@keyframes popIn {
-    0% { opacity: 0; transform: scale(0.95) translateY(10px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 </style>

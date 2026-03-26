@@ -431,7 +431,7 @@
 <!-- Delete confirmation modal -->
 {#if intervalToDeleteIndex !== null}
 	<div class="hb-modal-backdrop" style="z-index:300;">
-		<div class="mr-del-modal">
+		<div class="hb-modal">
 			<div class="mr-del-icon-wrap">
 				<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M3 6h18"></path>
@@ -441,8 +441,10 @@
 					<line x1="14" y1="11" x2="14" y2="17"></line>
 				</svg>
 			</div>
-			<h3 style="font-size:1.25rem; font-weight:800; color:var(--text-primary); margin-bottom:0.5rem; letter-spacing:-0.02em;">{$t('settings.confirm_delete_interval')}</h3>
-			<p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.5; margin-bottom:1.5rem;">{$t('settings.confirm_delete_interval_message')}</p>
+			<div class="hb-modal-header">
+				<h3 class="hb-modal-title">{$t('settings.confirm_delete_interval')}</h3>
+				<p class="hb-modal-subtitle">{$t('settings.confirm_delete_interval_message')}</p>
+			</div>
 			<div style="display:flex; flex-direction:column; gap:0.75rem;">
 				<button class="mr-btn-danger" on:click={executeDeleteInterval}>
 					{$t('common.delete')}
@@ -458,7 +460,11 @@
 <!-- Notes modal -->
 {#if notesModalIndex !== null}
 	<div class="hb-modal-backdrop" style="z-index:300;">
-		<div class="sm-notes-modal">
+		<div class="hb-modal">
+			<button class="hb-modal-close" on:click={closeNotesModal}>
+				<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+			</button>
+
 			<div class="sm-notes-icon-wrap" style="color: {getAccent(localIntervals[notesModalIndex].color)}; background: {getAccent(localIntervals[notesModalIndex].color)}15;">
 				<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -469,8 +475,10 @@
 				</svg>
 			</div>
 			
-			<h3 style="font-size:1.25rem; font-weight:800; color:var(--text-primary); margin-bottom:0.15rem; letter-spacing:-0.02em;">{$t('settings.notes')}</h3>
-			<p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1.5rem;">{localIntervals[notesModalIndex].name || $t('settings.new_interval')}</p>
+			<div class="hb-modal-header">
+				<h3 class="hb-modal-title">{$t('settings.notes')}</h3>
+				<p class="hb-modal-subtitle">{localIntervals[notesModalIndex].name || $t('settings.new_interval')}</p>
+			</div>
 			
 			<div class="sm-notes-field">
 				<textarea
@@ -483,7 +491,7 @@
 			</div>
 			
 			<div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
-				<button class="hb-btn hb-btn-primary" style="background: {getAccent(localIntervals[notesModalIndex].color)}" on:click={closeNotesModal}>
+				<button class="hb-btn hb-btn-primary" style="background: {getAccent(localIntervals[notesModalIndex].color)}; width:100%; justify-content:center;" on:click={closeNotesModal}>
 					{$t('common.done')}
 				</button>
 			</div>
@@ -708,17 +716,6 @@
 .sm-footer-actions { display: flex; gap: 0.6rem; }
 
 /* ── Delete modal ── */
-.mr-del-modal {
-	background: var(--bg-card);
-	border: 1px solid var(--border-card);
-	border-radius: var(--radius-card);
-	padding: 2.5rem 2rem;
-	width: 100%; max-width: 360px;
-	text-align: center;
-	box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
-	animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
 .mr-del-icon-wrap {
 	width: 60px; height: 60px;
 	background: rgba(239,68,68,0.12);
@@ -745,16 +742,6 @@
 
 .sm-act-notes.sm-has-notes { color: var(--accent-green); background: rgba(34,197,94,0.1); }
 
-.sm-notes-modal {
-	background: var(--bg-card);
-	border: 1px solid var(--border-card);
-	border-radius: 24px;
-	padding: 2rem;
-	width: 90%; max-width: 400px;
-	text-align: center;
-	box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
-	animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
 .sm-notes-icon-wrap {
 	width: 56px; height: 56px;
 	border-radius: 16px; display: flex;

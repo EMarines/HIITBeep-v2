@@ -164,22 +164,50 @@ export function updateRoutineLastUsed(id: string): void {
 export function logWorkout(routineId: string, routineName: string, duration: number, repetitionsCompleted: number, routineSnapshot?: SavedRoutine, customDate?: number): void {
 	try {
 		const logs = loadWorkoutLogs();
+		const completedAt = customDate || Date.now();
 		
-		const newLog: WorkoutLog = {
-			id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-			routineId,
-			routineName,
-			completedAt: customDate || Date.now(),
-			duration,
-			repetitionsCompleted,
-			routineSnapshot: routineSnapshot ? JSON.parse(JSON.stringify(routineSnapshot)) : undefined
-		};
+		// Buscar si ya existe un log para esta misma rutina en la MISMA FECHA (día/mes/año)
+		const completedDate = new Date(completedAt);
+		const completedDayStr = completedDate.toDateString(); // "Wed Mar 25 2026"
 		
-		logs.unshift(newLog); // Agregar al inicio
-		
-		// Mantener solo los últimos 100 registros
-		if (logs.length > MAX_LOGS) {
-			logs.splice(MAX_LOGS);
+		const existingLogIndex = routineId === 'default-routine' ? -1 : logs.findIndex(log => {
+			if (log.routineId !== routineId) return false;
+			const logDate = new Date(log.completedAt);
+			return logDate.toDateString() === completedDayStr;
+		});
+
+		if (existingLogIndex !== -1) {
+			// Si ya existe, ACTUALIZAR sumando los valores
+			const existingLog = logs[existingLogIndex];
+			existingLog.duration += duration;
+			existingLog.repetitionsCompleted += repetitionsCompleted;
+			// Actualizamos la fecha a la más reciente (por si es un customDate o similar)
+			existingLog.completedAt = completedAt;
+			
+			// Si hay snapshot nuevo, lo actualizamos también (opcional)
+			if (routineSnapshot) {
+				existingLog.routineSnapshot = JSON.parse(JSON.stringify(routineSnapshot));
+			}
+			
+			console.log(`Actualizado log existente para ${routineName} del día ${completedDayStr}`);
+		} else {
+			// Si NO existe, CREAR uno nuevo
+			const newLog: WorkoutLog = {
+				id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+				routineId,
+				routineName,
+				completedAt,
+				duration,
+				repetitionsCompleted,
+				routineSnapshot: routineSnapshot ? JSON.parse(JSON.stringify(routineSnapshot)) : undefined
+			};
+			
+			logs.unshift(newLog); // Agregar al inicio
+			
+			// Mantener solo los últimos 100 registros
+			if (logs.length > MAX_LOGS) {
+				logs.splice(MAX_LOGS);
+			}
 		}
 		
 		localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));

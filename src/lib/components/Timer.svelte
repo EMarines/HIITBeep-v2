@@ -24,7 +24,7 @@
 	let isRunning = false;
 	let isPaused = false;
 	let isCompleted = false; // Nueva variable para indicar rutina completada
-	let timer: number;
+	let timer: ReturnType<typeof setInterval>;
 	let audioContext: AudioContext | null = null;
 	let wakeLock: any = null;
 	let repeatMarkersExecuted: Map<number, number> = new Map(); // Controla cuántas veces se ha ejecutado cada marcador

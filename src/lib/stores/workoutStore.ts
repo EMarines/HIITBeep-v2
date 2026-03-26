@@ -48,8 +48,8 @@ function createWorkoutStore() {
 				await syncLogsToFirestore(userData.uid, currentLocal);
 			}
 			
-			const newLog = currentLocal[0];
-			update(logs => [newLog, ...logs].slice(0, 100));
+			// Refresh store state with the authoritative local logs
+			set(currentLocal);
 		},
 
 		refresh: async () => {

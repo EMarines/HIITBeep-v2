@@ -6,6 +6,7 @@ import { get } from 'svelte/store';
 
 export interface UserProfile {
     username: string;
+    photoURL?: string;
     age: number | null;
     gender: string;
     weight: number | null;
@@ -17,6 +18,7 @@ export interface UserProfile {
 
 const defaultProfile: UserProfile = {
     username: '',
+    photoURL: '',
     age: null,
     gender: '',
     weight: null,

@@ -12,7 +12,10 @@
 	let totalMinutes = 0;
 	let currentStreak = 0;
 	let longestStreak = 0;
-	let selectedLog: WorkoutLog | null = null;
+	let selectedLogs: WorkoutLog[] = [];
+	let currentLogIndex = 0;
+	
+	$: selectedLog = selectedLogs[currentLogIndex];
 
 	$: if ($workoutStore) {
 		calculateStats($workoutStore);
@@ -92,24 +95,31 @@
 		return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')} min` : `${secs}s`;
 	}
 
-	function showDetail(log: WorkoutLog) {
-		if (log.routineSnapshot) {
-			selectedLog = log;
-		}
+	function showDetail(logs: WorkoutLog[]) {
+		selectedLogs = logs;
+		currentLogIndex = 0;
 	}
 
 	function closeDetail() {
-		selectedLog = null;
+		selectedLogs = [];
+		currentLogIndex = 0;
 	}
 
 	function handleCalendarDayClick(event: CustomEvent<WorkoutLog[]>) {
 		const workouts = event.detail;
 		if (workouts && workouts.length > 0) {
-			// Ordenar por más reciente (completedAt descedente) y tomar el primero,
-			// ya que el usuario podría tener múltiples en un día.
+			// Ordenar por más reciente (completedAt descedente)
 			const sortedWorkouts = [...workouts].sort((a, b) => b.completedAt - a.completedAt);
-			showDetail(sortedWorkouts[0]);
+			showDetail(sortedWorkouts);
 		}
+	}
+
+	function nextLog() {
+		if (currentLogIndex < selectedLogs.length - 1) currentLogIndex++;
+	}
+
+	function prevLog() {
+		if (currentLogIndex > 0) currentLogIndex--;
 	}
 
 	function back() { dispatch('back'); }
@@ -175,11 +185,16 @@
 	</div>
 </div>
 
-{#if selectedLog && selectedLog.routineSnapshot}
+{#if selectedLogs.length > 0 && selectedLog && selectedLog.routineSnapshot}
 	<WorkoutDetailModal 
 		routine={selectedLog.routineSnapshot} 
 		completedAt={selectedLog.completedAt}
+		log={selectedLog}
+		totalLogs={selectedLogs.length}
+		currentIndex={currentLogIndex}
 		on:close={closeDetail}
+		on:next={nextLog}
+		on:prev={prevLog}
 	/>
 {/if}
 

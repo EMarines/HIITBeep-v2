@@ -56,20 +56,20 @@
 	}
 </script>
 
-<div class="am-backdrop" on:click|self={() => dispatch('close')} on:keydown={(e) => e.key === 'Escape' && dispatch('close')} role="dialog" tabindex="-1">
-	<div class="am-panel">
+<div class="hb-modal-backdrop" on:click|self={() => dispatch('close')} on:keydown={(e) => e.key === 'Escape' && dispatch('close')} role="dialog" tabindex="-1">
+	<div class="hb-modal">
 		<div class="am-top-bar" class:registering={isRegistering}></div>
 
-		<button aria-label="Cerrar" class="am-close-btn" on:click={() => dispatch('close')}>
+		<button aria-label="Cerrar" class="hb-modal-close" on:click={() => dispatch('close')}>
 			<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
 				<line x1="18" y1="6" x2="6" y2="18"></line>
 				<line x1="6" y1="6" x2="18" y2="18"></line>
 			</svg>
 		</button>
 
-		<div class="am-header">
-			<h2 class="am-title">{isRegistering ? 'Crear cuenta' : '¡Hola de nuevo!'}</h2>
-			<p class="am-subtitle">{isRegistering ? 'Únete a la comunidad HIITBeep' : 'Entra para sincronizar tus rutinas'}</p>
+		<div class="hb-modal-header">
+			<h2 class="hb-modal-title">{isRegistering ? 'Crear cuenta' : '¡Hola de nuevo!'}</h2>
+			<p class="hb-modal-subtitle">{isRegistering ? 'Únete a la comunidad HIITBeep' : 'Entra para sincronizar tus rutinas'}</p>
 		</div>
 
 		{#if error}
@@ -142,25 +142,6 @@
 </div>
 
 <style>
-.am-backdrop {
-	position: fixed; inset: 0; z-index: 9999;
-	background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(14px);
-	display: flex; align-items: center; justify-content: center;
-	padding: 1.5rem;
-}
-
-.am-panel {
-	background: var(--bg-card);
-	border: 1px solid var(--border-card);
-	width: 100%; max-width: 400px;
-	border-radius: var(--radius-card);
-	position: relative; overflow: hidden;
-	box-shadow: var(--shadow-card);
-	padding: 2.5rem 2rem;
-	font-family: 'Inter', sans-serif;
-	animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
 .am-top-bar {
 	position: absolute; top: 0; left: 0; right: 0; height: 4px;
 	background: linear-gradient(90deg, var(--accent-blue) 0%, #1d4ed8 100%);
@@ -169,22 +150,6 @@
 .am-top-bar.registering {
 	background: linear-gradient(90deg, var(--accent-purple) 0%, #7e22ce 100%);
 }
-
-.am-close-btn {
-	position: absolute; top: 1.25rem; right: 1.25rem;
-	background: none; border: none; cursor: pointer;
-	color: var(--text-secondary); padding: 0.25rem;
-	border-radius: 50%; display: flex; align-items: center; justify-content: center;
-	transition: all 0.2s;
-}
-.am-close-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
-
-.am-header { text-align: center; margin-bottom: 2rem; }
-.am-title {
-	font-size: 1.6rem; font-weight: 800; color: var(--text-primary);
-	margin-bottom: 0.35rem; letter-spacing: -0.02em;
-}
-.am-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
 
 .am-error {
 	background: rgba(239, 68, 68, 0.12);
@@ -202,7 +167,7 @@
 	color: var(--text-secondary); pointer-events: none;
 	display: flex; align-items: center; justify-content: center;
 }
-.am-input { padding-left: 2.8rem; width: 100%; background: var(--bg-input); color: var(--text-input); }
+.am-input { padding-left: 2.8rem; width: 100%; }
 .am-input:focus ~ .am-icon { color: var(--accent-green); }
 
 .am-divider { display: flex; align-items: center; gap: 1rem; margin: 0.5rem 0; }
@@ -226,9 +191,4 @@
 	color: var(--accent-blue); font-weight: 700; cursor: pointer;
 }
 .am-footer button:hover { text-decoration: underline; }
-
-@keyframes popIn {
-	0% { opacity: 0; transform: scale(0.95) translateY(10px); }
-	100% { opacity: 1; transform: scale(1) translateY(0); }
-}
 </style>

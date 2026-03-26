@@ -94,7 +94,7 @@
 
 			<!-- User Area -->
 			{#if $user}
-				<div style="position:relative;">
+				<div class="relative">
 					<button class="user-pill" on:click={toggleUserMenu}>
 						{#if $user.photoURL}
 							<img src={$user.photoURL} alt="avatar" class="user-avatar" />
@@ -222,7 +222,7 @@
 				<div class="nav-card-body">
 					<div class="hb-nav-card-title">{$t('dashboard.my_routines')}</div>
 					<div class="hb-nav-card-desc">
-						<span style="font-weight:700;color:#fff;">{$routineStats.totalRoutines}</span>
+						<span class="font-bold text-white">{$routineStats.totalRoutines}</span>
 						{$routineStats.totalRoutines === 1 ? $t('dashboard.routine_saved') : $t('dashboard.routines_saved')}
 					</div>
 				</div>
@@ -234,7 +234,7 @@
 				<div class="nav-card-body">
 					<div class="hb-nav-card-title">{$t('dashboard.history')}</div>
 					<div class="hb-nav-card-desc">
-						<span style="font-weight:700;color:#fff;">{$routineStats.totalWorkouts}</span>
+						<span class="font-bold text-white">{$routineStats.totalWorkouts}</span>
 						{$routineStats.totalWorkouts === 1 ? $t('dashboard.workout_completed') : $t('dashboard.workouts_completed')}
 					</div>
 				</div>
